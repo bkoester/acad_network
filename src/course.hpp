@@ -19,6 +19,8 @@ class Course {
 	bool operator==(const Course& other) const
 	{ return other.subject_ == subject_ && other.number_ == number_; }
 
+	bool operator!=(const Course& other) const { return !(*this == other); }
+
 	bool operator<(const Course& other) const;
 
  private:

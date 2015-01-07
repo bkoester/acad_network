@@ -5,7 +5,7 @@ set(SRCS
 set(MAIN_SRC main.cpp)
 
 set(UNITTEST_SRCS
-	)
+	course_network_test.cpp)
 
 set(DEBUG_OBJECT_LIBRARY "debug_objects")
 set(DEBUG_BINARY "thesisd")

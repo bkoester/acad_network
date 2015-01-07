@@ -9,6 +9,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 #include <boost/graph/adjacency_list.hpp>
 
@@ -26,6 +27,8 @@ using std::istream;
 using std::getline;
 using std::max;
 using std::min;
+using std::ostream;
+using std::pair;
 using std::streamsize;
 using std::string;
 using std::stringstream;
@@ -102,7 +105,7 @@ CourseNetwork::CourseNetwork(istream& input) {
 	// assign properties of vertices
 	auto course_it = courses.begin();
 	for (const auto& vertex : GetVertices()) {
-		assert(courses_it != courses.end());
+		assert(course_it != courses.end());
 		graph_[vertex] = *course_it;
 		course_to_vertex_[*course_it++] = vertex;
 	}
@@ -111,19 +114,45 @@ CourseNetwork::CourseNetwork(istream& input) {
 	for (auto& edge_pair : edge_weights) {
 		CoursePair e = edge_pair.first;
 		int weight{edge_pair.second};
-		// the vertex should not exist in the graph already
-		assert(!edge(vertex1, vertex2, graph_).second);
 
 		vertex_t vertex1{course_to_vertex_[e.vertex1]};
 		vertex_t vertex2{course_to_vertex_[e.vertex2]};
+
+		// the vertex should not exist in the graph already
+		assert(edge(vertex1, vertex2) == 0);
 		edge_t edge{add_edge(vertex1, vertex2, weight, graph_).first};
 	}
 
-	for (const auto& edge : GetEdges()) {
-		cout << graph_[source(edge, graph_)] << " " << 
-			graph_[target(edge, graph_)] << " " << graph_[edge] << endl;
+}
+
+CourseNetwork::vertex_t CourseNetwork::GetVertex(const Course& course)
+{ return course_to_vertex_.at(course); }
+
+const CourseNetwork::vertex_t CourseNetwork::GetVertex(
+		const Course& course) const { return course_to_vertex_.at(course); }
+
+Course CourseNetwork::GetSource(const CourseNetwork::edge_t& edge) const
+{ return graph_[source(edge, graph_)]; }
+
+Course CourseNetwork::GetTarget(const CourseNetwork::edge_t& edge) const
+{ return graph_[target(edge, graph_)]; }
+
+
+int CourseNetwork::edge(const vertex_t& source, const vertex_t& target) const {
+	pair<edge_t, bool> boost_edge = boost::edge(source, target, graph_);
+	if (!boost_edge.second) { return 0; }
+	return operator[](boost_edge.first);
+}
+
+ostream& operator<<(ostream& output, const CourseNetwork& course_network) {
+	// print edges of graph in form: "Course1 Course2 weight"
+	for (const auto& edge : course_network.GetEdges()) {
+		output << course_network.GetSource(edge) << " "
+			<< course_network.GetTarget(edge) << " " << course_network[edge]
+			<< endl;
 	}
 
+	return output;
 }
 
 // Ignore any line in the given istream

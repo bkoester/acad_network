@@ -78,27 +78,27 @@ TEST(CourseNetwork, Construction) {
 			Course{"MATH", 425})};
 
 	// test edges that exist
-	EXPECT_EQ(2, course_network.edge(english125_vertex, chem210_vertex));
+	EXPECT_EQ(2, course_network(english125_vertex, chem210_vertex));
 
 	// test both ways for this one
-	EXPECT_EQ(2, course_network.edge(chem210_vertex, english125_vertex));
+	EXPECT_EQ(2, course_network(chem210_vertex, english125_vertex));
 
-	EXPECT_EQ(1, course_network.edge(english125_vertex, chem211_vertex));
-	EXPECT_EQ(2, course_network.edge(english125_vertex, aaptis277_vertex));
-	EXPECT_EQ(2, course_network.edge(english125_vertex, environ311_vertex));
+	EXPECT_EQ(1, course_network(english125_vertex, chem211_vertex));
+	EXPECT_EQ(2, course_network(english125_vertex, aaptis277_vertex));
+	EXPECT_EQ(2, course_network(english125_vertex, environ311_vertex));
 
-	EXPECT_EQ(1, course_network.edge(chem210_vertex, chem211_vertex));
-	EXPECT_EQ(1, course_network.edge(chem210_vertex, aaptis277_vertex));
-	EXPECT_EQ(0, course_network.edge(chem210_vertex, environ311_vertex));
+	EXPECT_EQ(1, course_network(chem210_vertex, chem211_vertex));
+	EXPECT_EQ(1, course_network(chem210_vertex, aaptis277_vertex));
+	EXPECT_EQ(0, course_network(chem210_vertex, environ311_vertex));
 	// test non-existent edge both ways
-	EXPECT_EQ(0, course_network.edge(environ311_vertex, chem210_vertex));
+	EXPECT_EQ(0, course_network(environ311_vertex, chem210_vertex));
 
-	EXPECT_EQ(1, course_network.edge(chem211_vertex, aaptis277_vertex));
-	EXPECT_EQ(0, course_network.edge(chem211_vertex, environ311_vertex));
-	EXPECT_EQ(0, course_network.edge(chem211_vertex, math425_vertex));
+	EXPECT_EQ(1, course_network(chem211_vertex, aaptis277_vertex));
+	EXPECT_EQ(0, course_network(chem211_vertex, environ311_vertex));
+	EXPECT_EQ(0, course_network(chem211_vertex, math425_vertex));
 	
-	EXPECT_EQ(1, course_network.edge(aaptis277_vertex, environ311_vertex));
-	EXPECT_EQ(0, course_network.edge(aaptis277_vertex, math425_vertex));
+	EXPECT_EQ(1, course_network(aaptis277_vertex, environ311_vertex));
+	EXPECT_EQ(0, course_network(aaptis277_vertex, math425_vertex));
 
-	EXPECT_EQ(1, course_network.edge(environ311_vertex, math425_vertex));
+	EXPECT_EQ(1, course_network(environ311_vertex, math425_vertex));
 }

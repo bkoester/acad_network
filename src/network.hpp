@@ -2,8 +2,12 @@
 #define NETWORK_H
 
 #include <unordered_map>
+#include <iostream>
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/adj_list_serialize.hpp>
 #include <boost/optional.hpp>
 
 #include "course.hpp"
@@ -14,8 +18,21 @@ class NoEdgeException{};
 template <typename Vertex, typename Edge>
 class Network {
  public:
-	 Network();
-	 virtual ~Network() {}
+	// construct empty graph
+	Network();
+	// ifstream must contain a boost input archive.
+	Network(std::ifstream& input);
+
+	// Copy constructors only copy the graph_ member. vertices_ and edges_ will
+	// still reference the same graph_ object and do not need to be copied.
+	Network(const Network& other);
+	Network& operator=(const Network& other);
+	// No move operations defined because the graph is allocated on the stack
+	// and it is the most memory intensive member, so there's no point in
+	// defining a move operation for the other members' sake. The copy fallback
+	// will do.
+
+	virtual ~Network() {}
 
 	using graph_t = boost::adjacency_list<boost::vecS, boost::vecS, 
 		  boost::undirectedS, Vertex, Edge>;
@@ -40,6 +57,9 @@ class Network {
 
 	virtual Edge operator()(
 			const vertex_t& source, const vertex_t& target) const;
+
+	void Save(std::ostream& os);
+	void Load(std::istream& is);
 
 	// classes declared to provide iterator access to vertices
 	// constructors are private to require access through GetVertices() and
@@ -100,6 +120,22 @@ Network<Vertex, Edge>::Network() : vertices_{graph_}, edges_{graph_} {}
 
 
 template <typename Vertex, typename Edge>
+Network<Vertex, Edge>::Network(std::ifstream& input) : 
+		vertices_{graph_}, edges_{graph_} { Load(input); }
+
+
+template <typename Vertex, typename Edge>
+Network<Vertex, Edge>::Network(const Network& other) : 
+	graph_{other.graph_}, vertices_{graph_}, edges_{graph_} {}
+
+
+template <typename Vertex, typename Edge>
+Network<Vertex, Edge>& Network<Vertex, Edge>::operator=(const Network& other) {
+	graph_ = other.graph_; 
+	return *this;
+}
+
+template <typename Vertex, typename Edge>
 typename Network<Vertex, Edge>::vertex_t Network<Vertex, Edge>::GetSourceVertex(
 		const edge_t& edge) const { return source(edge, graph_); }
 
@@ -124,6 +160,21 @@ Edge Network<Vertex, Edge>::operator()(
 	boost::optional<edge_t> edge{GetEdge(source, target)};
 	if (!edge) { throw NoEdgeException{}; };
 	return operator[](edge.get());
+}
+
+
+template <typename Vertex, typename Edge>
+void Network<Vertex, Edge>::Save(std::ostream& output) {
+	// create boost archive from ostream and save the graph
+	boost::archive::text_oarchive archive{output};
+	archive << graph_;
+}
+
+
+template <typename Vertex, typename Edge>
+void Network<Vertex, Edge>::Load(std::istream& input) {
+	boost::archive::text_iarchive archive{input};
+	archive >> graph_;
 }
 
 

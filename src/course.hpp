@@ -5,6 +5,8 @@
 #include <iosfwd>
 #include <string>
 
+#include <boost/serialization/utility.hpp>
+
 class Course {
 
  public:
@@ -23,7 +25,15 @@ class Course {
 
 	bool operator<(const Course& other) const;
 
+	template <typename Archive>
+	void serialize(Archive& ar, const unsigned int version) {
+		ar & subject_;
+		ar & number_;
+	}
+
  private:
+	friend class boost::serialization::access;
+
 	std::string subject_;
 	int number_;
 };

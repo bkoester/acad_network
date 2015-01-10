@@ -58,47 +58,62 @@ ID	SUBJECT	CATALOGNBR	COURSE_CODE	GRADE	GPAO	CUM_GPA	TOTALCREDITS	TOTALGRADEPTS	
 352468	MATH	425	NA	4	4	4	27	108	3	201407
 */
 
-TEST(CourseNetwork, Construction) {
-	stringstream course_stream{sample_tab};
+class CourseNetworkTest : public ::testing::Test {
+ public:
+	CourseNetworkTest() : course_stream_{sample_tab}, network{course_stream_} {}
 
-	// build the network with the sample
-	CourseNetwork course_network{course_stream};
+ private:
+	stringstream course_stream_;
 
-	CourseNetwork::vertex_t english125_vertex{course_network.GetVertex(
+	// must be defined after the private member for initialization reasons
+ protected:
+	CourseNetwork network;
+
+};
+
+TEST_F(CourseNetworkTest, Construction) {
+	CourseNetwork::vertex_t english125_vertex{network.GetVertex(
 			Course{"ENGLISH", 125})};
-	CourseNetwork::vertex_t chem210_vertex{course_network.GetVertex(
+	CourseNetwork::vertex_t chem210_vertex{network.GetVertex(
 			Course{"CHEM", 210})};
-	CourseNetwork::vertex_t chem211_vertex{course_network.GetVertex(
+	CourseNetwork::vertex_t chem211_vertex{network.GetVertex(
 			Course{"CHEM", 211})};
-	CourseNetwork::vertex_t aaptis277_vertex{course_network.GetVertex(
+	CourseNetwork::vertex_t aaptis277_vertex{network.GetVertex(
 			Course{"AAPTIS", 277})};
-	CourseNetwork::vertex_t environ311_vertex{course_network.GetVertex(
+	CourseNetwork::vertex_t environ311_vertex{network.GetVertex(
 			Course{"ENVIRON", 311})};
-	CourseNetwork::vertex_t math425_vertex{course_network.GetVertex(
+	CourseNetwork::vertex_t math425_vertex{network.GetVertex(
 			Course{"MATH", 425})};
 
 	// test edges that exist
-	EXPECT_EQ(2, course_network(english125_vertex, chem210_vertex));
+	EXPECT_EQ(2, network(english125_vertex, chem210_vertex));
 
 	// test both ways for this one
-	EXPECT_EQ(2, course_network(chem210_vertex, english125_vertex));
+	EXPECT_EQ(2, network(chem210_vertex, english125_vertex));
 
-	EXPECT_EQ(1, course_network(english125_vertex, chem211_vertex));
-	EXPECT_EQ(2, course_network(english125_vertex, aaptis277_vertex));
-	EXPECT_EQ(2, course_network(english125_vertex, environ311_vertex));
+	EXPECT_EQ(1, network(english125_vertex, chem211_vertex));
+	EXPECT_EQ(2, network(english125_vertex, aaptis277_vertex));
+	EXPECT_EQ(2, network(english125_vertex, environ311_vertex));
 
-	EXPECT_EQ(1, course_network(chem210_vertex, chem211_vertex));
-	EXPECT_EQ(1, course_network(chem210_vertex, aaptis277_vertex));
-	EXPECT_EQ(0, course_network(chem210_vertex, environ311_vertex));
+	EXPECT_EQ(1, network(chem210_vertex, chem211_vertex));
+	EXPECT_EQ(1, network(chem210_vertex, aaptis277_vertex));
+	EXPECT_EQ(0, network(chem210_vertex, environ311_vertex));
 	// test non-existent edge both ways
-	EXPECT_EQ(0, course_network(environ311_vertex, chem210_vertex));
+	EXPECT_EQ(0, network(environ311_vertex, chem210_vertex));
 
-	EXPECT_EQ(1, course_network(chem211_vertex, aaptis277_vertex));
-	EXPECT_EQ(0, course_network(chem211_vertex, environ311_vertex));
-	EXPECT_EQ(0, course_network(chem211_vertex, math425_vertex));
+	EXPECT_EQ(1, network(chem211_vertex, aaptis277_vertex));
+	EXPECT_EQ(0, network(chem211_vertex, environ311_vertex));
+	EXPECT_EQ(0, network(chem211_vertex, math425_vertex));
 	
-	EXPECT_EQ(1, course_network(aaptis277_vertex, environ311_vertex));
-	EXPECT_EQ(0, course_network(aaptis277_vertex, math425_vertex));
+	EXPECT_EQ(1, network(aaptis277_vertex, environ311_vertex));
+	EXPECT_EQ(0, network(aaptis277_vertex, math425_vertex));
 
-	EXPECT_EQ(1, course_network(environ311_vertex, math425_vertex));
+	EXPECT_EQ(1, network(environ311_vertex, math425_vertex));
+}
+
+TEST_F(CourseNetworkTest, Serialization) {
+	stringstream archive;
+	network.Save(archive);
+
+	network.Load(archive);
 }

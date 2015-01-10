@@ -5,7 +5,7 @@ project (littletsp)
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 set(GMOCK_ROOT "$ENV{HOME}/links/third_party/gmock-1.7.0")
 
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED serialization)
 
 # set compilation variables
 set(CXXFLAGS "-Wall -Werror -pedantic-errors -std=c++14")

@@ -26,6 +26,12 @@ set_property(SOURCE ${SRCS} PROPERTY COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
 set_target_properties(${DEBUG_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
 set_target_properties(${RELEASE_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_RELEASE}")
 
+target_link_libraries(${DEBUG_BINARY}
+	${Boost_LIBRARIES})
+
+target_link_libraries(${RELEASE_BINARY}
+	${Boost_LIBRARIES})
+
 # if we choose to build unit tests, add rules for building unittest executable
 if (unit_tests)
 	if (NOT EXISTS "${GMOCK_ROOT}")
@@ -49,6 +55,7 @@ if (unit_tests)
 
 	set_target_properties(${UNITTEST_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
 	target_link_libraries(${UNITTEST_BINARY}
+		${Boost_LIBRARIES}
 		gmock_main
 		pthread)
 

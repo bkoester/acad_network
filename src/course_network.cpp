@@ -134,7 +134,7 @@ CourseNetwork::CourseNetwork(istream& input) {
 }
 
 
-CourseNetwork::vertex_t CourseNetwork::GetVertex(const Course& course)
+CourseNetwork::vertex_t CourseNetwork::GetVertex(const Course& course) const
 { return course_to_vertex_.at(course); }
 
 
@@ -143,6 +143,15 @@ int CourseNetwork::operator()(
 	auto edge_option = GetEdge(source, target);
 	if (!edge_option) { return default_edge_value; }
 	return operator[](edge_option.get());
+}
+
+void CourseNetwork::Load(std::istream& input_graph_archive) {
+	// load the graph itself using the base function
+	Network<Course, int>::Load(input_graph_archive);
+
+	// load the vertices into the hash table
+	for (const auto& vertex : GetVertices())
+	{ course_to_vertex_[operator[](vertex)] = vertex; }
 }
 
 

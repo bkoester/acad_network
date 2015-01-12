@@ -9,9 +9,14 @@
 
 class CourseNetwork : public Network<Course, int> {
  public:
+	CourseNetwork() {}
 	CourseNetwork(std::istream& input);
 
-	vertex_t GetVertex(const Course& course);
+	// gets the vertex type in the graph for a specific course
+	// will throw out_of_range exception for the vertex
+	vertex_t GetVertex(const Course& course) const;
+
+	void Load(std::istream& input_graph_archive);
 
 	int operator()(const vertex_t& source, 
 				   const vertex_t& target) const override;

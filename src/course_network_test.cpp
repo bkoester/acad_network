@@ -8,11 +8,15 @@
 
 #include "gtest/gtest.h"
 
+using std::cout;
+using std::endl;
 using std::pair;
 using std::string;
 using std::stringstream;
 
 using boost::edge;
+
+void TestGraphStructure(const CourseNetwork& network);
 
 const string sample_tab{
 "ID\tSUBJECT\tCATALOGNBR\tCOURSE_CODE\tGRADE\tGPAO\tCUM_GPA\tTOTALCREDITS\t"
@@ -67,11 +71,25 @@ class CourseNetworkTest : public ::testing::Test {
 
 	// must be defined after the private member for initialization reasons
  protected:
-	CourseNetwork network;
 
+	CourseNetwork network;
 };
 
-TEST_F(CourseNetworkTest, Construction) {
+TEST_F(CourseNetworkTest, Construction) { TestGraphStructure(network); }
+
+TEST_F(CourseNetworkTest, Serialization) {
+	// save the network
+	stringstream archive;
+	network.Save(archive);
+	TestGraphStructure(network);
+
+	// load the network
+	CourseNetwork loaded_network;
+	loaded_network.Load(archive);
+	TestGraphStructure(loaded_network);
+}
+
+void TestGraphStructure(const CourseNetwork& network) {
 	CourseNetwork::vertex_t english125_vertex{network.GetVertex(
 			Course{"ENGLISH", 125})};
 	CourseNetwork::vertex_t chem210_vertex{network.GetVertex(
@@ -109,11 +127,5 @@ TEST_F(CourseNetworkTest, Construction) {
 	EXPECT_EQ(0, network(aaptis277_vertex, math425_vertex));
 
 	EXPECT_EQ(1, network(environ311_vertex, math425_vertex));
-}
 
-TEST_F(CourseNetworkTest, Serialization) {
-	stringstream archive;
-	network.Save(archive);
-
-	network.Load(archive);
 }

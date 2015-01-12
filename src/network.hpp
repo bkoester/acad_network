@@ -10,8 +10,6 @@
 #include <boost/graph/adj_list_serialize.hpp>
 #include <boost/optional.hpp>
 
-#include "course.hpp"
-
 class NoEdgeException{};
 
 // Define abstract templated class for Network.
@@ -39,10 +37,6 @@ class Network {
 	using vertex_t = typename boost::graph_traits<graph_t>::vertex_descriptor;
 	using edge_t = typename boost::graph_traits<graph_t>::edge_descriptor;
 
-	// gets the vertex type in the graph for a specific course
-	// will throw out_of_range exception for the vertex
-	vertex_t GetVertex(const Course& course) const;
-
 	vertex_t GetSourceVertex(const edge_t& edge) const;
 	vertex_t GetTargetVertex(const edge_t& edge) const;
 	boost::optional<edge_t> GetEdge(
@@ -58,14 +52,15 @@ class Network {
 	virtual Edge operator()(
 			const vertex_t& source, const vertex_t& target) const;
 
-	void Save(std::ostream& os);
-	void Load(std::istream& is);
+	void Save(std::ostream& output_graph_archive);
+	void Load(std::istream& input_graph_archive);
 
 	// classes declared to provide iterator access to vertices
 	// constructors are private to require access through GetVertices() and
 	// GetEdges() functions, which supply the graph parameter to the constructors
 	class Vertices {
 	 public:
+		auto size() const { return boost::num_vertices(graph_); }
 		auto begin() { return boost::vertices(graph_).first; }
 		const auto begin() const { return boost::vertices(graph_).first; }
 		const auto cbegin() const { return boost::vertices(graph_).first; }
@@ -83,6 +78,7 @@ class Network {
 
 	class Edges {
 	 public:
+		auto size() const { return boost::num_edges(graph_); }
 		auto begin() { return boost::edges(graph_).first; }
 		const auto begin() const { return boost::edges(graph_).first; }
 		const auto cbegin() const { return boost::edges(graph_).first; }
@@ -164,16 +160,16 @@ Edge Network<Vertex, Edge>::operator()(
 
 
 template <typename Vertex, typename Edge>
-void Network<Vertex, Edge>::Save(std::ostream& output) {
+void Network<Vertex, Edge>::Save(std::ostream& output_graph_archive) {
 	// create boost archive from ostream and save the graph
-	boost::archive::text_oarchive archive{output};
+	boost::archive::text_oarchive archive{output_graph_archive};
 	archive << graph_;
 }
 
 
 template <typename Vertex, typename Edge>
-void Network<Vertex, Edge>::Load(std::istream& input) {
-	boost::archive::text_iarchive archive{input};
+void Network<Vertex, Edge>::Load(std::istream& input_graph_archive) {
+	boost::archive::text_iarchive archive{input_graph_archive};
 	archive >> graph_;
 }
 

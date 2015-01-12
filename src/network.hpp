@@ -16,10 +16,18 @@ class NoEdgeException{};
 template <typename Vertex, typename Edge>
 class Network {
  public:
+	// convenient for dealing with graphs
+	using graph_t = boost::adjacency_list<boost::vecS, boost::vecS, 
+		  boost::undirectedS, Vertex, Edge>;
+	using vertex_t = typename boost::graph_traits<graph_t>::vertex_descriptor;
+	using edge_t = typename boost::graph_traits<graph_t>::edge_descriptor;
+
 	// construct empty graph
 	Network();
 	// ifstream must contain a boost input archive.
-	Network(std::ifstream& input);
+	Network(std::istream& input);
+	// Allows a network to be built from a non-boost archive graph format.
+	Network(const graph_t& graph);
 
 	// Copy constructors only copy the graph_ member. vertices_ and edges_ will
 	// still reference the same graph_ object and do not need to be copied.
@@ -32,12 +40,7 @@ class Network {
 
 	virtual ~Network() {}
 
-	using graph_t = boost::adjacency_list<boost::vecS, boost::vecS, 
-		  boost::undirectedS, Vertex, Edge>;
-	using vertex_t = typename boost::graph_traits<graph_t>::vertex_descriptor;
-	using edge_t = typename boost::graph_traits<graph_t>::edge_descriptor;
-
-	vertex_t GetSourceVertex(const edge_t& edge) const;
+		vertex_t GetSourceVertex(const edge_t& edge) const;
 	vertex_t GetTargetVertex(const edge_t& edge) const;
 	boost::optional<edge_t> GetEdge(
 			const vertex_t& source, const vertex_t& target) const;
@@ -52,7 +55,7 @@ class Network {
 	virtual Edge operator()(
 			const vertex_t& source, const vertex_t& target) const;
 
-	void Save(std::ostream& output_graph_archive);
+	void Save(std::ostream& output_graph_archive) const;
 	void Load(std::istream& input_graph_archive);
 
 	// classes declared to provide iterator access to vertices
@@ -66,8 +69,8 @@ class Network {
 		const auto cbegin() const { return boost::vertices(graph_).first; }
 
 		auto end() { return boost::vertices(graph_).second; }
-		const auto end() const { return boost::vertices(graph_).first; }
-		const auto cend() const { return boost::vertices(graph_).first; }
+		const auto end() const { return boost::vertices(graph_).second; }
+		const auto cend() const { return boost::vertices(graph_).second; }
 
 	 private:
 		friend class Network;
@@ -116,8 +119,13 @@ Network<Vertex, Edge>::Network() : vertices_{graph_}, edges_{graph_} {}
 
 
 template <typename Vertex, typename Edge>
-Network<Vertex, Edge>::Network(std::ifstream& input) : 
+Network<Vertex, Edge>::Network(std::istream& input) : 
 		vertices_{graph_}, edges_{graph_} { Load(input); }
+
+
+template <typename Vertex, typename Edge>
+Network<Vertex, Edge>::Network(const graph_t& graph) :
+	graph_{graph}, vertices_{graph_}, edges_{graph_} {}
 
 
 template <typename Vertex, typename Edge>
@@ -160,7 +168,7 @@ Edge Network<Vertex, Edge>::operator()(
 
 
 template <typename Vertex, typename Edge>
-void Network<Vertex, Edge>::Save(std::ostream& output_graph_archive) {
+void Network<Vertex, Edge>::Save(std::ostream& output_graph_archive) const {
 	// create boost archive from ostream and save the graph
 	boost::archive::text_oarchive archive{output_graph_archive};
 	archive << graph_;

@@ -8,6 +8,8 @@
 
 #include "gtest/gtest.h"
 
+#include "graph_builder.hpp"
+
 using std::cout;
 using std::endl;
 using std::pair;
@@ -64,14 +66,14 @@ ID	SUBJECT	CATALOGNBR	COURSE_CODE	GRADE	GPAO	CUM_GPA	TOTALCREDITS	TOTALGRADEPTS	
 
 class CourseNetworkTest : public ::testing::Test {
  public:
-	CourseNetworkTest() : course_stream_{sample_tab}, network{course_stream_} {}
+	CourseNetworkTest() : course_stream_{sample_tab},
+						  network{BuildGraphFromCourseTab(course_stream_)} {}
 
  private:
 	stringstream course_stream_;
 
 	// must be defined after the private member for initialization reasons
  protected:
-
 	CourseNetwork network;
 };
 

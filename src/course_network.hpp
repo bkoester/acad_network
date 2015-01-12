@@ -10,7 +10,9 @@
 class CourseNetwork : public Network<Course, int> {
  public:
 	CourseNetwork() {}
+	// input must be a boost graph archive
 	CourseNetwork(std::istream& input);
+	CourseNetwork(const graph_t& graph);
 
 	// gets the vertex type in the graph for a specific course
 	// will throw out_of_range exception for the vertex
@@ -22,6 +24,9 @@ class CourseNetwork : public Network<Course, int> {
 				   const vertex_t& target) const override;
 
  private:
+	// Fill out the hash table of courses => vertices.
+	void BuildCourseToVertexMap();
+
 	std::unordered_map<Course, vertex_t, CourseHasher> course_to_vertex_;
 };
 

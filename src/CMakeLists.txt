@@ -1,6 +1,7 @@
 set(SRCS
 	course.cpp
-	course_network.cpp)
+	course_network.cpp
+	graph_builder.cpp)
 
 set(MAIN_SRC main.cpp)
 

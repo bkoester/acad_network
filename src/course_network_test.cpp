@@ -67,7 +67,7 @@ ID	SUBJECT	CATALOGNBR	COURSE_CODE	GRADE	GPAO	CUM_GPA	TOTALCREDITS	TOTALGRADEPTS	
 class CourseNetworkTest : public ::testing::Test {
  public:
 	CourseNetworkTest() : course_stream_{sample_tab},
-						  network{BuildGraphFromCourseTab(course_stream_)} {}
+						  network{BuildCourseGraphFromTab(course_stream_)} {}
 
  private:
 	stringstream course_stream_;

@@ -8,16 +8,19 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 #include <boost/graph/adjacency_list.hpp>
 
 #include "course.hpp"
+#include "course_tab.hpp"
 
 
 using std::cerr; using std::endl;
 using std::getline; using std::string;
 using std::max; using std::min;
 using std::istream;
+using std::pair;
 using std::stringstream;
 using std::unordered_map;
 using std::unordered_set;
@@ -25,9 +28,6 @@ using std::unordered_set;
 using boost::vertices;
 using boost::add_edge;
 using boost::source;
-
-
-static void SkipLine(istream& input);
 
 
 struct CoursePair {
@@ -51,26 +51,13 @@ struct CoursePairHasher {
 };
 
 
-CourseNetwork::graph_t BuildGraphFromCourseTab(istream& course_tab) {
-	SkipLine(course_tab);
-	// declare expensive objects outside the loop
-	string line, subject;
-	
+CourseNetwork::graph_t BuildCourseGraphFromTab(istream& course_tab_stream) {
 	// loop over all students
+	CourseTab course_tab{course_tab_stream};
 	unordered_map<int, unordered_set<Course, CourseHasher>> student_to_courses;
-	while (getline(course_tab, line)) {
-		// read in the information we care about for now
-		int student_id, course_number;
-		stringstream student_stream{line};
-		student_stream >> student_id >> subject >> course_number;
-		if (!course_tab) {
-			cerr << "Could not read line " << line;
-			course_tab.clear();
-			assert(!course_tab.eof());
-		}
-
+	for (const CourseTab::Line& line : course_tab) {
 		// fill in the course information
-		student_to_courses[student_id].insert({subject, course_number});
+		student_to_courses[line.student.id()].insert(line.course);
 	}
 
 	// aggregate pairs of courses
@@ -122,7 +109,3 @@ CourseNetwork::graph_t BuildGraphFromCourseTab(istream& course_tab) {
 
 	return graph;
 }
-
-
-// Ignore any line in the given istream
-void SkipLine(istream& input) { while (input.get() != '\n'); }

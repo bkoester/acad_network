@@ -1,11 +1,13 @@
-#ifndef GRAPH_BUILDER
-#define GRAPH_BUILDER
+#ifndef GRAPH_BUILDER_H
+#define GRAPH_BUILDER_H
 
 #include <course_network.hpp>
 
 // Builds a graph for the network from the given course tab.
-CourseNetwork::graph_t BuildGraphFromCourseTab(std::istream& course_tab);
+CourseNetwork::graph_t BuildCourseGraphFromTab(std::istream& course_tab_stream);
 
-#endif  // GRAPH_BUILDER
+//StudentNetwork::graph_t BuildStudentGraphFromTab(std::istream& course_tab);
+
+#endif  // GRAPH_BUILDER_H
 
 

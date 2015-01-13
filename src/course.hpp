@@ -38,7 +38,9 @@ class Course {
 	int number_;
 };
 
+
 std::ostream& operator<<(std::ostream& output, const Course& course);
+
 
 struct CourseHasher {
 	int operator()(const Course& course) const {

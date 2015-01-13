@@ -5,7 +5,7 @@
 #include <string>
 
 
-using std::istream; using std::ostream; using std::cout; using std::endl;
+using std::istream; using std::ostream; using std::cerr; using std::endl;
 using std::string;
 using std::stringstream;
 

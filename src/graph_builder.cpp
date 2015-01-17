@@ -58,7 +58,7 @@ struct PairHasher {
 };
 
 
-CourseNetwork::graph_t BuildCourseGraphFromTab(istream& course_tab_stream) {
+CourseNetwork BuildCourseGraphFromTab(istream& course_tab_stream) {
 	auto student_to_courses = GetStudentsToCourses(course_tab_stream);
 
 	// aggregate pairs of courses
@@ -82,34 +82,22 @@ CourseNetwork::graph_t BuildCourseGraphFromTab(istream& course_tab_stream) {
 	}
 
 	// create new graph so all vertices can be added at once
-	CourseNetwork::graph_t graph{courses.size()};
-
-	// assign properties of vertices
-	unordered_map<Course, CourseNetwork::vertex_t, CourseHasher> 
-		course_to_vertex;
-	auto course_it = courses.begin();
-	for (auto vertex_it = vertices(graph).first; 
-			vertex_it != vertices(graph).second; ++vertex_it) {
-		assert(course_it != courses.end());
-		course_to_vertex[*course_it] = *vertex_it;
-		graph[*vertex_it] = *course_it++;
-	}
+	CourseNetwork course_network{courses.begin(), courses.end()};
 
 	// add edges and weights
 	for (auto& edge_pair : edge_weights) {
 		auto e = edge_pair.first;
 		int weight{edge_pair.second};
 
-		CourseNetwork::vertex_t vertex1{course_to_vertex[e.first]};
-		CourseNetwork::vertex_t vertex2{course_to_vertex[e.second]};
+		CourseNetwork::vertex_t vertex1{course_network.GetVertex(e.first)};
+		CourseNetwork::vertex_t vertex2{course_network.GetVertex(e.second)};
 
-		// INVARIANT: the vertex should not exist in the graph already.
-		assert(!edge(vertex1, vertex2, graph).second);
-		CourseNetwork::edge_t edge{add_edge(
-				vertex1, vertex2, weight, graph).first};
+		// INVARIANT: the edge should not exist in the graph already.
+		assert(!course_network.GetEdge(vertex1, vertex2));
+		course_network(vertex1, vertex2) = weight;
 	}
 
-	return graph;
+	return course_network;
 }
 
 
@@ -134,7 +122,7 @@ StudentNetwork::graph_t BuildStudentGraphFromTab(
 
 	// assign properties of vertices
 	auto student_it = student_to_courses.begin();
-	unordered_map<Student, CourseNetwork::vertex_t, StudentHasher> 
+	unordered_map<Student, StudentNetwork::vertex_t, StudentHasher> 
 		student_to_vertex;
 	for (auto vertex_it = vertices(graph).first; 
 			vertex_it != vertices(graph).second; ++vertex_it, ++student_it) {

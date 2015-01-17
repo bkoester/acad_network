@@ -106,28 +106,27 @@ void TestGraphStructure(const CourseNetwork& network) {
 			Course{"MATH", 425})};
 
 	// test edges that exist
-	EXPECT_EQ(2, network(english125_vertex, chem210_vertex));
+	EXPECT_EQ(2, network.CalculateValue(english125_vertex, chem210_vertex));
 
 	// test both ways for this one
-	EXPECT_EQ(2, network(chem210_vertex, english125_vertex));
+	EXPECT_EQ(2, network.CalculateValue(chem210_vertex, english125_vertex));
 
-	EXPECT_EQ(1, network(english125_vertex, chem211_vertex));
-	EXPECT_EQ(2, network(english125_vertex, aaptis277_vertex));
-	EXPECT_EQ(2, network(english125_vertex, environ311_vertex));
+	EXPECT_EQ(1, network.CalculateValue(english125_vertex, chem211_vertex));
+	EXPECT_EQ(2, network.CalculateValue(english125_vertex, aaptis277_vertex));
+	EXPECT_EQ(2, network.CalculateValue(english125_vertex, environ311_vertex));
 
-	EXPECT_EQ(1, network(chem210_vertex, chem211_vertex));
-	EXPECT_EQ(1, network(chem210_vertex, aaptis277_vertex));
-	EXPECT_EQ(0, network(chem210_vertex, environ311_vertex));
+	EXPECT_EQ(1, network.CalculateValue(chem210_vertex, chem211_vertex));
+	EXPECT_EQ(1, network.CalculateValue(chem210_vertex, aaptis277_vertex));
+	EXPECT_EQ(0, network.CalculateValue(chem210_vertex, environ311_vertex));
 	// test non-existent edge both ways
-	EXPECT_EQ(0, network(environ311_vertex, chem210_vertex));
+	EXPECT_EQ(0, network.CalculateValue(environ311_vertex, chem210_vertex));
 
-	EXPECT_EQ(1, network(chem211_vertex, aaptis277_vertex));
-	EXPECT_EQ(0, network(chem211_vertex, environ311_vertex));
-	EXPECT_EQ(0, network(chem211_vertex, math425_vertex));
+	EXPECT_EQ(1, network.CalculateValue(chem211_vertex, aaptis277_vertex));
+	EXPECT_EQ(0, network.CalculateValue(chem211_vertex, environ311_vertex));
+	EXPECT_EQ(0, network.CalculateValue(chem211_vertex, math425_vertex));
 	
-	EXPECT_EQ(1, network(aaptis277_vertex, environ311_vertex));
-	EXPECT_EQ(0, network(aaptis277_vertex, math425_vertex));
+	EXPECT_EQ(1, network.CalculateValue(aaptis277_vertex, environ311_vertex));
+	EXPECT_EQ(0, network.CalculateValue(aaptis277_vertex, math425_vertex));
 
-	EXPECT_EQ(1, network(environ311_vertex, math425_vertex));
-
+	EXPECT_EQ(1, network.CalculateValue(environ311_vertex, math425_vertex));
 }

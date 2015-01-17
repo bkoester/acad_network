@@ -7,8 +7,8 @@
 #include "course.hpp"
 
 
-using std::istream;
-using std::ostream;
+using std::istream; using std::ostream;
+
 
 const int default_edge_value{0};
 
@@ -25,12 +25,21 @@ CourseNetwork::vertex_t CourseNetwork::GetVertex(const Course& course) const
 { return course_to_vertex_.at(course); }
 
 
-int CourseNetwork::operator()(
+const Course& CourseNetwork::operator[](const Course& course) const
+{ return Network<Course, int>::operator[](GetVertex(course)); }
+
+
+Course& CourseNetwork::operator[](const Course& course)
+{ return Network<Course, int>::operator[](GetVertex(course)); }
+
+
+int CourseNetwork::CalculateValue(
 		const vertex_t& source, const vertex_t& target) const {
 	auto edge_option = GetEdge(source, target);
 	if (!edge_option) { return default_edge_value; }
-	return operator[](edge_option.get());
+	return Network<Course, int>::operator[](edge_option.get());
 }
+
 
 void CourseNetwork::Load(std::istream& input_graph_archive) {
 	// load the graph itself using the base function
@@ -41,7 +50,7 @@ void CourseNetwork::Load(std::istream& input_graph_archive) {
 
 void CourseNetwork::BuildCourseToVertexMap() {
 	for (const auto& vertex : GetVertices())
-	{ course_to_vertex_[operator[](vertex)] = vertex; }
+	{ course_to_vertex_[Network<Course, int>::operator[](vertex)] = vertex; }
 }
 
 

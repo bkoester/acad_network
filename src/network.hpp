@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <iostream>
+#include <iterator>
 
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
@@ -21,11 +22,18 @@ class Network {
 		  boost::undirectedS, Vertex, Edge>;
 	using vertex_t = typename boost::graph_traits<graph_t>::vertex_descriptor;
 	using edge_t = typename boost::graph_traits<graph_t>::edge_descriptor;
+	using degree_t = typename boost::graph_traits<graph_t>::degree_size_type;
 
-	// construct empty graph
+	// Construct empty graph.
 	Network();
 	// ifstream must contain a boost input archive.
 	Network(std::istream& input);
+	// Create a network with the given number of vertices.
+	Network(long unsigned int num_vertices);
+	// Construct a network with a certain starting set of vertices given in the
+	// range by the iterators.
+	template <typename ForwardIt>
+	Network(ForwardIt start, ForwardIt end);
 	// Allows a network to be built from a non-boost archive graph format.
 	Network(const graph_t& graph);
 
@@ -40,20 +48,33 @@ class Network {
 
 	virtual ~Network() {}
 
-		vertex_t GetSourceVertex(const edge_t& edge) const;
-	vertex_t GetTargetVertex(const edge_t& edge) const;
+	degree_t Degree(const vertex_t& vertex) 
+	{ return boost::degree(vertex, graph_); }
+	
+	vertex_t GetSourceVertexDescriptor(const edge_t& edge) const;
+	vertex_t GetTargetVertexDescriptor(const edge_t& edge) const;
 	boost::optional<edge_t> GetEdge(
 			const vertex_t& source, const vertex_t& target) const;
 
-	Edge& operator[](const edge_t& edge) { return graph_[edge]; }
+	auto GetEdgeIterators(const vertex_t& vertex)
+	{ return boost::in_edges(vertex, graph_); }
+
+		Edge& operator[](const edge_t& edge) { return graph_[edge]; }
 	const Edge& operator[](const edge_t& edge) const { return graph_[edge]; }
 
 	Vertex& operator[](const vertex_t& vertex) { return graph_[vertex]; }
 	const Vertex& operator[](const vertex_t& vertex) const
 	{ return graph_[vertex]; }
 
-	virtual Edge operator()(
-			const vertex_t& source, const vertex_t& target) const;
+	// The design of throwing error vs. creating edge is modeled after the
+	// member function calls of (unordered_)map.
+	// Returns the data structure at the edge, throws error if it doesn't exist.
+	const Edge& Get(const vertex_t& source, const vertex_t& target) const;
+	Edge& Get(const vertex_t& source, const vertex_t& target);
+
+	// Returns the data structure at the edge, creates edge if it doesn't exist.
+	const Edge& operator()(const vertex_t& source, const vertex_t& target) const;
+	Edge& operator()(const vertex_t& source, const vertex_t& target);
 
 	void Save(std::ostream& output_graph_archive) const;
 	void Load(std::istream& input_graph_archive);
@@ -119,6 +140,19 @@ Network<Vertex, Edge>::Network() : vertices_{graph_}, edges_{graph_} {}
 
 
 template <typename Vertex, typename Edge>
+Network<Vertex, Edge>::Network(long unsigned int num_vertices) : 
+	graph_{num_vertices}, vertices_{graph_}, edges_{graph_} {}
+
+
+template <typename Vertex, typename Edge>
+template <typename ForwardIt>
+Network<Vertex, Edge>::Network(ForwardIt first, ForwardIt last) : 
+		graph_{std::distance(first, last)}, vertices_{graph_}, edges_{graph_} {
+	auto it = first;
+	for (auto& vertex : GetVertices()) { operator[](vertex) = *it++; }
+}
+
+template <typename Vertex, typename Edge>
 Network<Vertex, Edge>::Network(std::istream& input) : 
 		vertices_{graph_}, edges_{graph_} { Load(input); }
 
@@ -135,18 +169,23 @@ Network<Vertex, Edge>::Network(const Network& other) :
 
 template <typename Vertex, typename Edge>
 Network<Vertex, Edge>& Network<Vertex, Edge>::operator=(const Network& other) {
-	graph_ = other.graph_; 
+	// using the copy-swap idiom
+	graph_t graph{other.graph_};
+	graph_.swap(graph);
 	return *this;
 }
 
+
 template <typename Vertex, typename Edge>
-typename Network<Vertex, Edge>::vertex_t Network<Vertex, Edge>::GetSourceVertex(
-		const edge_t& edge) const { return source(edge, graph_); }
+typename Network<Vertex, Edge>::vertex_t 
+Network<Vertex, Edge>::GetSourceVertexDescriptor(const edge_t& edge) const
+{ return source(edge, graph_); }
 
 
 template <typename Vertex, typename Edge>
-typename Network<Vertex, Edge>::vertex_t Network<Vertex, Edge>::GetTargetVertex(
-		const edge_t& edge) const { return target(edge, graph_); }
+typename Network<Vertex, Edge>::vertex_t 
+Network<Vertex, Edge>::GetTargetVertexDescriptor(const edge_t& edge) const
+{ return target(edge, graph_); }
 
 
 template <typename Vertex, typename Edge>
@@ -159,11 +198,33 @@ Network<Vertex, Edge>::GetEdge(
 
 
 template <typename Vertex, typename Edge>
-Edge Network<Vertex, Edge>::operator()(
+const Edge& Network<Vertex, Edge>::Get(
 		const vertex_t& source, const vertex_t& target) const {
 	boost::optional<edge_t> edge{GetEdge(source, target)};
 	if (!edge) { throw NoEdgeException{}; };
 	return operator[](edge.get());
+}
+
+
+template <typename Vertex, typename Edge>
+Edge& Network<Vertex, Edge>::Get(
+		const vertex_t& source, const vertex_t& target) {
+	boost::optional<edge_t> edge{GetEdge(source, target)};
+	if (!edge) { throw NoEdgeException{}; };
+	return operator[](edge.get());
+}
+
+
+template <typename Vertex, typename Edge>
+Edge& Network<Vertex, Edge>::operator()(
+		const vertex_t& source, const vertex_t& target) {
+	// add the edge if necessary
+	if (!GetEdge(source, target))
+	{ boost::add_edge(source, target, Edge{}, graph_); }
+
+	// get a reference to the Edge
+	boost::optional<edge_t> edge_option{GetEdge(source, target)};
+	return operator[](edge_option.get());
 }
 
 

@@ -18,7 +18,7 @@ using std::stringstream;
 
 using boost::edge;
 
-void TestGraphStructure(const CourseNetwork& network);
+static void TestGraphStructure(const CourseNetwork& network);
 
 const string sample_tab{
 "ID\tSUBJECT\tCATALOGNBR\tCOURSE_CODE\tGRADE\tGPAO\tCUM_GPA\tTOTALCREDITS\t"

@@ -5,9 +5,13 @@
 #include "network.hpp"
 #include "student.hpp"
 
+#include <boost/serialization/unordered_set.hpp>
+
+
 class StudentNetwork : 
 	public Network<StudentId, std::unordered_set<Course, CourseHasher>> {
  public:
+	StudentNetwork() {}
 	StudentNetwork(const graph_t& graph) : Network{graph} {}
 };
 

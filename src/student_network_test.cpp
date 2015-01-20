@@ -20,6 +20,11 @@ using std::string;
 using std::stringstream;
 
 
+static void TestGraphStructure(const StudentNetwork& network);
+static StudentNetwork::vertex_t FindStudentId(
+		const StudentNetwork& network, StudentId student);
+
+
 const string sample_tab{
 "ID\tSUBJECT\tCATALOGNBR\tCOURSE_CODE\tGRADE\tGPAO\tCUM_GPA\tTOTALCREDITS\t"
 "TOTALGRADEPTS\tCOURSECREDIT\tTERM\n"
@@ -52,25 +57,41 @@ const string sample_tab{
 
 class StudentNetworkTest : public ::testing::Test {
  public:
-   StudentNetworkTest() : course_stream_{sample_tab},
+	StudentNetworkTest() : course_stream_{sample_tab},
 						 network{BuildStudentGraphFromTab(course_stream_)} {}
+
 
  private:
    stringstream course_stream_;
 
    // must be defined after the private member for initialization reasons
  protected:
-	StudentNetwork::vertex_t FindStudentId(StudentId student);
 	StudentNetwork network;
 };
 
 
-TEST_F(StudentNetworkTest, Construction) {
-	StudentNetwork::vertex_t student1{FindStudentId(StudentId{312995})};
-	StudentNetwork::vertex_t student2{FindStudentId(StudentId{500928})};
-	StudentNetwork::vertex_t student3{FindStudentId(StudentId{147195})};
-	StudentNetwork::vertex_t student4{FindStudentId(StudentId{352468})};
-	StudentNetwork::vertex_t student5{FindStudentId(StudentId{123456})};
+TEST_F(StudentNetworkTest, Construction) { TestGraphStructure(network); }
+
+
+TEST_F(StudentNetworkTest, Serialization) {
+	// save the network
+	stringstream archive;
+	network.Save(archive);
+	TestGraphStructure(network);
+
+	// load the network
+	StudentNetwork loaded_network;
+	loaded_network.Load(archive);
+	TestGraphStructure(loaded_network);
+}
+
+
+void TestGraphStructure(const StudentNetwork& network) {
+	StudentNetwork::vertex_t student1{FindStudentId(network, StudentId{312995})};
+	StudentNetwork::vertex_t student2{FindStudentId(network, StudentId{500928})};
+	StudentNetwork::vertex_t student3{FindStudentId(network, StudentId{147195})};
+	StudentNetwork::vertex_t student4{FindStudentId(network, StudentId{352468})};
+	StudentNetwork::vertex_t student5{FindStudentId(network, StudentId{123456})};
 
 	auto edge1 = network.Get(student1, student2);
 	EXPECT_EQ(2u, edge1.size());
@@ -111,9 +132,10 @@ TEST_F(StudentNetworkTest, Construction) {
 }
 
 
-StudentNetwork::vertex_t StudentNetworkTest::FindStudentId(StudentId student) {
+StudentNetwork::vertex_t FindStudentId(
+		const StudentNetwork& network, StudentId student) {
 	auto it = find_if(network.GetVertices().begin(), network.GetVertices().end(), 
-		 [this, student](const StudentNetwork::vertex_t& vertex_descriptor)
+		 [&network, student](const StudentNetwork::vertex_t& vertex_descriptor)
 		 { return network[vertex_descriptor] == student; });
 	EXPECT_NE(network.GetVertices().end(), network.GetVertices().begin());
 

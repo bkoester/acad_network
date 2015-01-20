@@ -20,10 +20,10 @@ class CourseTab {
 	// Every line in a CourseTab contains a course and a student.
 	struct Line {
 		Course course;
-		Student student;
+		StudentId student;
 
 		Line() {}
-		Line(Course c, Student s) : course{c}, student{s} {}
+		Line(Course c, StudentId s) : course{c}, student{s} {}
 		Line(const Line& other) : course{other.course}, student{other.student} {}
 
 		bool operator==(const Line& other) const

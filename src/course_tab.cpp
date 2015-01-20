@@ -71,7 +71,7 @@ void CourseTab::Iterator::Advance() {
 
 	// store line state
 	line_.course = Course{subject, course_number};
-	line_.student = Student{student_id};
+	line_.student = StudentId{student_id};
 }
 
 

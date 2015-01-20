@@ -30,8 +30,14 @@ using boost::add_edge;
 using boost::source;
 
 
-static unordered_map<Student, unordered_set<Course, CourseHasher>, StudentHasher> 
-GetStudentsToCourses(istream& course_tab_stream);
+static unordered_map<StudentId, unordered_set<Course, CourseHasher>> 
+GetStudentIdsToCourses(istream& course_tab_stream);
+
+
+static unordered_map<Course, 
+					 unordered_set<StudentId, StudentIdHasher>,
+					 CourseHasher> 
+	GetCoursesToStudentIds(istream& course_tab_stream);
 
 
 template <typename T>
@@ -59,7 +65,7 @@ struct PairHasher {
 
 
 CourseNetwork BuildCourseGraphFromTab(istream& course_tab_stream) {
-	auto student_to_courses = GetStudentsToCourses(course_tab_stream);
+	auto student_to_courses = GetStudentIdsToCourses(course_tab_stream);
 
 	// aggregate pairs of courses
 	unordered_map<DistinctUnorderedPair<Course>, int, PairHasher<CourseHasher>> 
@@ -101,59 +107,69 @@ CourseNetwork BuildCourseGraphFromTab(istream& course_tab_stream) {
 }
 
 
-StudentNetwork::graph_t BuildStudentGraphFromTab(
-		std::istream& course_tab_stream) {
-	auto student_to_courses = GetStudentsToCourses(course_tab_stream);
+StudentNetwork BuildStudentGraphFromTab(std::istream& course_tab_stream) {
+	auto courses_to_students = GetCoursesToStudentIds(course_tab_stream);
 
-	// get pairs of students and courses they have in common
-	unordered_map<DistinctUnorderedPair<Student>, int, PairHasher<StudentHasher>> 
-		edge_weights;
-	for (auto it1 = student_to_courses.cbegin(); 
-			it1 != student_to_courses.cend(); ++it1) {
-		for (auto it2 = it1; 
-				it2 != student_to_courses.cend(); ++it2) {
-			DistinctUnorderedPair<Student> edge{it1->first, it2->first};
-			++edge_weights[edge];
+	// build a map of pairs of students => courses in common
+	// build a list of all students
+	unordered_map<DistinctUnorderedPair<StudentId>, 
+				  unordered_set<Course, CourseHasher>,
+				  PairHasher<StudentIdHasher>> edges;
+	unordered_set<StudentId, StudentIdHasher> students;
+	for (const auto& course_students_pair : courses_to_students) {
+		Course course{course_students_pair.first};
+		auto course_students = course_students_pair.second;
+		for (auto it1 = course_students.begin(); 
+			 it1 != course_students.end(); ++it1) {
+			for (auto it2 = it1; ++it2 != course_students.end();) {
+				// add course to edge in the graph
+				DistinctUnorderedPair<StudentId> edge{*it1, *it2};
+				edges[edge].insert(course);
+
+				// add the students into the list of students
+				students.insert(*it1);
+				students.insert(*it2);
+			}
 		}
 	}
 
 	// create new graph with the number of students as number of vertices
-	StudentNetwork::graph_t graph{student_to_courses.size()};
+	StudentNetwork network{students.size()};
 
 	// assign properties of vertices
-	auto student_it = student_to_courses.begin();
-	unordered_map<Student, StudentNetwork::vertex_t, StudentHasher> 
+	auto student_it = students.begin();
+	unordered_map<StudentId, StudentNetwork::vertex_t, StudentIdHasher> 
 		student_to_vertex;
-	for (auto vertex_it = vertices(graph).first; 
-			vertex_it != vertices(graph).second; ++vertex_it, ++student_it) {
-		assert(student_it != student_to_courses.end());
-		student_to_vertex[student_it->first] = *vertex_it;
-		graph[*vertex_it] = student_it->first;
+	for (auto vertex_it = network.GetVertices().begin();
+			vertex_it != network.GetVertices().end();
+			++vertex_it, ++student_it) {
+		assert(student_it != students.end());
+		student_to_vertex[*student_it] = *vertex_it;
+		network[*vertex_it] = *student_it;
 	}
 
 	// add edges and weights
-	for (auto& edge_pair : edge_weights) {
-		auto e = edge_pair.first;
-		int weight{edge_pair.second};
+	for (auto& edge_pair : edges) {
+		auto edge = edge_pair.first;
+		auto edge_value = edge_pair.second;
 
-		StudentNetwork::vertex_t vertex1{student_to_vertex[e.first]};
-		StudentNetwork::vertex_t vertex2{student_to_vertex[e.second]};
+		StudentNetwork::vertex_t vertex1{student_to_vertex[edge.first]};
+		StudentNetwork::vertex_t vertex2{student_to_vertex[edge.second]};
 
 		// INVARIANT: the vertex should not exist in the graph already.
-		assert(!edge(vertex1, vertex2, graph).second);
-		StudentNetwork::edge_t edge{add_edge(
-				vertex1, vertex2, weight, graph).first};
+		assert(!network.GetEdge(vertex1, vertex2));
+		network(vertex1, vertex2) = edge_value;
 	}
 
-	return graph;
+	return network;
 }
 
 
 // Gets a hash table of students => set of courses they have taken
-unordered_map<Student, unordered_set<Course, CourseHasher>, StudentHasher> 
-GetStudentsToCourses(istream& course_tab_stream) {
+unordered_map<StudentId, unordered_set<Course, CourseHasher>> 
+GetStudentIdsToCourses(istream& course_tab_stream) {
 	CourseTab course_tab{course_tab_stream};
-	unordered_map<Student, unordered_set<Course, CourseHasher>, StudentHasher> 
+	unordered_map<StudentId, unordered_set<Course, CourseHasher>> 
 		student_to_courses;
 
 	// fill in the course information
@@ -161,4 +177,20 @@ GetStudentsToCourses(istream& course_tab_stream) {
 	{ student_to_courses[line.student].insert(line.course); }
 
 	return student_to_courses;
+}
+
+
+// Gets a hash table of courses => set of students who have taken it
+unordered_map<Course, unordered_set<StudentId, StudentIdHasher>, CourseHasher> 
+GetCoursesToStudentIds(istream& course_tab_stream) {
+	CourseTab course_tab{course_tab_stream};
+	unordered_map<Course,
+				  unordered_set<StudentId, StudentIdHasher>, 
+				  CourseHasher> courses_to_students;
+
+	// fill in the course information
+	for (const CourseTab::Line& line : course_tab)
+	{ courses_to_students[line.course].insert(line.student); }
+
+	return courses_to_students;
 }

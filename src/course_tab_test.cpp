@@ -58,30 +58,30 @@ TEST_F(CourseTabTest, Iteration) {
 	auto course_tab_it = course_tab.begin();
 	
 	// test classes are the same
-	CourseTab::Line line1{Course{"ENGLISH", 125}, Student{312995}};
+	CourseTab::Line line1{Course{"ENGLISH", 125}, StudentId{312995}};
 	CourseTab::Line result{*course_tab_it++};
 	EXPECT_EQ(line1, result);
-	CourseTab::Line line2{Course{"CHEM", 210}, Student{312995}};
+	CourseTab::Line line2{Course{"CHEM", 210}, StudentId{312995}};
 	EXPECT_EQ(line2, *course_tab_it++);
-	CourseTab::Line line3{Course{"CHEM", 211}, Student{312995}};
+	CourseTab::Line line3{Course{"CHEM", 211}, StudentId{312995}};
 	EXPECT_EQ(line3, *course_tab_it++);
-	CourseTab::Line line4{Course{"AAPTIS", 277}, Student{312995}};
+	CourseTab::Line line4{Course{"AAPTIS", 277}, StudentId{312995}};
 	EXPECT_EQ(line4, *course_tab_it++);
-	CourseTab::Line line5{Course{"ENGLISH", 125}, Student{500928}};
+	CourseTab::Line line5{Course{"ENGLISH", 125}, StudentId{500928}};
 	EXPECT_EQ(line5, *course_tab_it++);
-	CourseTab::Line line6{Course{"CHEM", 210}, Student{500928}};
+	CourseTab::Line line6{Course{"CHEM", 210}, StudentId{500928}};
 	EXPECT_EQ(line6, *course_tab_it++);
-	CourseTab::Line line7{Course{"ENGLISH", 125}, Student{147195}};
+	CourseTab::Line line7{Course{"ENGLISH", 125}, StudentId{147195}};
 	EXPECT_EQ(line7, *course_tab_it++);
-	CourseTab::Line line8{Course{"ENVIRON", 311}, Student{147195}};
+	CourseTab::Line line8{Course{"ENVIRON", 311}, StudentId{147195}};
 	EXPECT_EQ(line8, *course_tab_it++);
-	CourseTab::Line line9{Course{"AAPTIS", 277}, Student{147195}};
+	CourseTab::Line line9{Course{"AAPTIS", 277}, StudentId{147195}};
 	EXPECT_EQ(line9, *course_tab_it++);
-	CourseTab::Line line10{Course{"ENGLISH", 125}, Student{352468}};
+	CourseTab::Line line10{Course{"ENGLISH", 125}, StudentId{352468}};
 	EXPECT_EQ(line10, *course_tab_it++);
-	CourseTab::Line line11{Course{"ENVIRON", 311}, Student{352468}};
+	CourseTab::Line line11{Course{"ENVIRON", 311}, StudentId{352468}};
 	EXPECT_EQ(line11, *course_tab_it++);
-	CourseTab::Line line12{Course{"MATH", 425}, Student{352468}};
+	CourseTab::Line line12{Course{"MATH", 425}, StudentId{352468}};
 	EXPECT_EQ(line12, *course_tab_it++);
 
 	// make sure the iterator has hit the end of the input

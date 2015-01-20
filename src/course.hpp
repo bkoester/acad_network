@@ -8,7 +8,6 @@
 #include <boost/serialization/utility.hpp>
 
 class Course {
-
  public:
 	Course();
 

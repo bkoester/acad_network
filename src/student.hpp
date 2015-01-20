@@ -4,8 +4,12 @@
 #include <functional>
 #include <iosfwd>
 
-
 #include <boost/serialization/utility.hpp>
+
+
+using StudentId = int;
+using StudentIdHasher = std::hash<int>;
+
 
 class Student {
  public:
@@ -30,12 +34,6 @@ class Student {
 
 
 std::ostream& operator<<(std::ostream& os, const Student& student);
-
-
-struct StudentHasher {
-	int operator()(const Student& student) const 
-	{ return std::hash<int>()(student.id()); }
-};
 
 
 #endif  // STUDENT_H

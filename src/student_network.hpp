@@ -1,10 +1,12 @@
 #ifndef STUDENT_NETWORK_H
 #define STUDENT_NETWORK_H
 
+#include "course.hpp"
 #include "network.hpp"
 #include "student.hpp"
 
-class StudentNetwork : public Network<Student, int> {
+class StudentNetwork : 
+	public Network<StudentId, std::unordered_set<Course, CourseHasher>> {
  public:
 	StudentNetwork(const graph_t& graph) : Network{graph} {}
 };

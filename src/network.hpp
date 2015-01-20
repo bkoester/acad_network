@@ -59,7 +59,7 @@ class Network {
 	auto GetEdgeIterators(const vertex_t& vertex)
 	{ return boost::in_edges(vertex, graph_); }
 
-		Edge& operator[](const edge_t& edge) { return graph_[edge]; }
+	Edge& operator[](const edge_t& edge) { return graph_[edge]; }
 	const Edge& operator[](const edge_t& edge) const { return graph_[edge]; }
 
 	Vertex& operator[](const vertex_t& vertex) { return graph_[vertex]; }

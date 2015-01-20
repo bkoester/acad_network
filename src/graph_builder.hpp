@@ -7,7 +7,7 @@
 // Builds a graph for the network from the given course tab.
 CourseNetwork BuildCourseGraphFromTab(std::istream& course_tab_stream);
 
-StudentNetwork::graph_t BuildStudentGraphFromTab(std::istream& course_tab_stream);
+StudentNetwork BuildStudentGraphFromTab(std::istream& course_tab_stream);
 
 #endif  // GRAPH_BUILDER_H
 

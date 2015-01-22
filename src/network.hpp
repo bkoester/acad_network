@@ -53,6 +53,13 @@ class Network {
 	
 	vertex_t GetSourceVertexDescriptor(const edge_t& edge) const;
 	vertex_t GetTargetVertexDescriptor(const edge_t& edge) const;
+
+	const Vertex& GetSourceVertex(const edge_t& edge) const;
+	Vertex& GetSourceVertex(const edge_t& edge);
+
+	const Vertex& GetTargetVertex(const edge_t& edge) const;
+	Vertex& GetTargetVertex(const edge_t& edge);
+
 	boost::optional<edge_t> GetEdge(
 			const vertex_t& source, const vertex_t& target) const;
 
@@ -186,6 +193,26 @@ template <typename Vertex, typename Edge>
 typename Network<Vertex, Edge>::vertex_t 
 Network<Vertex, Edge>::GetTargetVertexDescriptor(const edge_t& edge) const
 { return target(edge, graph_); }
+
+
+template <typename Vertex, typename Edge>
+const Vertex& Network<Vertex, Edge>::GetSourceVertex(const edge_t& edge) const
+{ return operator[](GetSourceVertexDescriptor(edge)); }
+
+
+template <typename Vertex, typename Edge>
+Vertex& Network<Vertex, Edge>::GetSourceVertex(const edge_t& edge)
+{ return operator[](GetSourceVertexDescriptor(edge)); }
+
+
+template <typename Vertex, typename Edge>
+const Vertex& Network<Vertex, Edge>::GetTargetVertex(const edge_t& edge) const
+{ return operator[](GetTargetVertexDescriptor(edge)); }
+
+
+template <typename Vertex, typename Edge>
+Vertex& Network<Vertex, Edge>::GetTargetVertex(const edge_t& edge)
+{ return operator[](GetTargetVertexDescriptor(edge)); }
 
 
 template <typename Vertex, typename Edge>

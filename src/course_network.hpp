@@ -21,6 +21,8 @@ class CourseNetwork : public Network<Course, int> {
 	// gets the vertex type in the graph for a specific course
 	// Will throw out_of_range exception if the course doesn't exist.
 	vertex_t GetVertex(const Course& course) const;
+
+	using Network<Course, int>::operator[];
 	const Course& operator[](const Course& course) const;
 	Course& operator[](const Course& course);
 

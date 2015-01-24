@@ -3,7 +3,6 @@
 #include <cassert>
 
 #include <algorithm>
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -16,7 +15,6 @@
 #include "course_tab.hpp"
 
 
-using std::cerr; using std::endl;
 using std::getline; using std::string;
 using std::max; using std::min;
 using std::istream;
@@ -112,8 +110,7 @@ StudentNetwork BuildStudentGraphFromTab(std::istream& course_tab_stream) {
 
 	// build a map of pairs of students => courses in common
 	// build a list of all students
-	unordered_map<DistinctUnorderedPair<StudentId>, 
-				  unordered_set<Course, CourseHasher>,
+	unordered_set<DistinctUnorderedPair<StudentId>, 
 				  PairHasher<StudentIdHasher>> edges;
 	unordered_set<StudentId, StudentIdHasher> students;
 	for (const auto& course_students_pair : courses_to_students) {
@@ -124,7 +121,7 @@ StudentNetwork BuildStudentGraphFromTab(std::istream& course_tab_stream) {
 			for (auto it2 = it1; ++it2 != course_students.end();) {
 				// add course to edge in the graph
 				DistinctUnorderedPair<StudentId> edge{*it1, *it2};
-				edges[edge].insert(course);
+				edges.insert(edge);
 
 				// add the students into the list of students
 				students.insert(*it1);
@@ -149,16 +146,17 @@ StudentNetwork BuildStudentGraphFromTab(std::istream& course_tab_stream) {
 	}
 
 	// add edges and weights
-	for (auto& edge_pair : edges) {
+	for (auto& edge : edges) {
+		/*
 		auto edge = edge_pair.first;
-		auto edge_value = edge_pair.second;
+		auto edge_value = edge_pair.second; */
 
 		StudentNetwork::vertex_t vertex1{student_to_vertex[edge.first]};
 		StudentNetwork::vertex_t vertex2{student_to_vertex[edge.second]};
 
 		// INVARIANT: the vertex should not exist in the graph already.
 		assert(!network.GetEdge(vertex1, vertex2));
-		network(vertex1, vertex2) = edge_value;
+		network(vertex1, vertex2) = 1;
 	}
 
 	return network;

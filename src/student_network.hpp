@@ -6,8 +6,7 @@
 #include "student.hpp"
 
 
-class StudentNetwork : 
-	public Network<StudentId, std::unordered_set<Course, CourseHasher>> {
+class StudentNetwork : public Network<StudentId, int> {
  public:
 	StudentNetwork() {}
 	StudentNetwork(const graph_t& graph) : Network{graph} {}

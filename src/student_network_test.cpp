@@ -93,6 +93,21 @@ void TestGraphStructure(const StudentNetwork& network) {
 	StudentNetwork::vertex_t student4{FindStudentId(network, StudentId{352468})};
 	StudentNetwork::vertex_t student5{FindStudentId(network, StudentId{123456})};
 
+
+	EXPECT_EQ(1, network.Get(student1, student2));
+	EXPECT_EQ(1, network.Get(student1, student3));
+	EXPECT_EQ(1, network.Get(student1, student4));
+	EXPECT_THROW(network.Get(student1, student5), NoEdgeException);
+
+	EXPECT_EQ(1, network.Get(student2, student3));
+	EXPECT_EQ(1, network.Get(student2, student4));
+	EXPECT_THROW(network.Get(student2, student5), NoEdgeException);
+
+	EXPECT_EQ(1, network.Get(student3, student4));
+	EXPECT_THROW(network.Get(student3, student5), NoEdgeException);
+	EXPECT_EQ(1, network.Get(student4, student5));
+
+	/*
 	auto edge1 = network.Get(student1, student2);
 	EXPECT_EQ(2u, edge1.size());
 	EXPECT_EQ(1u, edge1.count(Course{"ENGLISH", 125}));
@@ -129,6 +144,7 @@ void TestGraphStructure(const StudentNetwork& network) {
 	auto edge10 = network.Get(student4, student5);
 	EXPECT_EQ(1u, edge10.size());
 	EXPECT_EQ(1u, edge10.count(Course{"MATH", 425}));
+	*/
 }
 
 

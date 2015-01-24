@@ -63,7 +63,9 @@ class Network {
 	boost::optional<edge_t> GetEdge(
 			const vertex_t& source, const vertex_t& target) const;
 
-	auto GetEdgeIterators(const vertex_t& vertex)
+	typename std::pair<typename boost::graph_traits<graph_t>::in_edge_iterator,
+		  typename boost::graph_traits<graph_t>::in_edge_iterator>
+	GetEdgeIterators(const vertex_t& vertex)
 	{ return boost::in_edges(vertex, graph_); }
 
 	Edge& operator[](const edge_t& edge) { return graph_[edge]; }
@@ -91,36 +93,51 @@ class Network {
 	// GetEdges() functions, which supply the graph parameter to the constructors
 	class Vertices {
 	 public:
-		auto size() const { return boost::num_vertices(graph_); }
-		auto begin() { return boost::vertices(graph_).first; }
-		const auto begin() const { return boost::vertices(graph_).first; }
-		const auto cbegin() const { return boost::vertices(graph_).first; }
+		typename boost::graph_traits<graph_t>::vertices_size_type 
+		size() const { return boost::num_vertices(graph_); }
 
-		auto end() { return boost::vertices(graph_).second; }
-		const auto end() const { return boost::vertices(graph_).second; }
-		const auto cend() const { return boost::vertices(graph_).second; }
+		typename boost::graph_traits<graph_t>::vertex_iterator 
+		begin() { return boost::vertices(graph_).first; }
+		const typename boost::graph_traits<graph_t>::vertex_iterator 
+		begin() const { return boost::vertices(graph_).first; }
+		const typename boost::graph_traits<graph_t>::vertex_iterator 
+		cbegin() const { return boost::vertices(graph_).first; }
+
+		typename boost::graph_traits<graph_t>::vertex_iterator 
+		end() { return boost::vertices(graph_).second; }
+		const typename boost::graph_traits<graph_t>::vertex_iterator 
+		end() const { return boost::vertices(graph_).second; }
+		const typename boost::graph_traits<graph_t>::vertex_iterator 
+		cend() const { return boost::vertices(graph_).second; }
 
 	 private:
 		friend class Network;
-		Vertices(graph_t& graph) : graph_{graph} {}
+		Vertices(graph_t& graph) : graph_(graph) {}
 
 		graph_t& graph_;
 	};
 
 	class Edges {
 	 public:
-		auto size() const { return boost::num_edges(graph_); }
-		auto begin() { return boost::edges(graph_).first; }
-		const auto begin() const { return boost::edges(graph_).first; }
-		const auto cbegin() const { return boost::edges(graph_).first; }
+		typename boost::graph_traits<graph_t>::edges_size_type 
+		size() const { return boost::num_edges(graph_); }
+		typename boost::graph_traits<graph_t>::edge_iterator
+		begin() { return boost::edges(graph_).first; }
+		const typename boost::graph_traits<graph_t>::edge_iterator
+		begin() const { return boost::edges(graph_).first; }
+		const typename boost::graph_traits<graph_t>::edge_iterator
+		cbegin() const { return boost::edges(graph_).first; }
 
-		auto end() { return boost::edges(graph_).second; }
-		const auto end() const { return boost::edges(graph_).second; }
-		const auto cend() const { return boost::edges(graph_).second; }
+		typename boost::graph_traits<graph_t>::edge_iterator
+		end() { return boost::edges(graph_).second; }
+		const typename boost::graph_traits<graph_t>::edge_iterator
+		end() const { return boost::edges(graph_).second; }
+		const typename boost::graph_traits<graph_t>::edge_iterator
+		cend() const { return boost::edges(graph_).second; }
 
 	 private:
 		friend class Network;
-		Edges(graph_t& graph) : graph_{graph} {}
+		Edges(graph_t& graph) : graph_(graph) {}
 
 		graph_t& graph_;
 	};
@@ -143,35 +160,35 @@ class Network {
 
 
 template <typename Vertex, typename Edge>
-Network<Vertex, Edge>::Network() : vertices_{graph_}, edges_{graph_} {}
+Network<Vertex, Edge>::Network() : vertices_(graph_), edges_(graph_) {}
 
 
 template <typename Vertex, typename Edge>
 Network<Vertex, Edge>::Network(long unsigned int num_vertices) : 
-	graph_{num_vertices}, vertices_{graph_}, edges_{graph_} {}
+	graph_{num_vertices}, vertices_(graph_), edges_(graph_) {}
 
 
 template <typename Vertex, typename Edge>
 template <typename ForwardIt>
 Network<Vertex, Edge>::Network(ForwardIt first, ForwardIt last) : 
-		graph_{std::distance(first, last)}, vertices_{graph_}, edges_{graph_} {
+		graph_{std::distance(first, last)}, vertices_(graph_), edges_(graph_) {
 	auto it = first;
 	for (auto& vertex : GetVertices()) { operator[](vertex) = *it++; }
 }
 
 template <typename Vertex, typename Edge>
 Network<Vertex, Edge>::Network(std::istream& input) : 
-		vertices_{graph_}, edges_{graph_} { Load(input); }
+		vertices_(graph_), edges_(graph_) { Load(input); }
 
 
 template <typename Vertex, typename Edge>
 Network<Vertex, Edge>::Network(const graph_t& graph) :
-	graph_{graph}, vertices_{graph_}, edges_{graph_} {}
+	graph_{graph}, vertices_(graph_), edges_(graph_) {}
 
 
 template <typename Vertex, typename Edge>
 Network<Vertex, Edge>::Network(const Network& other) : 
-	graph_{other.graph_}, vertices_{graph_}, edges_{graph_} {}
+	graph_{other.graph_}, vertices_(graph_), edges_(graph_) {}
 
 
 template <typename Vertex, typename Edge>

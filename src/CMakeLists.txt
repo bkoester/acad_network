@@ -19,7 +19,7 @@ set(UNITTEST_BINARY "unittest")
 
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
-	${Boost_CURRENT_SOURCE_DIR})
+	${Boost_INCLUDE_DIRS})
 
 add_library(${DEBUG_OBJECT_LIBRARY} OBJECT ${SRCS})
 add_executable(${DEBUG_BINARY}

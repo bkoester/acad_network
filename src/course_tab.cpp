@@ -10,7 +10,7 @@ using std::string;
 using std::stringstream;
 
 
-CourseTab::CourseTab(istream& course_tab) : course_tab_{course_tab} {
+CourseTab::CourseTab(istream& course_tab) : course_tab_(course_tab) {
 	// skip the headings line
 	SkipLine(course_tab_);
 }
@@ -23,15 +23,15 @@ CourseTab::Iterator CourseTab::end() { return Iterator{course_tab_, true}; }
 
 
 CourseTab::Iterator::Iterator(istream& course_tab) :
-	course_tab_{course_tab}, end_{false} { operator++(); }
+	course_tab_(course_tab), end_{false} { operator++(); }
 
 
 CourseTab::Iterator::Iterator(istream& course_tab, bool end) :
-	course_tab_{course_tab}, end_{end} {}
+	course_tab_(course_tab), end_{end} {}
 
 
 CourseTab::Iterator::Iterator(const Iterator& other) : 
-	course_tab_{other.course_tab_}, end_{other.end_}, line_{other.line_} {}
+	course_tab_(other.course_tab_), end_{other.end_}, line_{other.line_} {}
 
 
 CourseTab::Iterator CourseTab::Iterator::operator++(int) { 

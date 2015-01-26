@@ -3,13 +3,10 @@
 #include <cassert>
 
 #include <algorithm>
-#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
-
-#include <boost/graph/adjacency_list.hpp>
 
 #include "course.hpp"
 #include "course_tab.hpp"
@@ -19,13 +16,8 @@ using std::getline; using std::string;
 using std::max; using std::min;
 using std::istream;
 using std::pair;
-using std::stringstream;
 using std::unordered_map;
 using std::unordered_set;
-
-using boost::vertices;
-using boost::add_edge;
-using boost::source;
 
 
 static unordered_map<StudentId, unordered_set<Course, CourseHasher>> 

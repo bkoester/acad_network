@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#PBS -A lsa_flux
+#PBS -l qos=flux
+#PBS -q flux
+#PBS -M karepker@umich.edu
+#PBS -N students
+#PBS -l procs=1,walltime=10:00:00,mem=60gb
+#PBS -m abe
+#PBS -V
+
+WORKING_DIR=/tmp/$PBS_JOBID
+DEPLOY_DIR=$HOME/thesis
+INPUT_FILENAME=student.course.tab
+mkdir $WORKING_DIR
+
+cp ${DEPLOY_DIR}/data/${INPUT_FILENAME} $WORKING_DIR
+cp ${DEPLOY_DIR}/code/build/src/thesis $WORKING_DIR
+
+cd $WORKING_DIR
+./thesis < $INPUT_FILENAME 
+
+rm -rf $WORKING_DIR

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.8)  # for object libraries
+cmake_minimum_required(VERSION 2.8.10)  # for compiler version
 project (thesis)
 
 # set some locations

@@ -1,15 +1,17 @@
 set(SRCS
 	course.cpp
-	course_tab.cpp
 	course_network.cpp
+	course_tab.cpp
 	graph_builder.cpp
 	student.cpp)
 
 set(MAIN_SRC main.cpp)
 
 set(UNITTEST_SRCS
+	course_test.cpp
 	course_network_test.cpp
 	course_tab_test.cpp
+	student_test.cpp
 	student_network_test.cpp)
 
 set(DEBUG_OBJECT_LIBRARY "debug_objects")

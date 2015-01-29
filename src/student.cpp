@@ -10,17 +10,16 @@
 
 using std::ostream; using std::istream; using std::endl;
 using std::ostream_iterator;
-using std::transform;
+using std::copy;
 
 
 ostream& operator<<(ostream& os, const Student& student) {
 	if (student.id() == Student::uninitialized_id) { os << "ID: Undefined"; }
 	else { os << "ID: " << student.id(); }
 	os << "Classes: ";
-	transform(student.courses_taken_.cbegin(), --student.courses_taken_.cend(), 
-			  ostream_iterator<Course>{os, ", "}, 
-			  [](const Course* course) { return *course; });
-	os << **student.courses_taken_.rbegin();
+	copy(student.courses_taken_.cbegin(), --student.courses_taken_.cend(), 
+			  ostream_iterator<Course>{os, ", "});
+	os << *student.courses_taken_.rbegin();
 	os << endl;
 	return os;
 }
@@ -28,7 +27,7 @@ ostream& operator<<(ostream& os, const Student& student) {
 
 istream& operator>>(istream& input, Student& student) {
 	// read the input data we're interested in, skip the rest of the line
-	int id;
+	StudentId id;
 	input >> id;
 	if (!input) { return input; }
 	SkipLine(input);

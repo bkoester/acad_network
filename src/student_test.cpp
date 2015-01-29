@@ -33,24 +33,24 @@ TEST_F(StudentTest, Classes) {
 	Course course2{"EECS", 381};
 	Course course3{"PHYSICS", 260};
 
-	student1.AddCourseTaken(&course1);
-	student1.AddCourseTaken(&course2);
-	student1.AddCourseTaken(&course3);
+	student1.AddCourseTaken(course1);
+	student1.AddCourseTaken(course2);
+	student1.AddCourseTaken(course3);
 
-	student2.AddCourseTaken(&course1);
-	student2.AddCourseTaken(&course2);
+	student2.AddCourseTaken(course1);
+	student2.AddCourseTaken(course2);
 
-	EXPECT_TRUE(student1.HasTakenCourse(&course1));
-	EXPECT_TRUE(student1.HasTakenCourse(&course2));
-	EXPECT_TRUE(student1.HasTakenCourse(&course3));
+	EXPECT_TRUE(student1.HasTakenCourse(course1));
+	EXPECT_TRUE(student1.HasTakenCourse(course2));
+	EXPECT_TRUE(student1.HasTakenCourse(course3));
 
-	EXPECT_TRUE(student2.HasTakenCourse(&course1));
-	EXPECT_TRUE(student2.HasTakenCourse(&course2));
-	EXPECT_FALSE(student2.HasTakenCourse(&course3));
+	EXPECT_TRUE(student2.HasTakenCourse(course1));
+	EXPECT_TRUE(student2.HasTakenCourse(course2));
+	EXPECT_FALSE(student2.HasTakenCourse(course3));
 
-	EXPECT_FALSE(student3.HasTakenCourse(&course1));
-	EXPECT_FALSE(student3.HasTakenCourse(&course2));
-	EXPECT_FALSE(student3.HasTakenCourse(&course3));
+	EXPECT_FALSE(student3.HasTakenCourse(course1));
+	EXPECT_FALSE(student3.HasTakenCourse(course2));
+	EXPECT_FALSE(student3.HasTakenCourse(course3));
 }
 
 

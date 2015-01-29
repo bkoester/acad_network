@@ -29,8 +29,8 @@ class Student {
 	template <typename Archive>
 	void serialize(Archive& ar, const unsigned int version) { ar & id_; }
 
-	void AddCourseTaken(Course* course) { courses_taken_.insert(course); }
-	bool HasTakenCourse(Course* course) const
+	void AddCourseTaken(const Course& course) { courses_taken_.insert(course); }
+	bool HasTakenCourse(const Course& course) const
 	{ return courses_taken_.count(course) == 1; }
 
  private:
@@ -40,10 +40,9 @@ class Student {
 	friend std::istream& operator>>(std::istream& input, Student& student);
 
 	StudentId id_;
-	std::set<Course*> courses_taken_;
+	std::set<Course> courses_taken_;
 	static const int uninitialized_id;
 };
-
 
 
 #endif  // STUDENT_H

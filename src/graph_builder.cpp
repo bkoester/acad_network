@@ -3,6 +3,9 @@
 #include <cassert>
 
 #include <algorithm>
+#include <chrono>
+#include <iostream>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -10,12 +13,16 @@
 
 #include "course.hpp"
 #include "course_tab.hpp"
+#include "utility.cpp"
 
 
+using std::cerr; using std::endl;
 using std::getline; using std::string;
-using std::max; using std::min;
 using std::istream;
-using std::pair;
+using std::make_pair; using std::pair;
+using std::max; using std::min;
+using std::set;
+using std::set_intersection;
 using std::unordered_map;
 using std::unordered_set;
 
@@ -47,7 +54,7 @@ struct DistinctUnorderedPair {
 template <typename H>
 struct PairHasher {
 	template <typename T>
-	int operator()(const DistinctUnorderedPair<T>& pair) const
+	int operator()(const T& pair) const
 	{ return hasher(pair.first) ^ hasher(pair.second); }
 
 	H hasher;
@@ -98,19 +105,30 @@ CourseNetwork BuildCourseGraphFromTab(istream& course_tab_stream) {
 
 
 StudentNetwork BuildStudentGraphFromTab(std::istream& course_tab_stream) {
+	using namespace std::chrono;
 	auto courses_to_students = GetCoursesToStudentIds(course_tab_stream);
+	auto beginning_pairs_time = system_clock::now();
 
 	// build a map of pairs of students => courses in common
 	// build a list of all students
 	unordered_set<DistinctUnorderedPair<StudentId>, 
 				  PairHasher<StudentIdHasher>> edges;
 	unordered_set<StudentId, StudentIdHasher> students;
+	long num_pairs{0};
 	for (const auto& course_students_pair : courses_to_students) {
 		Course course{course_students_pair.first};
 		auto course_students = course_students_pair.second;
 		for (auto it1 = course_students.begin(); 
 			 it1 != course_students.end(); ++it1) {
 			for (auto it2 = it1; ++it2 != course_students.end();) {
+				// output debugging information
+				if (++num_pairs % 10000 == 0) {
+					auto duration_in_pairs = duration_cast<seconds>(
+							system_clock::now() - beginning_pairs_time);
+					cerr << num_pairs << " " << duration_in_pairs.count() 
+						 << endl;
+				}
+
 				// add course to edge in the graph
 				DistinctUnorderedPair<StudentId> edge{*it1, *it2};
 				edges.insert(edge);
@@ -139,8 +157,7 @@ StudentNetwork BuildStudentGraphFromTab(std::istream& course_tab_stream) {
 
 	// add edges and weights
 	for (auto& edge : edges) {
-		/*
-		auto edge = edge_pair.first;
+		/*auto edge = edge_pair.first;
 		auto edge_value = edge_pair.second; */
 
 		StudentNetwork::vertex_t vertex1{student_to_vertex[edge.first]};
@@ -152,6 +169,37 @@ StudentNetwork BuildStudentGraphFromTab(std::istream& course_tab_stream) {
 	}
 
 	return network;
+}
+
+
+StudentNetwork BuildStudentGraphFromEnrollment(
+		const student_container_t& students) {
+	using namespace std::chrono;
+	long num_pairs{0};
+	auto beginning_pairs_time = system_clock::now();
+
+	unordered_set<pair<StudentId, StudentId>, PairHasher<StudentIdHasher>> edges;
+	for (auto it1 = students.begin(); it1 != students.end(); ++it1) {
+		for (auto it2 = it1; ++it2 != students.end();) {
+			// Check if the students have taken the same course
+			const set<Course>& student1_courses{it1->courses_taken()};
+			const set<Course>& student2_courses{it2->courses_taken()};
+			bool has_intersection{HasIntersection(
+					student1_courses.begin(), student1_courses.end(), 
+					student2_courses.begin(), student2_courses.end())};
+
+			// Add an edge if the students have taken the same course
+			if (has_intersection)
+			{ edges.insert(make_pair(it1->id(), it2->id())); }
+
+			if (++num_pairs % 10000 == 0) {
+				cerr << num_pairs << " " << duration_cast<seconds>(
+					system_clock::now() - beginning_pairs_time).count() << endl;
+			}
+		}
+	}
+
+	return StudentNetwork{students.size()};
 }
 
 

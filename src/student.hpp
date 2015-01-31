@@ -32,6 +32,8 @@ class Student {
 	void AddCourseTaken(const Course& course) { courses_taken_.insert(course); }
 	bool HasTakenCourse(const Course& course) const
 	{ return courses_taken_.count(course) == 1; }
+	// provide access to the container to allow stl algorithms to be run on them
+	const std::set<Course>& courses_taken() const { return courses_taken_; }
 
  private:
 	friend class StudentTest;

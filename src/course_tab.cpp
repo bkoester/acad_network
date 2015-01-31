@@ -4,6 +4,8 @@
 #include <sstream>
 #include <string>
 
+#include "utility.hpp"
+
 
 using std::istream; using std::ostream; using std::cerr; using std::endl;
 using std::string;
@@ -91,7 +93,3 @@ ostream& operator<<(ostream& os, const CourseTab::Line& line) {
 	os << "Student: " << line.student << ", Course: " << line.course;
 	return os;
 }
-
-
-// Ignore any line in the given istream
-void SkipLine(istream& input) { while (input.get() != '\n'); }

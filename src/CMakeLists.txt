@@ -14,7 +14,8 @@ set(UNITTEST_SRCS
 	course_tab_test.cpp
 	student_test.cpp
 	student_network_test.cpp
-	tab_reader_test.cpp)
+	tab_reader_test.cpp
+	utility_test.cpp)
 
 set(DEBUG_OBJECT_LIBRARY "debug_objects")
 set(DEBUG_BINARY "thesisd")

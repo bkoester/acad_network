@@ -5,14 +5,13 @@
 #include <sstream>
 #include <utility>
 
-#include <boost/graph/adjacency_list.hpp>
-
 #include "gtest/gtest.h"
 
 #include "course.hpp"
 #include "graph_builder.hpp"
 #include "network.hpp"
 #include "student.hpp"
+#include "test_data_streams.hpp"
 
 
 using std::find_if;
@@ -21,48 +20,18 @@ using std::stringstream;
 
 
 static void TestGraphStructure(const StudentNetwork& network);
+
 static StudentNetwork::vertex_t FindStudentId(
 		const StudentNetwork& network, StudentId student);
 
 
-const string sample_tab{
-"ID\tSUBJECT\tCATALOGNBR\tCOURSE_CODE\tGRADE\tGPAO\tCUM_GPA\tTOTALCREDITS\t"
-"TOTALGRADEPTS\tCOURSECREDIT\tTERM\n"
-"312995\tENGLISH\t125\tNA\t3.7\t3.65909090909091\t3.66538461538462\t26\t95.3\t"
-"4\t201403\n"
-"312995\tCHEM\t210\tCHEM_III\t3.3\t3.73181818181818\t3.66538461538462\t26\t95.3"
-"\t4\t201403\n"
-"312995\tCHEM\t211\tCHEM_III_LAB\t3\t3.692\t3.66538461538462\t26\t95.3\t1"
-"\t201407\n"
-"312995\tAAPTIS\t277\tNA\t4\t3.60454545454545\t3.66538461538462\t26\t95.3\t4\t"
-"201403\n"
-"500928\tENGLISH\t125\tNA\t4\t3.57538461538462\t3.58181818181818\t66\t236.4\t1"
-"\t201407\n"
-"500928\tCHEM\t210\tCHEM_III\t3.3\t3.73181818181818\t3.66538461538462\t26\t95.3"
-"\t4\t201403\n"
-"147195\tENGLISH\t125\tNA\t4\t3.57538461538462\t3.58181818181818\t66\t236.4\t1"
-"\t201403\n"
-"147195\tENVIRON\t311\tNA\t4\t3.55483870967742\t3.58181818181818\t66\t236.4\t4"
-"\t201405\n"
-"147195\tAAPTIS\t277\tNA\t4\t3.60454545454545\t3.66538461538462\t26\t95.3\t4\t"
-"201403\n"
-"352468\tENGLISH\t125\tNA\t4\t3.57538461538462\t3.58181818181818\t66\t236.4\t1"
-"\t201405\n"
-"352468\tENVIRON\t311\tNA\t4\t3.55483870967742\t3.58181818181818\t66\t236.4\t4"
-"\t201403\n"
-"352468\tMATH\t425\tNA\t4\t4\t4\t27\t108\t3\t201407\n"
-"123456\tMATH\t425\tNA\t4\t4\t4\t27\t108\t3\t201407\n"
-};
-
-
 class StudentNetworkTest : public ::testing::Test {
  public:
-	StudentNetworkTest() : course_stream_{sample_tab},
-						 network{BuildStudentGraphFromTab(course_stream_)} {}
-
+	StudentNetworkTest() : enrollment_stream{enrollment_tab},
+		network{BuildStudentGraphFromTab(enrollment_stream)} {}
 
  private:
-   stringstream course_stream_;
+	 stringstream enrollment_stream;
 
    // must be defined after the private member for initialization reasons
  protected:
@@ -91,7 +60,7 @@ void TestGraphStructure(const StudentNetwork& network) {
 	StudentNetwork::vertex_t student2{FindStudentId(network, StudentId{500928})};
 	StudentNetwork::vertex_t student3{FindStudentId(network, StudentId{147195})};
 	StudentNetwork::vertex_t student4{FindStudentId(network, StudentId{352468})};
-	StudentNetwork::vertex_t student5{FindStudentId(network, StudentId{123456})};
+	StudentNetwork::vertex_t student5{FindStudentId(network, StudentId{567890})};
 
 
 	EXPECT_EQ(1, network.Get(student1, student2));

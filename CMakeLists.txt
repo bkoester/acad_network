@@ -14,7 +14,7 @@ if (${SITE_NAME} MATCHES ".*flux.*")
 	message(STATUS "Using flux configuration.")
 endif()
 
-find_package(Boost 1.57.0 REQUIRED serialization)
+find_package(Boost 1.57.0 REQUIRED serialization program_options)
 message(STATUS "Boost including from ${Boost_INCLUDE_DIRS}")
 
 # set compilation variables

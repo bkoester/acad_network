@@ -14,7 +14,6 @@
 
 #include "course.hpp"
 #include "course_network.hpp"
-#include "course_tab.hpp"
 #include "student.hpp"
 #include "student_network.hpp"
 #include "tab_reader.hpp"
@@ -34,12 +33,12 @@ using std::unordered_set;
 
 
 static unordered_map<StudentId, unordered_set<Course, CourseHasher>> 
-GetStudentIdsToCourses(istream& course_tab_stream);
+GetStudentIdsToCourses(istream& enrollment_stream);
 
 static unordered_map<Course, 
 					 unordered_set<Student, StudentHasher>,
 					 CourseHasher> 
-	GetCoursesToStudents(istream& course_tab_stream);
+	GetCoursesToStudents(istream& enrollment_stream);
 
 template <typename StudentsContainer, typename EdgesContainer>
 static StudentNetwork PopulateStudentNetwork(
@@ -70,8 +69,8 @@ struct PairHasher {
 };
 
 
-CourseNetwork BuildCourseNetworkFromEnrollment(istream& course_tab_stream) {
-	auto student_to_courses = GetStudentIdsToCourses(course_tab_stream);
+CourseNetwork BuildCourseNetworkFromEnrollment(istream& enrollment_stream) {
+	auto student_to_courses = GetStudentIdsToCourses(enrollment_stream);
 
 	// aggregate pairs of courses
 	unordered_map<DistinctUnorderedPair<Course>, int, PairHasher<CourseHasher>> 
@@ -114,9 +113,9 @@ CourseNetwork BuildCourseNetworkFromEnrollment(istream& course_tab_stream) {
 
 
 StudentNetwork BuildStudentNetworkFromEnrollment(
-		std::istream& course_tab_stream) {
+		std::istream& enrollment_stream) {
 	using namespace std::chrono;
-	auto courses_to_students = GetCoursesToStudents(course_tab_stream);
+	auto courses_to_students = GetCoursesToStudents(enrollment_stream);
 	auto beginning_pairs_time = system_clock::now();
 
 	// build a map of pairs of students => courses in common
@@ -221,15 +220,19 @@ StudentNetwork PopulateStudentNetwork(
 
 // Gets a hash table of students => set of courses they have taken
 unordered_map<StudentId, unordered_set<Course, CourseHasher>> 
-GetStudentIdsToCourses(istream& course_tab_stream) {
-	CourseTab course_tab{course_tab_stream};
+GetStudentIdsToCourses(istream& enrollment_stream) {
+	SkipLine(enrollment_stream);
+	istream_iterator<Enrollment> enrollment_it{enrollment_stream};
+
 	unordered_map<StudentId, unordered_set<Course, CourseHasher>> 
 		student_to_courses;
 
-	// fill in the course information
-	for (const CourseTab::Line& line : course_tab)
-	{ student_to_courses[line.student].insert(line.course); }
-
+	// make a map of student id => courses taken
+	for (;enrollment_it != istream_iterator<Enrollment>{}; ++enrollment_it) {
+		const Enrollment& enrollment{*enrollment_it};
+		student_to_courses[enrollment.student_id].insert(enrollment.course);
+	}
+	
 	return student_to_courses;
 }
 
@@ -245,7 +248,7 @@ GetCoursesToStudents(istream& enrollment_stream) {
 				  unordered_set<Student, StudentHasher>, 
 				  CourseHasher> courses_to_students;
 
-	// fill in the course information
+	// make a map of courses => students who took them
 	for (;enrollment_it != istream_iterator<Enrollment>{}; ++enrollment_it) {
 		const Enrollment& enrollment{*enrollment_it};
 		courses_to_students[enrollment.course].insert(

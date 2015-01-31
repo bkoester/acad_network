@@ -9,10 +9,10 @@ class CourseNetwork;
 class StudentNetwork;
 
 // Builds a graph for the network from the given course tab.
-CourseNetwork BuildCourseNetworkFromEnrollment(std::istream& course_tab_stream);
+CourseNetwork BuildCourseNetworkFromEnrollment(std::istream& enrollment_stream);
 
 StudentNetwork BuildStudentNetworkFromEnrollment(
-		std::istream& course_tab_stream);
+		std::istream& enrollment_stream);
 
 StudentNetwork BuildStudentNetworkFromStudents(
 		const student_container_t& students);

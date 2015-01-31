@@ -12,6 +12,8 @@ set(UNITTEST_SRCS
 	course_test.cpp
 	course_network_test.cpp
 	course_tab_test.cpp
+	graph_builder_test.cpp
+	network_structure_test.cpp
 	student_test.cpp
 	student_network_test.cpp
 	tab_reader_test.cpp

@@ -1,37 +1,52 @@
 #include "student_network.hpp"
 
 #include <algorithm>
-#include <string>
 #include <sstream>
-#include <utility>
 
+#include <boost/graph/adjacency_list.hpp>
 #include "gtest/gtest.h"
 
 #include "course.hpp"
 #include "graph_builder.hpp"
 #include "network.hpp"
+#include "network_structure_test.hpp"
 #include "student.hpp"
 #include "test_data_streams.hpp"
 
 
 using std::find_if;
-using std::string;
 using std::stringstream;
 
-
-static void TestGraphStructure(const StudentNetwork& network);
-
-static StudentNetwork::vertex_t FindStudentId(
-		const StudentNetwork& network, StudentId student);
+using boost::add_edge;
+using boost::add_vertex;
 
 
 class StudentNetworkTest : public ::testing::Test {
  public:
-	StudentNetworkTest() : enrollment_stream{enrollment_tab},
-		network{BuildStudentGraphFromTab(enrollment_stream)} {}
+	 void SetUp() override {
+		 // add vertices
+		 auto student1 = add_vertex(StudentId{312995}, graph_);
+		 auto student2 = add_vertex(StudentId{500928}, graph_);
+		 auto student3 = add_vertex(StudentId{147195}, graph_);
+		 auto student4 = add_vertex(StudentId{352468}, graph_);
+		 auto student5 = add_vertex(StudentId{567890}, graph_);
+
+		 // add edges
+		 add_edge(student1, student2, 1, graph_);
+		 add_edge(student1, student3, 1, graph_);
+		 add_edge(student1, student4, 1, graph_);
+
+		 add_edge(student2, student3, 1, graph_);
+		 add_edge(student2, student4, 1, graph_);
+
+		 add_edge(student3, student4, 1, graph_);
+		 add_edge(student4, student5, 1, graph_);
+
+		 network = StudentNetwork{graph_};
+	 }
 
  private:
-	 stringstream enrollment_stream;
+	StudentNetwork::graph_t graph_;
 
    // must be defined after the private member for initialization reasons
  protected:
@@ -39,90 +54,14 @@ class StudentNetworkTest : public ::testing::Test {
 };
 
 
-TEST_F(StudentNetworkTest, Construction) { TestGraphStructure(network); }
-
-
 TEST_F(StudentNetworkTest, Serialization) {
 	// save the network
 	stringstream archive;
 	network.Save(archive);
-	TestGraphStructure(network);
+	TestStudentNetworkStructure(network);
 
 	// load the network
 	StudentNetwork loaded_network;
 	loaded_network.Load(archive);
-	TestGraphStructure(loaded_network);
-}
-
-
-void TestGraphStructure(const StudentNetwork& network) {
-	StudentNetwork::vertex_t student1{FindStudentId(network, StudentId{312995})};
-	StudentNetwork::vertex_t student2{FindStudentId(network, StudentId{500928})};
-	StudentNetwork::vertex_t student3{FindStudentId(network, StudentId{147195})};
-	StudentNetwork::vertex_t student4{FindStudentId(network, StudentId{352468})};
-	StudentNetwork::vertex_t student5{FindStudentId(network, StudentId{567890})};
-
-
-	EXPECT_EQ(1, network.Get(student1, student2));
-	EXPECT_EQ(1, network.Get(student1, student3));
-	EXPECT_EQ(1, network.Get(student1, student4));
-	EXPECT_THROW(network.Get(student1, student5), NoEdgeException);
-
-	EXPECT_EQ(1, network.Get(student2, student3));
-	EXPECT_EQ(1, network.Get(student2, student4));
-	EXPECT_THROW(network.Get(student2, student5), NoEdgeException);
-
-	EXPECT_EQ(1, network.Get(student3, student4));
-	EXPECT_THROW(network.Get(student3, student5), NoEdgeException);
-	EXPECT_EQ(1, network.Get(student4, student5));
-
-	/*
-	auto edge1 = network.Get(student1, student2);
-	EXPECT_EQ(2u, edge1.size());
-	EXPECT_EQ(1u, edge1.count(Course{"ENGLISH", 125}));
-	EXPECT_EQ(1u, edge1.count(Course{"CHEM", 210}));
-
-	auto edge2 = network.Get(student1, student3);
-	EXPECT_EQ(2u, edge2.size());
-	EXPECT_EQ(1u, edge2.count(Course{"ENGLISH", 125}));
-	EXPECT_EQ(1u, edge2.count(Course{"AAPTIS", 277}));
-
-	auto edge3 = network.Get(student1, student4);
-	EXPECT_EQ(1u, edge3.size());
-	EXPECT_EQ(1u, edge3.count(Course{"ENGLISH", 125}));
-
-	EXPECT_THROW(network.Get(student1, student5), NoEdgeException);
-
-	auto edge5 = network.Get(student2, student3);
-	EXPECT_EQ(1u, edge5.size());
-	EXPECT_EQ(1u, edge5.count(Course{"ENGLISH", 125}));
-
-	auto edge6 = network.Get(student2, student4);
-	EXPECT_EQ(1u, edge6.size());
-	EXPECT_EQ(1u, edge6.count(Course{"ENGLISH", 125}));
-
-	EXPECT_THROW(network.Get(student2, student5), NoEdgeException);
-
-	auto edge8 = network.Get(student3, student4);
-	EXPECT_EQ(2u, edge8.size());
-	EXPECT_EQ(1u, edge8.count(Course{"ENGLISH", 125}));
-	EXPECT_EQ(1u, edge8.count(Course{"ENVIRON", 311}));
-
-	EXPECT_THROW(network.Get(student3, student5), NoEdgeException);
-
-	auto edge10 = network.Get(student4, student5);
-	EXPECT_EQ(1u, edge10.size());
-	EXPECT_EQ(1u, edge10.count(Course{"MATH", 425}));
-	*/
-}
-
-
-StudentNetwork::vertex_t FindStudentId(
-		const StudentNetwork& network, StudentId student) {
-	auto it = find_if(network.GetVertices().begin(), network.GetVertices().end(), 
-		 [&network, student](const StudentNetwork::vertex_t& vertex_descriptor)
-		 { return network[vertex_descriptor] == student; });
-	EXPECT_NE(network.GetVertices().end(), network.GetVertices().begin());
-
-	return *it;
+	TestStudentNetworkStructure(loaded_network);
 }

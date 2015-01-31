@@ -9,8 +9,14 @@
 
 
 using std::ostream; using std::istream; using std::endl;
-using std::ostream_iterator;
+using std::ostream_iterator; using std::inserter;
 using std::copy;
+
+
+void Student::AddCoursesTaken(std::initializer_list<Course> courses) { 
+	copy(courses.begin(), courses.end(), 
+			inserter(courses_taken_, courses_taken_.end()));
+}
 
 
 ostream& operator<<(ostream& os, const Student& student) {

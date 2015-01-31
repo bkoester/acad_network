@@ -9,6 +9,15 @@
 #include "course.hpp"
 #include "student.hpp"
 
+
+struct Enrollment {
+	StudentId student_id;
+	Course course;
+};
+
+std::istream& operator>>(std::istream& input, Enrollment& enrollment);
+
+
 using course_container_t = std::set<Course>;
 using student_container_t = std::vector<Student>;
 

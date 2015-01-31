@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <chrono>
 #include <iostream>
+#include <iterator>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -12,13 +13,18 @@
 #include <utility>
 
 #include "course.hpp"
+#include "course_network.hpp"
 #include "course_tab.hpp"
+#include "student.hpp"
+#include "student_network.hpp"
+#include "tab_reader.hpp"
 #include "utility.cpp"
 
 
 using std::cerr; using std::endl;
 using std::getline; using std::string;
 using std::istream;
+using std::istream_iterator;
 using std::make_pair; using std::pair;
 using std::max; using std::min;
 using std::set;
@@ -30,11 +36,14 @@ using std::unordered_set;
 static unordered_map<StudentId, unordered_set<Course, CourseHasher>> 
 GetStudentIdsToCourses(istream& course_tab_stream);
 
-
 static unordered_map<Course, 
-					 unordered_set<StudentId, StudentIdHasher>,
+					 unordered_set<Student, StudentHasher>,
 					 CourseHasher> 
-	GetCoursesToStudentIds(istream& course_tab_stream);
+	GetCoursesToStudents(istream& course_tab_stream);
+
+template <typename StudentsContainer, typename EdgesContainer>
+static StudentNetwork PopulateStudentNetwork(
+		const StudentsContainer& students, const EdgesContainer& edges);
 
 
 template <typename T>
@@ -61,7 +70,7 @@ struct PairHasher {
 };
 
 
-CourseNetwork BuildCourseGraphFromTab(istream& course_tab_stream) {
+CourseNetwork BuildCourseNetworkFromEnrollment(istream& course_tab_stream) {
 	auto student_to_courses = GetStudentIdsToCourses(course_tab_stream);
 
 	// aggregate pairs of courses
@@ -104,16 +113,17 @@ CourseNetwork BuildCourseGraphFromTab(istream& course_tab_stream) {
 }
 
 
-StudentNetwork BuildStudentGraphFromTab(std::istream& course_tab_stream) {
+StudentNetwork BuildStudentNetworkFromEnrollment(
+		std::istream& course_tab_stream) {
 	using namespace std::chrono;
-	auto courses_to_students = GetCoursesToStudentIds(course_tab_stream);
+	auto courses_to_students = GetCoursesToStudents(course_tab_stream);
 	auto beginning_pairs_time = system_clock::now();
 
 	// build a map of pairs of students => courses in common
 	// build a list of all students
-	unordered_set<DistinctUnorderedPair<StudentId>, 
-				  PairHasher<StudentIdHasher>> edges;
-	unordered_set<StudentId, StudentIdHasher> students;
+	unordered_set<DistinctUnorderedPair<Student>, 
+				  PairHasher<StudentHasher>> edges;
+	unordered_set<Student, StudentHasher> students;
 	long num_pairs{0};
 	for (const auto& course_students_pair : courses_to_students) {
 		Course course{course_students_pair.first};
@@ -130,7 +140,7 @@ StudentNetwork BuildStudentGraphFromTab(std::istream& course_tab_stream) {
 				}
 
 				// add course to edge in the graph
-				DistinctUnorderedPair<StudentId> edge{*it1, *it2};
+				DistinctUnorderedPair<Student> edge{*it1, *it2};
 				edges.insert(edge);
 
 				// add the students into the list of students
@@ -140,39 +150,11 @@ StudentNetwork BuildStudentGraphFromTab(std::istream& course_tab_stream) {
 		}
 	}
 
-	// create new graph with the number of students as number of vertices
-	StudentNetwork network{students.size()};
-
-	// assign properties of vertices
-	auto student_it = students.begin();
-	unordered_map<StudentId, StudentNetwork::vertex_t, StudentIdHasher> 
-		student_to_vertex;
-	for (auto vertex_it = network.GetVertices().begin();
-			vertex_it != network.GetVertices().end();
-			++vertex_it, ++student_it) {
-		assert(student_it != students.end());
-		student_to_vertex[*student_it] = *vertex_it;
-		network[*vertex_it] = *student_it;
-	}
-
-	// add edges and weights
-	for (auto& edge : edges) {
-		/*auto edge = edge_pair.first;
-		auto edge_value = edge_pair.second; */
-
-		StudentNetwork::vertex_t vertex1{student_to_vertex[edge.first]};
-		StudentNetwork::vertex_t vertex2{student_to_vertex[edge.second]};
-
-		// INVARIANT: the vertex should not exist in the graph already.
-		assert(!network.GetEdge(vertex1, vertex2));
-		network(vertex1, vertex2) = 1;
-	}
-
-	return network;
+	return PopulateStudentNetwork(students, edges);
 }
 
 
-StudentNetwork BuildStudentGraphFromEnrollment(
+StudentNetwork BuildStudentNetworkFromStudents(
 		const student_container_t& students) {
 	using namespace std::chrono;
 	long num_pairs{0};
@@ -199,9 +181,43 @@ StudentNetwork BuildStudentGraphFromEnrollment(
 		}
 	}
 
-	return StudentNetwork{students.size()};
+	return PopulateStudentNetwork(students, edges);
 }
 
+
+template <typename StudentsContainer, typename EdgesContainer>
+StudentNetwork PopulateStudentNetwork(
+		const StudentsContainer& students, const EdgesContainer& edges) {
+	// create the network of students
+	StudentNetwork network{students.size()};
+
+	// assign properties of vertices
+	auto student_it = students.begin();
+	unordered_map<Student, StudentNetwork::vertex_t, StudentHasher> 
+		student_to_vertex;
+	for (auto vertex_it = network.GetVertices().begin();
+			vertex_it != network.GetVertices().end();
+			++vertex_it, ++student_it) {
+		assert(student_it != students.end());
+		student_to_vertex[*student_it] = *vertex_it;
+		network[*vertex_it] = student_it->id();
+	}
+
+	// add edges and weights
+	for (auto& edge : edges) {
+		/*auto edge = edge_pair.first;
+		auto edge_value = edge_pair.second; */
+
+		StudentNetwork::vertex_t vertex1{student_to_vertex[edge.first]};
+		StudentNetwork::vertex_t vertex2{student_to_vertex[edge.second]};
+
+		// INVARIANT: the vertex should not exist in the graph already.
+		assert(!network.GetEdge(vertex1, vertex2));
+		network(vertex1, vertex2) = 1;
+	}
+
+	return network;
+}
 
 // Gets a hash table of students => set of courses they have taken
 unordered_map<StudentId, unordered_set<Course, CourseHasher>> 
@@ -219,16 +235,22 @@ GetStudentIdsToCourses(istream& course_tab_stream) {
 
 
 // Gets a hash table of courses => set of students who have taken it
-unordered_map<Course, unordered_set<StudentId, StudentIdHasher>, CourseHasher> 
-GetCoursesToStudentIds(istream& course_tab_stream) {
-	CourseTab course_tab{course_tab_stream};
+unordered_map<Course, unordered_set<Student, StudentHasher>, CourseHasher> 
+GetCoursesToStudents(istream& enrollment_stream) {
+	// set up to read from the enrollment stream
+	SkipLine(enrollment_stream);
+	istream_iterator<Enrollment> enrollment_it{enrollment_stream};
+
 	unordered_map<Course,
-				  unordered_set<StudentId, StudentIdHasher>, 
+				  unordered_set<Student, StudentHasher>, 
 				  CourseHasher> courses_to_students;
 
 	// fill in the course information
-	for (const CourseTab::Line& line : course_tab)
-	{ courses_to_students[line.course].insert(line.student); }
+	for (;enrollment_it != istream_iterator<Enrollment>{}; ++enrollment_it) {
+		const Enrollment& enrollment{*enrollment_it};
+		courses_to_students[enrollment.course].insert(
+				Student{enrollment.student_id});
+	}
 
 	return courses_to_students;
 }

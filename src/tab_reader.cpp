@@ -29,14 +29,6 @@ student_container_t ReadStudents(istream& student_stream) {
 }
 
 
-struct Enrollment {
-	StudentId student_id;
-	Course course;
-};
-
-static istream& operator>>(istream& input, Enrollment& enrollment);
-
-
 course_container_t ReadEnrollment(istream& enrollment_stream, 
 								  student_container_t& students) {
 	course_container_t courses;

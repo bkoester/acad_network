@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <iosfwd>
+#include <initializer_list>
 #include <set>
 
 #include <boost/serialization/utility.hpp>
@@ -30,6 +31,7 @@ class Student {
 	void serialize(Archive& ar, const unsigned int version) { ar & id_; }
 
 	void AddCourseTaken(const Course& course) { courses_taken_.insert(course); }
+	void AddCoursesTaken(std::initializer_list<Course> courses);
 	bool HasTakenCourse(const Course& course) const
 	{ return courses_taken_.count(course) == 1; }
 	// provide access to the container to allow stl algorithms to be run on them
@@ -44,6 +46,11 @@ class Student {
 	StudentId id_;
 	std::set<Course> courses_taken_;
 	static const int uninitialized_id;
+};
+
+struct StudentHasher {
+	size_t operator()(const Student& student) const 
+	{ return std::hash<int>()(student.id()); }
 };
 
 

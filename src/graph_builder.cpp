@@ -35,10 +35,13 @@ using std::thread;
 using std::unordered_map;
 using std::unordered_set;
 using std::vector;
+namespace chr = std::chrono;
 
 
 // By default, use just 1 thread for building networks.
 int num_network_building_threads{1};
+// output timing information every time we have num_pairs % this variable == 0
+const int timing_modulus{10000000};
 
 
 static unordered_map<StudentId, unordered_set<Course, CourseHasher>> 
@@ -127,7 +130,7 @@ CourseNetwork BuildCourseNetworkFromEnrollment(istream& enrollment_stream) {
 
 StudentNetwork BuildStudentNetworkFromEnrollment(
 		std::istream& enrollment_stream) {
-	using namespace std::chrono;
+	using namespace chr;
 	auto courses_to_students = GetCoursesToStudents(enrollment_stream);
 	auto beginning_pairs_time = system_clock::now();
 
@@ -144,7 +147,7 @@ StudentNetwork BuildStudentNetworkFromEnrollment(
 			 it1 != course_students.end(); ++it1) {
 			for (auto it2 = it1; ++it2 != course_students.end();) {
 				// output debugging information
-				if (++num_pairs % 10000 == 0) {
+				if (++num_pairs % timing_modulus == 0) {
 					auto duration_in_pairs = duration_cast<seconds>(
 							system_clock::now() - beginning_pairs_time);
 					cerr << num_pairs << " " << duration_in_pairs.count() 
@@ -170,17 +173,17 @@ class StudentNetworkFromStudentPairsBuilder {
  public:
 	StudentNetworkFromStudentPairsBuilder(const student_container_t& students) : 
 		students_{students}, it1_{students_.begin()}, it2_{it1_}, num_pairs_{0},
-		beginning_pairs_time_{std::chrono::system_clock::now()} {}
+		beginning_pairs_time_{chr::system_clock::now()} {}
 
 	pair<student_container_t::const_iterator, 
 		 student_container_t::const_iterator> GetNextIteratorPair()	{
 		lock_guard<mutex> iterator_lock_guard{iterator_mutex_};
 
 		// output time information for profiling
-		if (++num_pairs_ % 100000 == 0) {
+		if (++num_pairs_ % timing_modulus == 0) {
 			cerr << num_pairs_ << " " 
-				<< std::chrono::duration_cast<std::chrono::seconds>(
-						std::chrono::system_clock::now() - 
+				<< chr::duration_cast<chr::seconds>(
+						chr::system_clock::now() - 
 						beginning_pairs_time_).count() << endl;
 		}
 
@@ -208,7 +211,7 @@ class StudentNetworkFromStudentPairsBuilder {
 	student_container_t::const_iterator it1_;
 	student_container_t::const_iterator it2_;
 	long num_pairs_;
-	std::chrono::time_point<std::chrono::system_clock> beginning_pairs_time_;
+	chr::time_point<chr::system_clock> beginning_pairs_time_;
 	vector<pair<StudentId, StudentId>> edges_;
 
 	mutex iterator_mutex_, edges_mutex_;

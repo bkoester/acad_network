@@ -36,8 +36,8 @@ int main(int argc, char* argv[]) {
 		 "Set the path at which to find the enrollment file")
 		("network_to_build", 
 		 po::value<NetworkToBuild_e>(&network_to_build)->default_value(
-			 NetworkToBuild_e::Student),
-		 "Set the path at which to find the enrollment file")
+			 NetworkToBuild_e::Student), "Set the network to build "
+		 "('student' or 'course')")
 		("threads,t", 
 		 po::value<int>(&num_network_building_threads)->default_value(1),
 		 "Number of threads to use to build the network");

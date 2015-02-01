@@ -5,7 +5,8 @@ set(SRCS
 	student.cpp
 	tab_reader.cpp)
 
-set(MAIN_SRC main.cpp)
+set(BUILD_MAIN_SRC build_main.cpp)
+set(LOAD_MAIN_SRC load_main.cpp)
 
 set(UNITTEST_SRCS
 	course_test.cpp
@@ -18,8 +19,11 @@ set(UNITTEST_SRCS
 	utility_test.cpp)
 
 set(DEBUG_OBJECT_LIBRARY "debug_objects")
-set(DEBUG_BINARY "thesisd")
-set(RELEASE_BINARY "thesis")
+set(RELEASE_OBJECT_LIBRARY "release_objects")
+set(BUILD_DEBUG_BINARY "buildd")
+set(BUILD_RELEASE_BINARY "build")
+set(LOAD_DEBUG_BINARY "loadd")
+set(LOAD_RELEASE_BINARY "load")
 set(UNITTEST_BINARY "unittest")
 
 include_directories(
@@ -27,20 +31,38 @@ include_directories(
 	${Boost_INCLUDE_DIRS})
 
 add_library(${DEBUG_OBJECT_LIBRARY} OBJECT ${SRCS})
-add_executable(${DEBUG_BINARY}
-	${MAIN_SRC}
+add_library(${RELEASE_OBJECT_LIBRARY} OBJECT ${SRCS})
+add_executable(${BUILD_DEBUG_BINARY}
+	${BUILD_MAIN_SRC}
 	$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
-add_executable(${RELEASE_BINARY} ${MAIN_SRC} ${SRCS})
+add_executable(${BUILD_RELEASE_BINARY}
+	${BUILD_MAIN_SRC} 
+	$<TARGET_OBJECTS:${RELEASE_OBJECT_LIBRARY}>)
+add_executable(${LOAD_DEBUG_BINARY}
+	${LOAD_MAIN_SRC}
+	$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
+add_executable(${LOAD_RELEASE_BINARY}
+	${LOAD_MAIN_SRC} 
+	$<TARGET_OBJECTS:${RELEASE_OBJECT_LIBRARY}>)
 
-set_property(SOURCE ${SRCS} PROPERTY COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
-set_target_properties(${DEBUG_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
-set_target_properties(${RELEASE_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_RELEASE}")
 
-target_link_libraries(${DEBUG_BINARY}
+set_property(TARGET ${DEBUG_OBJECT_LIBRARY} PROPERTY COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
+set_property(TARGET ${RELEASE_OBJECT_LIBRARY} PROPERTY COMPILE_FLAGS "${CXXFLAGS_RELEASE}")
+set_target_properties(${LOAD_DEBUG_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
+set_target_properties(${LOAD_RELEASE_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_RELEASE}")
+set_target_properties(${BUILD_DEBUG_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
+set_target_properties(${BUILD_RELEASE_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_RELEASE}")
+
+
+target_link_libraries(${BUILD_DEBUG_BINARY}
+	${Boost_LIBRARIES})
+target_link_libraries(${BUILD_RELEASE_BINARY}
+	${Boost_LIBRARIES})
+target_link_libraries(${LOAD_DEBUG_BINARY}
+	${Boost_LIBRARIES})
+target_link_libraries(${LOAD_RELEASE_BINARY}
 	${Boost_LIBRARIES})
 
-target_link_libraries(${RELEASE_BINARY}
-	${Boost_LIBRARIES})
 
 # if we choose to build unit tests, add rules for building unittest executable
 if (unit_tests)

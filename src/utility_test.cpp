@@ -1,11 +1,13 @@
 #include "utility.hpp"
 
+#include <string>
 #include <vector>
 
 #include "gtest/gtest.h"
 
 
 using std::vector;
+using std::string;
 
 
 TEST(UtilityTest, HasIntersection) {
@@ -32,4 +34,15 @@ TEST(UtilityTest, HasIntersection) {
 			HasIntersection(v4a.begin(), v4a.end(), v4b.begin(), v4b.end()));
 	EXPECT_FALSE(
 			HasIntersection(v4b.begin(), v4b.end(), v4a.begin(), v4a.end()));
+}
+
+
+TEST(UtilityTest, icompare) {
+	EXPECT_TRUE(icompare(string("Testing, attention please."), 
+						 string("Testing, attention please.")));
+	EXPECT_FALSE(icompare(string("Testing, attention please."), 
+						  string("Testing, attention please")));
+	EXPECT_FALSE(icompare(string("Testing, attention please"), 
+						  string("Testing, attention please.")));
+	EXPECT_TRUE(icompare(string(), string()));
 }

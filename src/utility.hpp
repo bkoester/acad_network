@@ -2,6 +2,7 @@
 #define UTILITY_H
 
 #include <iosfwd>
+#include <string>
 #include <utility>
 
 // Ignore any line in the given istream
@@ -26,6 +27,8 @@ bool HasIntersection(
 	}
 	return false;
 }
+
+bool icompare(const std::string& first, const std::string& second);
 
 
 #endif  // UTILITY_H

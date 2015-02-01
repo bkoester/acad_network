@@ -4,13 +4,16 @@
 
 #include <algorithm>
 #include <chrono>
+#include <functional>
 #include <iostream>
 #include <iterator>
+#include <mutex>
 #include <set>
-#include <string>
+#include <thread>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <vector>
 
 #include "course.hpp"
 #include "course_network.hpp"
@@ -21,15 +24,21 @@
 
 
 using std::cerr; using std::endl;
-using std::getline; using std::string;
 using std::istream;
 using std::istream_iterator;
-using std::make_pair; using std::pair;
+using std::lock_guard; using std::mutex;
+using std::make_pair; using std::move; using std::pair;
 using std::max; using std::min;
+using std::ref;
 using std::set;
-using std::set_intersection;
+using std::thread;
 using std::unordered_map;
 using std::unordered_set;
+using std::vector;
+
+
+// By default, use just 1 thread for building networks.
+int num_network_building_threads{1};
 
 
 static unordered_map<StudentId, unordered_set<Course, CourseHasher>> 
@@ -39,6 +48,10 @@ static unordered_map<Course,
 					 unordered_set<Student, StudentHasher>,
 					 CourseHasher> 
 	GetCoursesToStudents(istream& enrollment_stream);
+
+class StudentNetworkFromStudentPairsBuilder;
+static void FindStudentNetworkEdgesFromStudentPairs(
+		StudentNetworkFromStudentPairsBuilder& builder);
 
 template <typename StudentsContainer, typename EdgesContainer>
 static StudentNetwork PopulateStudentNetwork(
@@ -153,34 +166,89 @@ StudentNetwork BuildStudentNetworkFromEnrollment(
 }
 
 
-StudentNetwork BuildStudentNetworkFromStudents(
-		const student_container_t& students) {
-	using namespace std::chrono;
-	long num_pairs{0};
-	auto beginning_pairs_time = system_clock::now();
+class StudentNetworkFromStudentPairsBuilder {
+ public:
+	StudentNetworkFromStudentPairsBuilder(const student_container_t& students) : 
+		students_{students}, it1_{students_.begin()}, it2_{it1_}, num_pairs_{0},
+		beginning_pairs_time_{std::chrono::system_clock::now()} {}
 
-	unordered_set<pair<StudentId, StudentId>, PairHasher<StudentIdHasher>> edges;
-	for (auto it1 = students.begin(); it1 != students.end(); ++it1) {
-		for (auto it2 = it1; ++it2 != students.end();) {
-			// Check if the students have taken the same course
-			const set<Course>& student1_courses{it1->courses_taken()};
-			const set<Course>& student2_courses{it2->courses_taken()};
-			bool has_intersection{HasIntersection(
-					student1_courses.begin(), student1_courses.end(), 
-					student2_courses.begin(), student2_courses.end())};
+	pair<student_container_t::const_iterator, 
+		 student_container_t::const_iterator> GetNextIteratorPair()	{
+		lock_guard<mutex> iterator_lock_guard{iterator_mutex_};
 
-			// Add an edge if the students have taken the same course
-			if (has_intersection)
-			{ edges.insert(make_pair(it1->id(), it2->id())); }
-
-			if (++num_pairs % 10000 == 0) {
-				cerr << num_pairs << " " << duration_cast<seconds>(
-					system_clock::now() - beginning_pairs_time).count() << endl;
-			}
+		// output time information for profiling
+		if (++num_pairs_ % 100000 == 0) {
+			cerr << num_pairs_ << " " 
+				<< std::chrono::duration_cast<std::chrono::seconds>(
+						std::chrono::system_clock::now() - 
+						beginning_pairs_time_).count() << endl;
 		}
+
+		// return we don't hit the end when incrementing the second iterator
+		if (++it2_ != students_.end()) { return make_pair(it1_, it2_); }
+		// if it does hit the end, increment the first and restart the second
+		it2_ = ++it1_;
+		return make_pair(it1_, it2_);
 	}
 
-	return PopulateStudentNetwork(students, edges);
+	void AddEdge(StudentId student1, StudentId student2) {
+		lock_guard<mutex> edge_lock_guard{edges_mutex_};
+		edges_.push_back(make_pair(student1, student2));
+	}
+
+	bool FinishedIteration(
+			pair<student_container_t::const_iterator, 
+				 student_container_t::const_iterator> it_pair) const
+	{ return it_pair.first == students_.end(); }
+
+	const vector<pair<StudentId, StudentId>>& edges() { return edges_; }
+
+ private:
+	const student_container_t& students_;
+	student_container_t::const_iterator it1_;
+	student_container_t::const_iterator it2_;
+	long num_pairs_;
+	std::chrono::time_point<std::chrono::system_clock> beginning_pairs_time_;
+	vector<pair<StudentId, StudentId>> edges_;
+
+	mutex iterator_mutex_, edges_mutex_;
+};
+
+
+StudentNetwork BuildStudentNetworkFromStudents(
+		const student_container_t& students) {
+
+	// spawn threads to iterate through each pair of students
+	StudentNetworkFromStudentPairsBuilder builder{students};
+	vector<thread> thread_pool;
+	for (int i{0}; i < num_network_building_threads; ++i) {
+		thread_pool.push_back(
+				thread{FindStudentNetworkEdgesFromStudentPairs, ref(builder)});
+	}
+
+	// wait for all threads to complete
+	for (auto& t : thread_pool) { t.join(); }
+
+	return PopulateStudentNetwork(students, builder.edges());
+}
+
+	
+void FindStudentNetworkEdgesFromStudentPairs(
+		StudentNetworkFromStudentPairsBuilder& builder) {
+	auto it_pair = builder.GetNextIteratorPair();
+	while (!builder.FinishedIteration(it_pair)) {
+		// Check if the students have taken the same course
+		const set<Course>& student1_courses{it_pair.first->courses_taken()};
+		const set<Course>& student2_courses{it_pair.second->courses_taken()};
+		bool has_intersection{HasIntersection(
+				student1_courses.begin(), student1_courses.end(), 
+				student2_courses.begin(), student2_courses.end())};
+
+		// Add an edge if the students have taken the same course
+		if (has_intersection)
+		{ builder.AddEdge(it_pair.first->id(), it_pair.second->id()); }
+		it_pair = builder.GetNextIteratorPair();
+	}
 }
 
 

@@ -22,7 +22,7 @@ void Student::AddCoursesTaken(std::initializer_list<Course> courses) {
 ostream& operator<<(ostream& os, const Student& student) {
 	if (student.id() == Student::uninitialized_id) { os << "ID: Undefined"; }
 	else { os << "ID: " << student.id(); }
-	os << "Classes: ";
+	os << " Classes: ";
 	copy(student.courses_taken_.cbegin(), --student.courses_taken_.cend(), 
 			  ostream_iterator<Course>{os, ", "});
 	os << *student.courses_taken_.rbegin();

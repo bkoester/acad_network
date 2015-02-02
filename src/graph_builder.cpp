@@ -172,7 +172,7 @@ StudentNetwork BuildStudentNetworkFromEnrollment(
 class StudentNetworkFromStudentPairsBuilder {
  public:
 	StudentNetworkFromStudentPairsBuilder(const student_container_t& students) : 
-		students_{students}, it1_{students_.begin()}, it2_{it1_}, num_pairs_{0},
+		students_(students), it1_{students_.begin()}, it2_{it1_}, num_pairs_{0},
 		beginning_pairs_time_{chr::system_clock::now()} {}
 
 	pair<student_container_t::const_iterator, 
@@ -181,10 +181,9 @@ class StudentNetworkFromStudentPairsBuilder {
 
 		// output time information for profiling
 		if (++num_pairs_ % timing_modulus == 0) {
-			cerr << num_pairs_ << " " 
-				<< chr::duration_cast<chr::seconds>(
-						chr::system_clock::now() - 
-						beginning_pairs_time_).count() << endl;
+			cerr << num_pairs_ << " " << chr::duration_cast<chr::seconds>(
+				chr::system_clock::now() - 
+				beginning_pairs_time_).count() << endl;
 		}
 
 		// return we don't hit the end when incrementing the second iterator
@@ -300,7 +299,7 @@ GetStudentIdsToCourses(istream& enrollment_stream) {
 
 	// make a map of student id => courses taken
 	for (;enrollment_it != istream_iterator<Enrollment>{}; ++enrollment_it) {
-		const Enrollment& enrollment{*enrollment_it};
+		const Enrollment& enrollment(*enrollment_it);
 		student_to_courses[enrollment.student_id].insert(enrollment.course);
 	}
 	
@@ -321,7 +320,7 @@ GetCoursesToStudents(istream& enrollment_stream) {
 
 	// make a map of courses => students who took them
 	for (;enrollment_it != istream_iterator<Enrollment>{}; ++enrollment_it) {
-		const Enrollment& enrollment{*enrollment_it};
+		const Enrollment& enrollment(*enrollment_it);
 		courses_to_students[enrollment.course].insert(
 				Student{enrollment.student_id});
 	}

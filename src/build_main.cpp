@@ -100,7 +100,7 @@ istream& operator>>(istream& input, NetworkToBuild_e& network_to_build) {
 	if (icompare(network_type, "course"))
 	{ network_to_build = NetworkToBuild_e::Course; }
 	else if (icompare(network_type, "student"))
-	{ network_to_build = NetworkToBuild_e::Course; }
+	{ network_to_build = NetworkToBuild_e::Student; }
 	else { throw po::invalid_option_value{"Invalid network type!"}; }
 
 	return input;

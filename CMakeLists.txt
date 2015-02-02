@@ -11,6 +11,7 @@ if (${SITE_NAME} MATCHES ".*flux.*")
 	set(BOOST_INCLUDEDIR "/home/software/rhel6/boost/1.57.0-gcc-4.8.0/include")
 	set(BOOST_LIBRARYDIR "/home/software/rhel6/boost/1.57.0-gcc-4.8.0/lib")
 	set(Boost_NO_SYSTEM_PATHS ON)
+	set(GMOCK_ROOT "/afs/umich.edu/user/k/a/karepker/links/third_party/gmock-1.7.0/")
 	message(STATUS "Using flux configuration.")
 endif()
 

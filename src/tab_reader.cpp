@@ -38,7 +38,7 @@ course_container_t ReadEnrollment(istream& enrollment_stream,
 	istream_iterator<Enrollment> enrollment_it{enrollment_stream};
 
 	for (;enrollment_it != istream_iterator<Enrollment>{}; ++enrollment_it) {
-		const Enrollment& enrollment{*enrollment_it};
+		const Enrollment& enrollment(*enrollment_it);
 
 		// insert the course and get a pointer to it
 		Course course{*(courses.insert(enrollment.course).first)};

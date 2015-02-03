@@ -82,10 +82,10 @@ inline void load(Archive & ar,
 
 	// read edges
 	while (E-- > 0){
-		long u; long v;
+		long u{0}; long v{0};
 		ar >> BOOST_SERIALIZATION_NVP(u);
 		ar >> BOOST_SERIALIZATION_NVP(v);
-		Edge e{add_edge(verts[u], verts[v], tmp).first};
+		Edge e{add_edge(verts[u], verts[v], EP{}, tmp).first};
 		ar >> serialization::make_nvp(
 				"edge_property", get(edge_all_t(), tmp, e));
 	}

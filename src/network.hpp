@@ -4,12 +4,14 @@
 #include <unordered_map>
 #include <iostream>
 #include <iterator>
+#include <utility>
 
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/adj_list_serialize.hpp>
+#include <boost/graph/adjacency_matrix.hpp>
 #include <boost/optional.hpp>
+
+#include "adj_mat_serialize.hpp"
 
 class NoEdgeException{};
 
@@ -18,8 +20,7 @@ template <typename Vertex, typename Edge>
 class Network {
  public:
 	// convenient for dealing with graphs
-	using graph_t = boost::adjacency_list<boost::vecS, boost::vecS, 
-		  boost::undirectedS, Vertex, Edge>;
+	using graph_t = boost::adjacency_matrix<boost::undirectedS, Vertex, Edge>;
 	using vertex_t = typename boost::graph_traits<graph_t>::vertex_descriptor;
 	using edge_t = typename boost::graph_traits<graph_t>::edge_descriptor;
 	using degree_t = typename boost::graph_traits<graph_t>::degree_size_type;
@@ -49,7 +50,7 @@ class Network {
 	virtual ~Network() {}
 
 	degree_t Degree(const vertex_t& vertex) 
-	{ return boost::degree(vertex, graph_); }
+	{ return boost::out_degree(vertex, graph_); }
 	
 	vertex_t GetSourceVertexDescriptor(const edge_t& edge) const;
 	vertex_t GetTargetVertexDescriptor(const edge_t& edge) const;
@@ -160,7 +161,8 @@ class Network {
 
 
 template <typename Vertex, typename Edge>
-Network<Vertex, Edge>::Network() : vertices_(graph_), edges_(graph_) {}
+Network<Vertex, Edge>::Network() : graph_{0}, vertices_(graph_), 
+	edges_(graph_) {}
 
 
 template <typename Vertex, typename Edge>
@@ -177,7 +179,7 @@ Network<Vertex, Edge>::Network(ForwardIt first, ForwardIt last) :
 }
 
 template <typename Vertex, typename Edge>
-Network<Vertex, Edge>::Network(std::istream& input) : 
+Network<Vertex, Edge>::Network(std::istream& input) : graph_{0},
 		vertices_(graph_), edges_(graph_) { Load(input); }
 
 
@@ -195,7 +197,7 @@ template <typename Vertex, typename Edge>
 Network<Vertex, Edge>& Network<Vertex, Edge>::operator=(const Network& other) {
 	// using the copy-swap idiom
 	graph_t graph{other.graph_};
-	graph_.swap(graph);
+	std::swap(graph_, graph);
 	return *this;
 }
 
@@ -276,7 +278,7 @@ template <typename Vertex, typename Edge>
 void Network<Vertex, Edge>::Save(std::ostream& output_graph_archive) const {
 	// create boost archive from ostream and save the graph
 	boost::archive::text_oarchive archive{output_graph_archive};
-	archive << graph_;
+	archive << graph_;	
 }
 
 

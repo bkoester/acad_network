@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/adjacency_matrix.hpp>
 #include "gtest/gtest.h"
 
 #include "graph_builder.hpp"
@@ -13,36 +13,42 @@
 using std::stringstream;
 
 using boost::add_edge;
-using boost::add_vertex;
+using boost::vertex;
 
 
 class CourseNetworkTest : public ::testing::Test {
  public:
 	 void SetUp() override {
-		 auto english125_vertex = add_vertex(Course{"ENGLISH", 125}, graph_);
-		 auto chem210_vertex = add_vertex(Course{"CHEM", 210}, graph_);
-		 auto chem211_vertex = add_vertex(Course{"CHEM", 211}, graph_);
-		 auto aaptis277_vertex = add_vertex(Course{"AAPTIS", 277}, graph_);
-		 auto environ311_vertex = add_vertex(Course{"ENVIRON", 311}, graph_);
-		 auto math425_vertex = add_vertex(Course{"MATH", 425}, graph_);
+		 CourseNetwork::graph_t graph{6};
 
-		 add_edge(english125_vertex, chem210_vertex, 2, graph_);
-		 add_edge(english125_vertex, chem211_vertex, 1, graph_);
-		 add_edge(english125_vertex, aaptis277_vertex, 2, graph_);
-		 add_edge(english125_vertex, environ311_vertex, 2, graph_);
-		 add_edge(chem210_vertex, chem211_vertex, 1, graph_);
-		 add_edge(chem210_vertex, aaptis277_vertex, 1, graph_);
-		 add_edge(chem211_vertex, aaptis277_vertex, 1, graph_);
-		 add_edge(aaptis277_vertex, environ311_vertex, 1, graph_);
-		 add_edge(environ311_vertex, math425_vertex, 1, graph_);
+		 // assign the vertices
+		 auto english125_vertex = vertex(0, graph);
+		 graph[english125_vertex] = Course{"ENGLISH", 125};
+		 auto chem210_vertex = vertex(1, graph);
+		 graph[chem210_vertex] = Course{"CHEM", 210};
+		 auto chem211_vertex = vertex(2, graph);
+		 graph[chem211_vertex] = Course{"CHEM", 211};
+		 auto aaptis277_vertex = vertex(3, graph);
+		 graph[aaptis277_vertex] = Course{"AAPTIS", 277};
+		 auto environ311_vertex = vertex(4, graph);
+		 graph[environ311_vertex] = Course{"ENVIRON", 311};
+		 auto math425_vertex = vertex(5, graph);
+		 graph[math425_vertex] = Course{"MATH", 425};
 
-		 network = CourseNetwork{graph_};
+		 // assign the edges
+		 add_edge(english125_vertex, chem210_vertex, 2, graph);
+		 add_edge(english125_vertex, chem211_vertex, 1, graph);
+		 add_edge(english125_vertex, aaptis277_vertex, 2, graph);
+		 add_edge(english125_vertex, environ311_vertex, 2, graph);
+		 add_edge(chem210_vertex, chem211_vertex, 1, graph);
+		 add_edge(chem210_vertex, aaptis277_vertex, 1, graph);
+		 add_edge(chem211_vertex, aaptis277_vertex, 1, graph);
+		 add_edge(aaptis277_vertex, environ311_vertex, 1, graph);
+		 add_edge(environ311_vertex, math425_vertex, 1, graph);
+
+		 network = CourseNetwork{graph};
 	 }
 
- private:
-	CourseNetwork::graph_t graph_;
-
-	// must be defined after the private member for initialization reasons
  protected:
 	CourseNetwork network;
 };

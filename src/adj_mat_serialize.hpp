@@ -91,7 +91,7 @@ inline void load(Archive & ar,
 	}
 
 	// assign the temporary graph object to the input graph object
-	graph = std::move(tmp);
+	std::swap(graph, tmp);
 }
 
 template <typename Archive, typename D, typename VP, typename EP, typename GP, 

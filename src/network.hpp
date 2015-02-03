@@ -1,7 +1,6 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#include <algorithm>
 #include <unordered_map>
 #include <iostream>
 #include <iterator>

@@ -23,7 +23,7 @@
 #include "utility.cpp"
 
 
-using std::cerr; using std::endl;
+using std::cerr; using std::cout; using std::endl;
 using std::istream;
 using std::istream_iterator;
 using std::lock_guard; using std::mutex;
@@ -257,6 +257,7 @@ void FindStudentNetworkEdgesFromStudentPairs(
 template <typename StudentsContainer, typename EdgesContainer>
 StudentNetwork PopulateStudentNetwork(
 		const StudentsContainer& students, const EdgesContainer& edges) {
+	auto start_network_time = chr::system_clock::now();
 	// create the network of students
 	StudentNetwork network{students.size()};
 
@@ -273,7 +274,14 @@ StudentNetwork PopulateStudentNetwork(
 	}
 
 	// add edges and weights
+	long edge_num{0};
 	for (auto& edge : edges) {
+		if (++edge_num % timing_modulus == 0) {
+			cerr << edge_num << " " << chr::duration_cast<chr::seconds>(
+					chr::system_clock::now() - start_network_time).count()
+				 << endl;
+		}
+
 		/*auto edge = edge_pair.first;
 		auto edge_value = edge_pair.second; */
 

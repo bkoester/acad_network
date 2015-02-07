@@ -46,9 +46,9 @@ CourseNetwork::CourseNetwork(ForwardIt first, ForwardIt last) :
 		Network{static_cast<long unsigned int>(std::distance(first, last))} {
 	auto it = first;
 	// assign the courses to the vertices and build the course to vertex map
-	for (auto vertex : GetVertices()) {
+	for (auto vertex : GetVertexDescriptors()) {
 		course_to_vertex_[*it] = vertex;
-		Network<Course, int>::operator[](vertex) = *it++;
+		operator[](vertex) = *it++;
 	}
 }
 

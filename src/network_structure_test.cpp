@@ -121,10 +121,12 @@ void TestStudentNetworkStructure(const StudentNetwork& network) {
 
 StudentNetwork::vertex_t FindStudentId(
 		const StudentNetwork& network, StudentId student) {
-	auto it = find_if(network.GetVertices().begin(), network.GetVertices().end(), 
-		 [&network, student](const StudentNetwork::vertex_t& vertex_descriptor)
-		 { return network[vertex_descriptor] == student; });
-	EXPECT_NE(network.GetVertices().end(), network.GetVertices().begin());
+	auto it = find_if(network.GetVertexDescriptors().begin(),
+			network.GetVertexDescriptors().end(),
+			[&network, student](StudentNetwork::vertex_t vertex_descriptor)
+			{ return network[vertex_descriptor] == student; });
+	EXPECT_NE(network.GetVertexValues().end(), 
+			  network.GetVertexValues().begin());
 
 	return *it;
 }

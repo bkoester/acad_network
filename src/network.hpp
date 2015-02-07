@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <iostream>
 #include <iterator>
+#include <type_traits>
 #include <utility>
 
 #include <boost/archive/text_iarchive.hpp>
@@ -12,6 +13,7 @@
 #include <boost/optional.hpp>
 
 #include "adj_mat_serialize.hpp"
+#include "bgl_value_iterator.hpp"
 
 class NoEdgeException{};
 
@@ -24,13 +26,19 @@ class Network {
 	using vertex_t = typename boost::graph_traits<graph_t>::vertex_descriptor;
 	using edge_t = typename boost::graph_traits<graph_t>::edge_descriptor;
 	using degree_t = typename boost::graph_traits<graph_t>::degree_size_type;
+	using vertices_size_t = 
+		typename boost::graph_traits<graph_t>::vertices_size_type;
+	using vertex_iterator_t = 
+		typename boost::graph_traits<graph_t>::vertex_iterator;
+	using edges_size_t = typename boost::graph_traits<graph_t>::edges_size_type;
+	using edge_iterator_t = typename boost::graph_traits<graph_t>::edge_iterator;
 
 	// Construct empty graph.
 	Network();
 	// ifstream must contain a boost input archive.
-	Network(std::istream& input);
+	explicit Network(std::istream& input);
 	// Create a network with the given number of vertices.
-	Network(long unsigned int num_vertices);
+	explicit Network(long unsigned int num_vertices);
 	// Construct a network with a certain starting set of vertices given in the
 	// range by the iterators.
 	template <typename ForwardIt>
@@ -61,7 +69,7 @@ class Network {
 	const Vertex& GetTargetVertex(const edge_t& edge) const;
 	Vertex& GetTargetVertex(const edge_t& edge);
 
-	boost::optional<edge_t> GetEdge(
+	boost::optional<edge_t> GetEdgeDescriptor(
 			const vertex_t& source, const vertex_t& target) const;
 
 	typename std::pair<typename boost::graph_traits<graph_t>::in_edge_iterator,
@@ -92,105 +100,164 @@ class Network {
 	// classes declared to provide iterator access to vertices
 	// constructors are private to require access through GetVertices() and
 	// GetEdges() functions, which supply the graph parameter to the constructors
-	class Vertices {
+	template <typename Adaptor>
+	class Properties {
 	 public:
-		typename boost::graph_traits<graph_t>::vertices_size_type 
-		size() const { return boost::num_vertices(graph_); }
+		using iterator_t = decltype(std::declval<Adaptor>().Iterate().first);
+		using prop_size_t = decltype(std::declval<Adaptor>().size());
 
-		typename boost::graph_traits<graph_t>::vertex_iterator 
-		begin() { return boost::vertices(graph_).first; }
-		const typename boost::graph_traits<graph_t>::vertex_iterator 
-		begin() const { return boost::vertices(graph_).first; }
-		const typename boost::graph_traits<graph_t>::vertex_iterator 
-		cbegin() const { return boost::vertices(graph_).first; }
+		prop_size_t size() const { return adaptor_.size(); }
 
-		typename boost::graph_traits<graph_t>::vertex_iterator 
-		end() { return boost::vertices(graph_).second; }
-		const typename boost::graph_traits<graph_t>::vertex_iterator 
-		end() const { return boost::vertices(graph_).second; }
-		const typename boost::graph_traits<graph_t>::vertex_iterator 
-		cend() const { return boost::vertices(graph_).second; }
+		iterator_t begin() const { return adaptor_.Iterate().first; }
+		iterator_t cbegin() const { return begin(); }
+
+		iterator_t end() const { return adaptor_.Iterate().second; }
+		iterator_t cend() const { return end(); }
 
 	 private:
 		friend class Network;
-		Vertices(graph_t& graph) : graph_(graph) {}
+		Properties(const Adaptor& adaptor) : adaptor_{adaptor} {}
 
-		graph_t& graph_;
+		Adaptor adaptor_;
 	};
 
-	class Edges {
-	 public:
-		typename boost::graph_traits<graph_t>::edges_size_type 
-		size() const { return boost::num_edges(graph_); }
-		typename boost::graph_traits<graph_t>::edge_iterator
-		begin() { return boost::edges(graph_).first; }
-		const typename boost::graph_traits<graph_t>::edge_iterator
-		begin() const { return boost::edges(graph_).first; }
-		const typename boost::graph_traits<graph_t>::edge_iterator
-		cbegin() const { return boost::edges(graph_).first; }
+	template <typename Adaptor>
+	class Descriptors : public Properties<Adaptor> {
+	 private:
+		friend class Network;
+		Descriptors(const Adaptor& adaptor) : Properties<Adaptor>{adaptor} {}
+	};
 
-		typename boost::graph_traits<graph_t>::edge_iterator
-		end() { return boost::edges(graph_).second; }
-		const typename boost::graph_traits<graph_t>::edge_iterator
-		end() const { return boost::edges(graph_).second; }
-		const typename boost::graph_traits<graph_t>::edge_iterator
-		cend() const { return boost::edges(graph_).second; }
+	template <typename Adaptor, typename IteratorT>
+	class Values : public Properties<Adaptor> {
+	 public:
+		using value_iterator_t = BglValueIterator<graph_t, IteratorT>;
+		using const_value_iterator_t = 
+			BglValueIterator<const graph_t, IteratorT>;
+		using parent_t = Properties<Adaptor>;
+
+		value_iterator_t begin()
+		{ return value_iterator_t{graph_, parent_t::begin()}; }
+		const_value_iterator_t begin() const
+		{ return const_value_iterator_t{graph_, parent_t::begin()}; }
+		const_value_iterator_t cbegin() const
+		{ return const_value_iterator_t{graph_, parent_t::cbegin()}; }
+
+		value_iterator_t end()
+		{ return value_iterator_t{graph_, parent_t::end()}; }
+		const_value_iterator_t end() const
+		{ return const_value_iterator_t{graph_, parent_t::end()}; }
+		const_value_iterator_t cend() const
+		{ return const_value_iterator_t{graph_, parent_t::cend()}; }
 
 	 private:
 		friend class Network;
-		Edges(graph_t& graph) : graph_(graph) {}
+		Values(const Adaptor& adaptor, graph_t& graph) : 
+			parent_t{adaptor}, graph_(graph) {}
 
 		graph_t& graph_;
 	};
-
-	Vertices GetVertices() { return vertices_; }
-	Vertices GetVertices() const { return vertices_; }
-	Edges GetEdges() { return edges_; }
-	Edges GetEdges() const { return edges_; }
-
- protected:
-	// It's usually considered bad design to have protected members, but derived
-	// classes need more access to this than external code, and the BGL provides
-	// its own encapsulation.
-	graph_t graph_;  
 
  private:
-	Vertices vertices_;
-	Edges edges_;
+	struct EdgeAdaptor;
+	struct VertexAdaptor;
+
+ public:
+	using vertex_descriptors_t = Descriptors<VertexAdaptor>;
+	using edge_descriptors_t = Descriptors<EdgeAdaptor>;
+	using vertex_values_t = Values<VertexAdaptor, vertex_iterator_t>;
+	using edge_values_t = Values<EdgeAdaptor, edge_iterator_t>;
+
+	vertex_descriptors_t GetVertexDescriptors() const
+	{ return vertex_descriptors_t{VertexAdaptor{graph_}}; }
+	edge_descriptors_t GetEdgeDescriptors() const
+	{ return edge_descriptors_t{EdgeAdaptor{graph_}}; }
+
+	vertex_values_t GetVertexValues() { return vertices_; }
+	const vertex_values_t GetVertexValues() const { return vertices_; }
+	edge_values_t GetEdgeValues() { return edges_; }
+	const edge_values_t GetEdgeValues() const { return edges_; }
+
+ private:
+	class VertexAdaptor {
+	 public:
+		VertexAdaptor(const graph_t& graph) : graph_(graph) {}
+		VertexAdaptor(const VertexAdaptor& other) : graph_(other.graph_) {}
+
+		auto Iterate() const
+			-> decltype(boost::vertices(graph_t{vertices_size_t{}}))
+		{ return boost::vertices(graph_); }
+		auto size() const 
+			-> decltype(boost::num_vertices(graph_t{vertices_size_t{}}))
+		{ return boost::num_vertices(graph_); }
+
+	 private:
+		const graph_t& graph_;
+	};
+
+	class EdgeAdaptor {
+	 public:
+		EdgeAdaptor(const graph_t& graph) : graph_(graph) {}
+		EdgeAdaptor(const EdgeAdaptor& other) : graph_(other.graph_) {}
+
+		auto Iterate() const 
+			-> decltype(boost::edges(graph_t{vertices_size_t{}}))
+		{ return boost::edges(graph_); }
+		auto size() const
+			-> decltype(boost::num_edges(graph_t{vertices_size_t{}}))
+		{ return boost::num_edges(graph_); }
+
+	 private:
+		const graph_t& graph_;
+	};
+
+ private:
+	graph_t graph_;
+	vertex_values_t vertices_;
+	edge_values_t edges_;
 };
 
 
 template <typename Vertex, typename Edge>
-Network<Vertex, Edge>::Network() : graph_{0}, vertices_(graph_), 
-	edges_(graph_) {}
+Network<Vertex, Edge>::Network() : graph_{0}, 
+	vertices_{VertexAdaptor{graph_}, graph_}, 
+	edges_{EdgeAdaptor{graph_}, graph_} {}
 
 
 template <typename Vertex, typename Edge>
 Network<Vertex, Edge>::Network(long unsigned int num_vertices) : 
-	graph_{num_vertices}, vertices_(graph_), edges_(graph_) {}
+	graph_{num_vertices},
+	vertices_{VertexAdaptor{graph_}, graph_}, 
+	edges_{EdgeAdaptor{graph_}, graph_} {}
 
 
 template <typename Vertex, typename Edge>
 template <typename ForwardIt>
 Network<Vertex, Edge>::Network(ForwardIt first, ForwardIt last) : 
-		graph_{std::distance(first, last)}, vertices_(graph_), edges_(graph_) {
+		graph_{std::distance(first, last)},
+		vertices_{VertexAdaptor{graph_}, graph_}, 
+		edges_{EdgeAdaptor{graph_}, graph_} {
 	auto it = first;
-	for (auto& vertex : GetVertices()) { operator[](vertex) = *it++; }
+	for (auto& vertex : GetVertexValues()) { vertex = *it++; }
 }
 
-template <typename Vertex, typename Edge>
-Network<Vertex, Edge>::Network(std::istream& input) : graph_{0},
-		vertices_(graph_), edges_(graph_) { Load(input); }
-
 
 template <typename Vertex, typename Edge>
-Network<Vertex, Edge>::Network(const graph_t& graph) :
-	graph_{graph}, vertices_(graph_), edges_(graph_) {}
+Network<Vertex, Edge>::Network(std::istream& input) : graph_{0}, 
+	vertices_{VertexAdaptor{graph_}, graph_}, 
+	edges_{EdgeAdaptor{graph_}, graph_} { Load(input); }
 
 
 template <typename Vertex, typename Edge>
-Network<Vertex, Edge>::Network(const Network& other) : 
-	graph_{other.graph_}, vertices_(graph_), edges_(graph_) {}
+Network<Vertex, Edge>::Network(const graph_t& graph) : graph_{graph}, 
+	vertices_{VertexAdaptor{graph_}, graph_}, 
+	edges_{EdgeAdaptor{graph_}, graph_} {}
+
+
+template <typename Vertex, typename Edge>
+Network<Vertex, Edge>::Network(const Network& other) : graph_{other.graph_}, 
+	vertices_{VertexAdaptor{graph_}, graph_}, 
+	edges_{EdgeAdaptor{graph_}, graph_} {}
 
 
 template <typename Vertex, typename Edge>
@@ -236,7 +303,7 @@ Vertex& Network<Vertex, Edge>::GetTargetVertex(const edge_t& edge)
 
 template <typename Vertex, typename Edge>
 boost::optional<typename Network<Vertex, Edge>::edge_t> 
-Network<Vertex, Edge>::GetEdge(
+Network<Vertex, Edge>::GetEdgeDescriptor(
 		const vertex_t& source, const vertex_t& target) const { 
 	auto boost_edge = boost::edge(source, target, graph_);
 	return boost::make_optional(boost_edge.second, boost_edge.first); 
@@ -246,7 +313,7 @@ Network<Vertex, Edge>::GetEdge(
 template <typename Vertex, typename Edge>
 const Edge& Network<Vertex, Edge>::Get(
 		const vertex_t& source, const vertex_t& target) const {
-	boost::optional<edge_t> edge{GetEdge(source, target)};
+	boost::optional<edge_t> edge{GetEdgeDescriptor(source, target)};
 	if (!edge) { throw NoEdgeException{}; };
 	return operator[](edge.get());
 }
@@ -255,7 +322,7 @@ const Edge& Network<Vertex, Edge>::Get(
 template <typename Vertex, typename Edge>
 Edge& Network<Vertex, Edge>::Get(
 		const vertex_t& source, const vertex_t& target) {
-	boost::optional<edge_t> edge{GetEdge(source, target)};
+	boost::optional<edge_t> edge{GetEdgeDescriptor(source, target)};
 	if (!edge) { throw NoEdgeException{}; };
 	return operator[](edge.get());
 }
@@ -265,11 +332,11 @@ template <typename Vertex, typename Edge>
 Edge& Network<Vertex, Edge>::operator()(
 		const vertex_t& source, const vertex_t& target) {
 	// add the edge if necessary
-	if (!GetEdge(source, target))
+	if (!GetEdgeDescriptor(source, target))
 	{ boost::add_edge(source, target, Edge{}, graph_); }
 
 	// get a reference to the Edge
-	boost::optional<edge_t> edge_option{GetEdge(source, target)};
+	boost::optional<edge_t> edge_option{GetEdgeDescriptor(source, target)};
 	return operator[](edge_option.get());
 }
 

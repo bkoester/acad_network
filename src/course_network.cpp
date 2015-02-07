@@ -35,7 +35,7 @@ Course& CourseNetwork::operator[](const Course& course)
 
 int CourseNetwork::CalculateValue(
 		const vertex_t& source, const vertex_t& target) const {
-	auto edge_option = GetEdge(source, target);
+	auto edge_option = GetEdgeDescriptor(source, target);
 	if (!edge_option) { return default_edge_value; }
 	return Network<Course, int>::operator[](edge_option.get());
 }
@@ -49,8 +49,8 @@ void CourseNetwork::Load(std::istream& input_graph_archive) {
 
 
 void CourseNetwork::BuildCourseToVertexMap() {
-	for (const auto& vertex : GetVertices())
-	{ course_to_vertex_[Network<Course, int>::operator[](vertex)] = vertex; }
+	for (const auto& vertex : GetVertexDescriptors())
+	{ course_to_vertex_[operator[](vertex)] = vertex; }
 }
 
 

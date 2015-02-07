@@ -120,7 +120,7 @@ CourseNetwork BuildCourseNetworkFromEnrollment(istream& enrollment_stream) {
 		CourseNetwork::vertex_t vertex2{course_network.GetVertex(e.second)};
 
 		// INVARIANT: the edge should not exist in the graph already.
-		assert(!course_network.GetEdge(vertex1, vertex2));
+		assert(!course_network.GetEdgeDescriptor(vertex1, vertex2));
 		course_network(vertex1, vertex2) = weight;
 	}
 
@@ -265,8 +265,8 @@ StudentNetwork PopulateStudentNetwork(
 	auto student_it = students.begin();
 	unordered_map<Student, StudentNetwork::vertex_t, StudentHasher> 
 		student_to_vertex;
-	for (auto vertex_it = network.GetVertices().begin();
-			vertex_it != network.GetVertices().end();
+	for (auto vertex_it = network.GetVertexDescriptors().begin();
+			vertex_it != network.GetVertexDescriptors().end();
 			++vertex_it, ++student_it) {
 		assert(student_it != students.end());
 		student_to_vertex[*student_it] = *vertex_it;
@@ -289,7 +289,7 @@ StudentNetwork PopulateStudentNetwork(
 		StudentNetwork::vertex_t vertex2{student_to_vertex[edge.second]};
 
 		// INVARIANT: the vertex should not exist in the graph already.
-		assert(!network.GetEdge(vertex1, vertex2));
+		assert(!network.GetEdgeDescriptor(vertex1, vertex2));
 		network(vertex1, vertex2) = 1;
 	}
 

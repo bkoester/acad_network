@@ -5,6 +5,15 @@
 #include <string>
 #include <utility>
 
+
+enum class NetworkType_e { Course, Student };
+
+std::ostream& operator<<(
+		std::ostream& output, const NetworkType_e& network_type);
+
+std::istream& operator>>(std::istream& input, NetworkType_e& network_type);
+
+
 // Ignore any line in the given istream
 void SkipLine(std::istream& input);
 

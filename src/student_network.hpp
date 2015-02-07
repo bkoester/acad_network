@@ -9,6 +9,7 @@
 class StudentNetwork : public Network<StudentId, int> {
  public:
 	StudentNetwork() {}
+	StudentNetwork(std::istream& student_archive) : Network{student_archive} {}
 	StudentNetwork(const graph_t& graph) : Network{graph} {}
 };
 

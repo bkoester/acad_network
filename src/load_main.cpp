@@ -28,7 +28,10 @@ int main(int argc, char* argv[]) {
 		("network_to_load", 
 		 po::value<NetworkType_e>(&network_to_load)->default_value(
 			 NetworkType_e::Student), "Set the network to load "
-		 "('student' or 'course')");
+		 "('student' or 'course')")
+		("threads,t", po::value<int>(&num_threads)->default_value(1),
+		 "Number of threads to use to build the network");
+
 
 	po::variables_map vm;
 
@@ -38,6 +41,7 @@ int main(int argc, char* argv[]) {
 			cout << desc << endl;
 			return 0;
 		}
+		// Make sure the appropriate input file is given.
 		if (network_to_load == NetworkType_e::Student && 
 				student_archive_path.empty()) {
 			throw po::required_option{"Must provide student archive file!"}; 

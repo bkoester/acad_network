@@ -32,8 +32,7 @@ int main(int argc, char* argv[]) {
 		 po::value<NetworkType_e>(&network_to_build)->default_value(
 			 NetworkType_e::Student), "Set the network to build "
 		 "('student' or 'course')")
-		("threads,t", 
-		 po::value<int>(&num_network_building_threads)->default_value(1),
+		("threads,t", po::value<int>(&num_threads)->default_value(1),
 		 "Number of threads to use to build the network");
 
 	po::variables_map vm;

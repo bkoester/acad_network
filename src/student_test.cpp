@@ -1,6 +1,7 @@
 #include "student.hpp"
 
 #include <sstream>
+#include <memory>
 
 #include "gtest/gtest.h"
 
@@ -8,6 +9,7 @@
 
 
 using std::stringstream;
+using std::unique_ptr;
 
 
 class StudentTest : public ::testing::Test {
@@ -29,28 +31,28 @@ TEST_F(StudentTest, Construction) {
 
 
 TEST_F(StudentTest, Classes) {
-	Course course1{"ENGLISH", 125};
-	Course course2{"EECS", 381};
-	Course course3{"PHYSICS", 260};
+	auto course1 = Course{"ENGLISH", 125, 0};
+	auto course2 = Course{"EECS", 381, 0};
+	auto course3 = Course{"PHYSICS", 260, 0};
 
-	student1.AddCourseTaken(course1);
-	student1.AddCourseTaken(course2);
-	student1.AddCourseTaken(course3);
+	student1.AddCourseTaken(&course1);
+	student1.AddCourseTaken(&course2);
+	student1.AddCourseTaken(&course3);
 
-	student2.AddCourseTaken(course1);
-	student2.AddCourseTaken(course2);
+	student2.AddCourseTaken(&course1);
+	student2.AddCourseTaken(&course2);
 
-	EXPECT_TRUE(student1.HasTakenCourse(course1));
-	EXPECT_TRUE(student1.HasTakenCourse(course2));
-	EXPECT_TRUE(student1.HasTakenCourse(course3));
+	EXPECT_TRUE(student1.HasTakenCourse(&course1));
+	EXPECT_TRUE(student1.HasTakenCourse(&course2));
+	EXPECT_TRUE(student1.HasTakenCourse(&course3));
 
-	EXPECT_TRUE(student2.HasTakenCourse(course1));
-	EXPECT_TRUE(student2.HasTakenCourse(course2));
-	EXPECT_FALSE(student2.HasTakenCourse(course3));
+	EXPECT_TRUE(student2.HasTakenCourse(&course1));
+	EXPECT_TRUE(student2.HasTakenCourse(&course2));
+	EXPECT_FALSE(student2.HasTakenCourse(&course3));
 
-	EXPECT_FALSE(student3.HasTakenCourse(course1));
-	EXPECT_FALSE(student3.HasTakenCourse(course2));
-	EXPECT_FALSE(student3.HasTakenCourse(course3));
+	EXPECT_FALSE(student3.HasTakenCourse(&course1));
+	EXPECT_FALSE(student3.HasTakenCourse(&course2));
+	EXPECT_FALSE(student3.HasTakenCourse(&course3));
 }
 
 

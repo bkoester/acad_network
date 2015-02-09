@@ -30,12 +30,13 @@ class Student {
 	template <typename Archive>
 	void serialize(Archive& ar, const unsigned int version) { ar & id_; }
 
-	void AddCourseTaken(const Course& course) { courses_taken_.insert(course); }
-	void AddCoursesTaken(std::initializer_list<Course> courses);
-	bool HasTakenCourse(const Course& course) const
+	void AddCourseTaken(const Course* course) { courses_taken_.insert(course); }
+	void AddCoursesTaken(std::initializer_list<const Course*> courses);
+	bool HasTakenCourse(const Course* course) const
 	{ return courses_taken_.count(course) == 1; }
 	// provide access to the container to allow stl algorithms to be run on them
-	const std::set<Course>& courses_taken() const { return courses_taken_; }
+	const std::set<const Course*>& courses_taken() const
+	{ return courses_taken_; }
 
  private:
 	friend class StudentTest;
@@ -44,7 +45,7 @@ class Student {
 	friend std::istream& operator>>(std::istream& input, Student& student);
 
 	StudentId id_;
-	std::set<Course> courses_taken_;
+	std::set<const Course*> courses_taken_;
 	static const int uninitialized_id;
 };
 

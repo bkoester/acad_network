@@ -2,11 +2,18 @@
 #define UTILITY_H
 
 #include <iosfwd>
+#include <memory>
 #include <string>
 #include <utility>
 
 
 enum class NetworkType_e { Course, Student };
+
+
+// The number of threads to help build the network. Defined as extern to allow
+// change by command line options.
+extern int num_threads;
+
 
 std::ostream& operator<<(
 		std::ostream& output, const NetworkType_e& network_type);
@@ -37,7 +44,14 @@ bool HasIntersection(
 	return false;
 }
 
+
 bool icompare(const std::string& first, const std::string& second);
+
+
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args) {
+	return std::unique_ptr<T>{new T{std::forward<Args>(args)...}};
+}
 
 
 #endif  // UTILITY_H

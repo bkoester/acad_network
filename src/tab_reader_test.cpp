@@ -1,6 +1,7 @@
 #include "tab_reader.hpp"
 
 #include <algorithm>
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -12,6 +13,7 @@
 
 
 using std::binary_search;
+using std::make_unique;
 using std::string;
 using std::stringstream;
 
@@ -48,29 +50,41 @@ TEST(TabReaderTest, ReadEnrollment) {
 	stringstream enrollment_stream{enrollment_tab};
 	auto courses = ReadEnrollment(enrollment_stream, students);
 
-	Course english125{*courses.find(Course{"ENGLISH", 125})};
-	Course chem210{*courses.find(Course{"CHEM", 210})};
-	Course chem211{*courses.find(Course{"CHEM", 211})};
-	Course aaptis277{*courses.find(Course{"AAPTIS", 277})};
-	Course environ311{*courses.find(Course{"ENVIRON", 311})};
-	Course math425{*courses.find(Course{"MATH", 425})};
+	EXPECT_NE(end(courses), 
+			  courses.find(make_unique<Course>("ENGLISH", 125, 201403)));
+	EXPECT_NE(end(courses),
+			  courses.find(make_unique<Course>("CHEM", 210, 201403)));
+	EXPECT_NE(end(courses),
+			  courses.find(make_unique<Course>("CHEM", 211, 201407)));
+	EXPECT_NE(end(courses),
+			  courses.find(make_unique<Course>("AAPTIS", 277, 201403)));
+	EXPECT_NE(end(courses),
+			  courses.find(make_unique<Course>("ENVIRON", 311, 201405)));
+	EXPECT_NE(end(courses),
+			  courses.find(make_unique<Course>("MATH", 425, 201407)));
 
-	EXPECT_EQ(1u, courses.count(english125));
-	EXPECT_EQ(1u, courses.count(chem210));
-	EXPECT_EQ(1u, courses.count(chem211));
-	EXPECT_EQ(1u, courses.count(aaptis277));
-	EXPECT_EQ(1u, courses.count(environ311));
-	EXPECT_EQ(1u, courses.count(math425));
-
-	Student student1{*lower_bound(
+	Course* english125{courses.find(
+			make_unique<Course>("ENGLISH", 125, 201403))->get()};
+	Course* chem210{courses.find(
+			make_unique<Course>("CHEM", 210, 201403))->get()};
+	Course* chem211{courses.find(
+			make_unique<Course>("CHEM", 211, 201407))->get()};
+	Course* aaptis277{courses.find(
+			make_unique<Course>("AAPTIS", 277, 201403))->get()};
+	Course* environ311{courses.find(
+			make_unique<Course>("ENVIRON", 311, 201405))->get()};
+	Course* math425{courses.find(
+			make_unique<Course>("MATH", 425, 201407))->get()};
+	
+	Student& student1{*lower_bound(
 			students.begin(), students.end(), Student{312995})};
-	Student student2{*lower_bound(
+	Student& student2{*lower_bound(
 			students.begin(), students.end(), Student{500928})};
-	Student student3{*lower_bound(
+	Student& student3{*lower_bound(
 			students.begin(), students.end(), Student{147195})};
-	Student student4{*lower_bound(
+	Student& student4{*lower_bound(
 			students.begin(), students.end(), Student{352468})};
-	Student student5{*lower_bound(
+	Student& student5{*lower_bound(
 			students.begin(), students.end(), Student{567890})};
 
 	EXPECT_TRUE(student1.HasTakenCourse(english125));
@@ -108,4 +122,39 @@ TEST(TabReaderTest, ReadEnrollment) {
 	EXPECT_FALSE(student5.HasTakenCourse(environ311));
 	EXPECT_TRUE(student5.HasTakenCourse(math425));
 
+	EXPECT_TRUE(english125->IsStudentEnrolled(&student1));
+	EXPECT_TRUE(english125->IsStudentEnrolled(&student2));
+	EXPECT_TRUE(english125->IsStudentEnrolled(&student3));
+	EXPECT_TRUE(english125->IsStudentEnrolled(&student4));
+	EXPECT_FALSE(english125->IsStudentEnrolled(&student5));
+
+	EXPECT_TRUE(chem210->IsStudentEnrolled(&student1));
+	EXPECT_TRUE(chem210->IsStudentEnrolled(&student2));
+	EXPECT_FALSE(chem210->IsStudentEnrolled(&student3));
+	EXPECT_FALSE(chem210->IsStudentEnrolled(&student4));
+	EXPECT_FALSE(chem210->IsStudentEnrolled(&student5));
+
+	EXPECT_TRUE(chem211->IsStudentEnrolled(&student1));
+	EXPECT_FALSE(chem211->IsStudentEnrolled(&student2));
+	EXPECT_FALSE(chem211->IsStudentEnrolled(&student3));
+	EXPECT_FALSE(chem211->IsStudentEnrolled(&student4));
+	EXPECT_FALSE(chem211->IsStudentEnrolled(&student5));
+
+	EXPECT_TRUE(aaptis277->IsStudentEnrolled(&student1));
+	EXPECT_FALSE(aaptis277->IsStudentEnrolled(&student2));
+	EXPECT_TRUE(aaptis277->IsStudentEnrolled(&student3));
+	EXPECT_FALSE(aaptis277->IsStudentEnrolled(&student4));
+	EXPECT_FALSE(aaptis277->IsStudentEnrolled(&student5));
+
+	EXPECT_FALSE(environ311->IsStudentEnrolled(&student1));
+	EXPECT_FALSE(environ311->IsStudentEnrolled(&student2));
+	EXPECT_TRUE(environ311->IsStudentEnrolled(&student3));
+	EXPECT_TRUE(environ311->IsStudentEnrolled(&student4));
+	EXPECT_FALSE(environ311->IsStudentEnrolled(&student5));
+
+	EXPECT_FALSE(math425->IsStudentEnrolled(&student1));
+	EXPECT_FALSE(math425->IsStudentEnrolled(&student2));
+	EXPECT_FALSE(math425->IsStudentEnrolled(&student3));
+	EXPECT_TRUE(math425->IsStudentEnrolled(&student4));
+	EXPECT_TRUE(math425->IsStudentEnrolled(&student5));
 }

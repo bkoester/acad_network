@@ -8,14 +8,15 @@
 #include "utility.hpp"
 
 
+using std::begin; using std::end;
+using std::copy; using std::transform;
 using std::ostream; using std::istream; using std::endl;
 using std::ostream_iterator; using std::inserter;
-using std::copy;
 
 
-void Student::AddCoursesTaken(std::initializer_list<Course> courses) { 
-	copy(courses.begin(), courses.end(), 
-			inserter(courses_taken_, courses_taken_.end()));
+void Student::AddCoursesTaken(std::initializer_list<const Course*> courses) { 
+	copy(begin(courses), end(courses), 
+			inserter(courses_taken_, end(courses_taken_)));
 }
 
 
@@ -23,8 +24,9 @@ ostream& operator<<(ostream& os, const Student& student) {
 	if (student.id() == Student::uninitialized_id) { os << "ID: Undefined"; }
 	else { os << "ID: " << student.id(); }
 	os << " Classes: ";
-	copy(student.courses_taken_.cbegin(), --student.courses_taken_.cend(), 
-			  ostream_iterator<Course>{os, ", "});
+	transform(student.courses_taken_.cbegin(), --student.courses_taken_.cend(), 
+			  ostream_iterator<Course>{os, ", "}, 
+			  [](const Course* course) { return *course; });
 	os << *student.courses_taken_.rbegin();
 	os << endl;
 	return os;

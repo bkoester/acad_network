@@ -33,22 +33,28 @@ course_container_t ReadEnrollment(istream& enrollment_stream,
 								  student_container_t& students) {
 	course_container_t courses;
 
-	// skip the headings line 
+	// Skip the headings line.
 	SkipLine(enrollment_stream);
 	istream_iterator<Enrollment> enrollment_it{enrollment_stream};
 
 	for (;enrollment_it != istream_iterator<Enrollment>{}; ++enrollment_it) {
 		const Enrollment& enrollment(*enrollment_it);
 
-		// insert the course and get a pointer to it
-		Course course{*(courses.insert(enrollment.course).first)};
-
-		// add the course as a course taken for the student
-		auto student_it = lower_bound(students.begin(), students.end(),
+		// Insert the course and get a pointer to it.
+		auto inserted_course = (*courses.insert(
+				make_unique<Course>(enrollment.course)).first).get();
+		
+		// Find the student.
+		auto student_it = lower_bound(begin(students), end(students),
 				Student{enrollment.student_id});
 		assert(student_it != students.end());
-		student_it->AddCourseTaken(course);
+		Student& student{*student_it};
+
+		// Add the student to the course.
+		inserted_course->AddStudentEnrolled(&student);
+		student.AddCourseTaken(inserted_course);
 	}
+
 
 	return courses;
 }

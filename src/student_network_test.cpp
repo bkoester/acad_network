@@ -39,15 +39,15 @@ class StudentNetworkTest : public ::testing::Test {
 		 graph[student5] = StudentId{567890};
 
 		 // add edges
-		 add_edge(student1, student2, 1, graph);
-		 add_edge(student1, student3, 1, graph);
-		 add_edge(student1, student4, 1, graph);
+		 add_edge(student1, student2, 3.0, graph);
+		 add_edge(student1, student3, 3.0, graph);
+		 add_edge(student1, student4, 1.0, graph);
 
-		 add_edge(student2, student3, 1, graph);
-		 add_edge(student2, student4, 1, graph);
+		 add_edge(student2, student3, 1.0, graph);
+		 add_edge(student2, student4, 1.0, graph);
 
-		 add_edge(student3, student4, 1, graph);
-		 add_edge(student4, student5, 1, graph);
+		 add_edge(student3, student4, 3.0, graph);
+		 add_edge(student4, student5, 1.5, graph);
 
 		 network = StudentNetwork{graph};
 	 }

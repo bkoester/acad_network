@@ -6,7 +6,7 @@
 #include "student.hpp"
 
 
-class StudentNetwork : public Network<StudentId, int> {
+class StudentNetwork : public Network<StudentId, double> {
  public:
 	StudentNetwork() {}
 	StudentNetwork(std::istream& student_archive) : Network{student_archive} {}

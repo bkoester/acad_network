@@ -15,6 +15,10 @@ using std::tolower;
 namespace po = boost::program_options;
 
 
+// By default, use just 1 thread.
+int num_threads{1};
+
+
 ostream& operator<<(
 		ostream& output, const NetworkType_e& network_type) {
 	if (network_type == NetworkType_e::Course)

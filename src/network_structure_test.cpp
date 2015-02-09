@@ -19,17 +19,17 @@ static StudentNetwork::vertex_t FindStudentId(
 
 void TestCourseNetworkStructure(const CourseNetwork& network) {
 	CourseNetwork::vertex_t english125_vertex{network.GetVertex(
-			Course{"ENGLISH", 125})};
+			Course{"ENGLISH", 125, 0})};
 	CourseNetwork::vertex_t chem210_vertex{network.GetVertex(
-			Course{"CHEM", 210})};
+			Course{"CHEM", 210, 0})};
 	CourseNetwork::vertex_t chem211_vertex{network.GetVertex(
-			Course{"CHEM", 211})};
+			Course{"CHEM", 211, 0})};
 	CourseNetwork::vertex_t aaptis277_vertex{network.GetVertex(
-			Course{"AAPTIS", 277})};
+			Course{"AAPTIS", 277, 0})};
 	CourseNetwork::vertex_t environ311_vertex{network.GetVertex(
-			Course{"ENVIRON", 311})};
+			Course{"ENVIRON", 311, 0})};
 	CourseNetwork::vertex_t math425_vertex{network.GetVertex(
-			Course{"MATH", 425})};
+			Course{"MATH", 425, 0})};
 
 	// test edges that exist
 	EXPECT_EQ(2, network.CalculateValue(english125_vertex, chem210_vertex));
@@ -65,18 +65,18 @@ void TestStudentNetworkStructure(const StudentNetwork& network) {
 	StudentNetwork::vertex_t student5{FindStudentId(network, StudentId{567890})};
 
 
-	EXPECT_EQ(1, network.Get(student1, student2));
-	EXPECT_EQ(1, network.Get(student1, student3));
-	EXPECT_EQ(1, network.Get(student1, student4));
+	EXPECT_EQ(3.0, network.Get(student1, student2));
+	EXPECT_EQ(3.0, network.Get(student1, student3));
+	EXPECT_EQ(1.0, network.Get(student1, student4));
 	EXPECT_THROW(network.Get(student1, student5), NoEdgeException);
 
-	EXPECT_EQ(1, network.Get(student2, student3));
-	EXPECT_EQ(1, network.Get(student2, student4));
+	EXPECT_EQ(1.0, network.Get(student2, student3));
+	EXPECT_EQ(1.0, network.Get(student2, student4));
 	EXPECT_THROW(network.Get(student2, student5), NoEdgeException);
 
-	EXPECT_EQ(1, network.Get(student3, student4));
+	EXPECT_EQ(3.0, network.Get(student3, student4));
 	EXPECT_THROW(network.Get(student3, student5), NoEdgeException);
-	EXPECT_EQ(1, network.Get(student4, student5));
+	EXPECT_EQ(1.5, network.Get(student4, student5));
 
 	/*
 	auto edge1 = network.Get(student1, student2);

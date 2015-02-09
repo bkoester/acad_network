@@ -18,7 +18,15 @@ struct Enrollment {
 std::istream& operator>>(std::istream& input, Enrollment& enrollment);
 
 
-using course_container_t = std::set<Course>;
+struct CourseComparator {
+	bool operator()(const std::unique_ptr<Course>& course1, 
+					const std::unique_ptr<Course>& course2) const {
+		return *course1 < *course2;
+	}
+};
+
+
+using course_container_t = std::set<std::unique_ptr<Course>, CourseComparator>;
 using student_container_t = std::vector<Student>;
 
 // Read students into a sorted vector. This vector "owns" the students, other 

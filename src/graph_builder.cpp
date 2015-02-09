@@ -23,13 +23,12 @@
 #include "utility.cpp"
 
 
+using std::begin; using std::end; using std::istream_iterator;
 using std::cerr; using std::cout; using std::endl;
+using std::cref; using std::ref; 
 using std::istream;
-using std::istream_iterator;
 using std::lock_guard; using std::mutex;
-using std::make_pair; using std::move; using std::pair;
-using std::max; using std::min;
-using std::ref;
+using std::make_pair; using std::pair;
 using std::set;
 using std::thread;
 using std::unordered_map;
@@ -38,8 +37,6 @@ using std::vector;
 namespace chr = std::chrono;
 
 
-// By default, use just 1 thread for building networks.
-int num_network_building_threads{1};
 // output timing information every time we have num_pairs % this variable == 0
 const int timing_modulus{10000000};
 
@@ -47,18 +44,10 @@ const int timing_modulus{10000000};
 static unordered_map<StudentId, unordered_set<Course, CourseHasher>> 
 GetStudentIdsToCourses(istream& enrollment_stream);
 
-static unordered_map<Course, 
-					 unordered_set<Student, StudentHasher>,
-					 CourseHasher> 
-	GetCoursesToStudents(istream& enrollment_stream);
-
-class StudentNetworkFromStudentPairsBuilder;
-static void FindStudentNetworkEdgesFromStudentPairs(
-		StudentNetworkFromStudentPairsBuilder& builder);
-
-template <typename StudentsContainer, typename EdgesContainer>
-static StudentNetwork PopulateStudentNetwork(
-		const StudentsContainer& students, const EdgesContainer& edges);
+class StudentNetworkBuilder;
+void CalculateStudentNetworkEdges(const StudentNetwork& network,
+		const student_container_t& students,
+		StudentNetworkBuilder& builder);
 
 
 template <typename T>
@@ -128,55 +117,28 @@ CourseNetwork BuildCourseNetworkFromEnrollment(istream& enrollment_stream) {
 }
 
 
-StudentNetwork BuildStudentNetworkFromEnrollment(
-		std::istream& enrollment_stream) {
-	using namespace chr;
-	auto courses_to_students = GetCoursesToStudents(enrollment_stream);
-	auto beginning_pairs_time = system_clock::now();
-
-	// build a map of pairs of students => courses in common
-	// build a list of all students
-	unordered_set<DistinctUnorderedPair<Student>, 
-				  PairHasher<StudentHasher>> edges;
-	unordered_set<Student, StudentHasher> students;
-	long num_pairs{0};
-	for (const auto& course_students_pair : courses_to_students) {
-		Course course{course_students_pair.first};
-		auto course_students = course_students_pair.second;
-		for (auto it1 = course_students.begin(); 
-			 it1 != course_students.end(); ++it1) {
-			for (auto it2 = it1; ++it2 != course_students.end();) {
-				// output debugging information
-				if (++num_pairs % timing_modulus == 0) {
-					auto duration_in_pairs = duration_cast<seconds>(
-							system_clock::now() - beginning_pairs_time);
-					cerr << num_pairs << " " << duration_in_pairs.count() 
-						 << endl;
-				}
-
-				// add course to edge in the graph
-				DistinctUnorderedPair<Student> edge{*it1, *it2};
-				edges.insert(edge);
-
-				// add the students into the list of students
-				students.insert(*it1);
-				students.insert(*it2);
-			}
+class StudentNetworkBuilder {
+ public:
+	StudentNetworkBuilder(
+			StudentNetwork& network, const student_container_t& students) :
+				network_(network), num_pairs_{0},
+				beginning_pairs_time_{chr::system_clock::now()} {
+		// assign the vertices in the network
+		auto student_it = students.begin();
+		for (auto vertex_it = network_.GetVertexValues().begin();
+				vertex_it != network_.GetVertexValues().end();
+				++vertex_it, ++student_it) {
+			assert(student_it != students.end());
+			*vertex_it = student_it->id();
 		}
+		
+		it1_ = begin(network_.GetVertexDescriptors());
+		it2_ = begin(network_.GetVertexDescriptors());
 	}
 
-	return PopulateStudentNetwork(students, edges);
-}
-
-
-class StudentNetworkFromStudentPairsBuilder {
- public:
-	StudentNetworkFromStudentPairsBuilder(const student_container_t& students) : 
-		students_(students), it1_{students_.begin()}, it2_{it1_}, num_pairs_{0},
-		beginning_pairs_time_{chr::system_clock::now()} {}
-
-	pair<student_container_t::const_iterator, 
-		 student_container_t::const_iterator> GetNextIteratorPair()	{
+	pair<StudentNetwork::vertex_descriptors_t::iterator_t,
+		 StudentNetwork::vertex_descriptors_t::iterator_t>
+	GetNextIteratorPair() {
 		lock_guard<mutex> iterator_lock_guard{iterator_mutex_};
 
 		// output time information for profiling
@@ -186,32 +148,29 @@ class StudentNetworkFromStudentPairsBuilder {
 				beginning_pairs_time_).count() << endl;
 		}
 
-		// return we don't hit the end when incrementing the second iterator
-		if (++it2_ != students_.end()) { return make_pair(it1_, it2_); }
+		// Return if we don't hit the end when incrementing the second iterator.
+		if (!ReachedEndOfStudents(++it2_)) { return make_pair(it1_, it2_); }
+
 		// if it does hit the end, increment the first and restart the second
 		it2_ = ++it1_;
 		return make_pair(it1_, it2_);
 	}
 
-	void AddEdge(StudentId student1, StudentId student2) {
+	void AddEdge(StudentNetwork::vertex_t student1, 
+			StudentNetwork::vertex_t student2, double value) {
 		lock_guard<mutex> edge_lock_guard{edges_mutex_};
-		edges_.push_back(make_pair(student1, student2));
+		network_(student1, student2) = value;
 	}
 
-	bool FinishedIteration(
-			pair<student_container_t::const_iterator, 
-				 student_container_t::const_iterator> it_pair) const
-	{ return it_pair.first == students_.end(); }
-
-	const vector<pair<StudentId, StudentId>>& edges() { return edges_; }
+	bool ReachedEndOfStudents(
+			StudentNetwork::vertex_descriptors_t::iterator_t it) const
+	{ return it == end(network_.GetVertexDescriptors()); }
 
  private:
-	const student_container_t& students_;
-	student_container_t::const_iterator it1_;
-	student_container_t::const_iterator it2_;
+	StudentNetwork& network_;
+	StudentNetwork::vertex_descriptors_t::iterator_t it1_, it2_;
 	long num_pairs_;
 	chr::time_point<chr::system_clock> beginning_pairs_time_;
-	vector<pair<StudentId, StudentId>> edges_;
 
 	mutex iterator_mutex_, edges_mutex_;
 };
@@ -221,80 +180,56 @@ StudentNetwork BuildStudentNetworkFromStudents(
 		const student_container_t& students) {
 
 	// spawn threads to iterate through each pair of students
-	StudentNetworkFromStudentPairsBuilder builder{students};
+	StudentNetwork network{students.size()};
+	StudentNetworkBuilder builder{network, students};
 	vector<thread> thread_pool;
-	for (int i{0}; i < num_network_building_threads; ++i) {
-		thread_pool.push_back(
-				thread{FindStudentNetworkEdgesFromStudentPairs, ref(builder)});
+	for (int i{0}; i < num_threads; ++i) {
+		thread_pool.emplace_back(CalculateStudentNetworkEdges, cref(network), 
+				cref(students), ref(builder));
 	}
 
 	// wait for all threads to complete
 	for (auto& t : thread_pool) { t.join(); }
 
-	return PopulateStudentNetwork(students, builder.edges());
+	return network;
 }
 
 	
-void FindStudentNetworkEdgesFromStudentPairs(
-		StudentNetworkFromStudentPairsBuilder& builder) {
+void CalculateStudentNetworkEdges(const StudentNetwork& network,
+		const student_container_t& students,
+		StudentNetworkBuilder& builder) {
 	auto it_pair = builder.GetNextIteratorPair();
-	while (!builder.FinishedIteration(it_pair)) {
-		// Check if the students have taken the same course
-		const set<Course>& student1_courses{it_pair.first->courses_taken()};
-		const set<Course>& student2_courses{it_pair.second->courses_taken()};
-		bool has_intersection{HasIntersection(
-				student1_courses.begin(), student1_courses.end(), 
-				student2_courses.begin(), student2_courses.end())};
+	while (!builder.ReachedEndOfStudents(it_pair.first)) {
+		// Get the courses each of the students have taken.
+		const Student& student1(*lower_bound(begin(students), end(students), 
+				network[*it_pair.first]));
+		const Student& student2(*lower_bound(begin(students), end(students), 
+				network[*it_pair.second]));
+		const set<const Course*>& student1_courses(student1.courses_taken());
+		const set<const Course*>& student2_courses(student2.courses_taken());
 
-		// Add an edge if the students have taken the same course
-		if (has_intersection)
-		{ builder.AddEdge(it_pair.first->id(), it_pair.second->id()); }
+		// Create a list of the courses the students have in common.
+		vector<const Course*> courses_in_common;
+		set_intersection(begin(student1_courses), end(student1_courses),
+						 begin(student2_courses), end(student2_courses),
+						 back_inserter(courses_in_common));
+
+		// Calculate the connection between the two students.
+		double connection{accumulate(begin(courses_in_common), 
+				end(courses_in_common), 0.,
+				[](double connection, const Course* course) { 
+					return connection + course->num_credits() / 
+						double(course->GetNumStudentsEnrolled());
+				})};
+
+		// Add an edge with the appropriate connection value.
+		if (!courses_in_common.empty()) {
+			builder.AddEdge(*it_pair.first, *it_pair.second, connection); 
+		}
 		it_pair = builder.GetNextIteratorPair();
 	}
 }
 
-
-template <typename StudentsContainer, typename EdgesContainer>
-StudentNetwork PopulateStudentNetwork(
-		const StudentsContainer& students, const EdgesContainer& edges) {
-	auto start_network_time = chr::system_clock::now();
-	// create the network of students
-	StudentNetwork network{students.size()};
-
-	// assign properties of vertices
-	auto student_it = students.begin();
-	unordered_map<Student, StudentNetwork::vertex_t, StudentHasher> 
-		student_to_vertex;
-	for (auto vertex_it = network.GetVertexDescriptors().begin();
-			vertex_it != network.GetVertexDescriptors().end();
-			++vertex_it, ++student_it) {
-		assert(student_it != students.end());
-		student_to_vertex[*student_it] = *vertex_it;
-		network[*vertex_it] = student_it->id();
-	}
-
-	// add edges and weights
-	long edge_num{0};
-	for (auto& edge : edges) {
-		if (++edge_num % timing_modulus == 0) {
-			cerr << edge_num << " " << chr::duration_cast<chr::seconds>(
-					chr::system_clock::now() - start_network_time).count()
-				 << endl;
-		}
-
-		/*auto edge = edge_pair.first;
-		auto edge_value = edge_pair.second; */
-
-		StudentNetwork::vertex_t vertex1{student_to_vertex[edge.first]};
-		StudentNetwork::vertex_t vertex2{student_to_vertex[edge.second]};
-
-		// INVARIANT: the vertex should not exist in the graph already.
-		assert(!network.GetEdgeDescriptor(vertex1, vertex2));
-		network(vertex1, vertex2) = 1;
-	}
-
-	return network;
-}
 
 // Gets a hash table of students => set of courses they have taken
 unordered_map<StudentId, unordered_set<Course, CourseHasher>> 
@@ -312,26 +247,4 @@ GetStudentIdsToCourses(istream& enrollment_stream) {
 	}
 	
 	return student_to_courses;
-}
-
-
-// Gets a hash table of courses => set of students who have taken it
-unordered_map<Course, unordered_set<Student, StudentHasher>, CourseHasher> 
-GetCoursesToStudents(istream& enrollment_stream) {
-	// set up to read from the enrollment stream
-	SkipLine(enrollment_stream);
-	istream_iterator<Enrollment> enrollment_it{enrollment_stream};
-
-	unordered_map<Course,
-				  unordered_set<Student, StudentHasher>, 
-				  CourseHasher> courses_to_students;
-
-	// make a map of courses => students who took them
-	for (;enrollment_it != istream_iterator<Enrollment>{}; ++enrollment_it) {
-		const Enrollment& enrollment(*enrollment_it);
-		courses_to_students[enrollment.course].insert(
-				Student{enrollment.student_id});
-	}
-
-	return courses_to_students;
 }

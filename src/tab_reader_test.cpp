@@ -1,7 +1,6 @@
 #include "tab_reader.hpp"
 
 #include <algorithm>
-#include <memory>
 #include <sstream>
 #include <string>
 
@@ -10,10 +9,10 @@
 #include "course.hpp"
 #include "student.hpp"
 #include "test_data_streams.hpp"
+#include "utility.hpp"
 
 
 using std::binary_search;
-using std::make_unique;
 using std::string;
 using std::stringstream;
 
@@ -51,41 +50,41 @@ TEST(TabReaderTest, ReadEnrollment) {
 	auto courses = ReadEnrollment(enrollment_stream, students);
 
 	EXPECT_NE(end(courses), 
-			  courses.find(make_unique<Course>("ENGLISH", 125, 201403)));
+			  courses.find(make_unique<Course>("ENGLISH", short{125}, 201403)));
 	EXPECT_NE(end(courses),
-			  courses.find(make_unique<Course>("CHEM", 210, 201403)));
+			  courses.find(make_unique<Course>("CHEM", short{210}, 201403)));
 	EXPECT_NE(end(courses),
-			  courses.find(make_unique<Course>("CHEM", 211, 201407)));
+			  courses.find(make_unique<Course>("CHEM", short{211}, 201407)));
 	EXPECT_NE(end(courses),
-			  courses.find(make_unique<Course>("AAPTIS", 277, 201403)));
+			  courses.find(make_unique<Course>("AAPTIS", short{277}, 201403)));
 	EXPECT_NE(end(courses),
-			  courses.find(make_unique<Course>("ENVIRON", 311, 201405)));
+			  courses.find(make_unique<Course>("ENVIRON", short{311}, 201405)));
 	EXPECT_NE(end(courses),
-			  courses.find(make_unique<Course>("MATH", 425, 201407)));
+			  courses.find(make_unique<Course>("MATH", short{425}, 201407)));
 
 	Course* english125{courses.find(
-			make_unique<Course>("ENGLISH", 125, 201403))->get()};
+			make_unique<Course>("ENGLISH", short{125}, 201403))->get()};
 	Course* chem210{courses.find(
-			make_unique<Course>("CHEM", 210, 201403))->get()};
+			make_unique<Course>("CHEM", short{210}, 201403))->get()};
 	Course* chem211{courses.find(
-			make_unique<Course>("CHEM", 211, 201407))->get()};
+			make_unique<Course>("CHEM", short{211}, 201407))->get()};
 	Course* aaptis277{courses.find(
-			make_unique<Course>("AAPTIS", 277, 201403))->get()};
+			make_unique<Course>("AAPTIS", short{277}, 201403))->get()};
 	Course* environ311{courses.find(
-			make_unique<Course>("ENVIRON", 311, 201405))->get()};
+			make_unique<Course>("ENVIRON", short{311}, 201405))->get()};
 	Course* math425{courses.find(
-			make_unique<Course>("MATH", 425, 201407))->get()};
+			make_unique<Course>("MATH", short{425}, 201407))->get()};
 	
-	Student& student1{*lower_bound(
-			students.begin(), students.end(), Student{312995})};
-	Student& student2{*lower_bound(
-			students.begin(), students.end(), Student{500928})};
-	Student& student3{*lower_bound(
-			students.begin(), students.end(), Student{147195})};
-	Student& student4{*lower_bound(
-			students.begin(), students.end(), Student{352468})};
-	Student& student5{*lower_bound(
-			students.begin(), students.end(), Student{567890})};
+	Student& student1(*lower_bound(
+			students.begin(), students.end(), Student{312995}));
+	Student& student2(*lower_bound(
+			students.begin(), students.end(), Student{500928}));
+	Student& student3(*lower_bound(
+			students.begin(), students.end(), Student{147195}));
+	Student& student4(*lower_bound(
+			students.begin(), students.end(), Student{352468}));
+	Student& student5(*lower_bound(
+			students.begin(), students.end(), Student{567890}));
 
 	EXPECT_TRUE(student1.HasTakenCourse(english125));
 	EXPECT_TRUE(student1.HasTakenCourse(chem210));

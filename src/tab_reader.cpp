@@ -46,7 +46,7 @@ course_container_t ReadEnrollment(istream& enrollment_stream,
 		auto student_it = lower_bound(begin(students), end(students),
 				Student{enrollment.student_id});
 		assert(student_it != students.end());
-		Student& student{*student_it};
+		Student& student(*student_it);
 
 		// Add the student to the course.
 		inserted_course->AddStudentEnrolled(&student);

@@ -5,16 +5,14 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
-#include <memory>
 #include <set>
 
 #include "utility.hpp"
 
 
+using std::back_inserter; using std::istream_iterator; 
 using std::copy; using std::lower_bound;
 using std::istream;
-using std::istream_iterator;
-using std::back_inserter;
 using std::set;
 
 

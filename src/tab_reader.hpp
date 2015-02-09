@@ -18,13 +18,7 @@ struct Enrollment {
 std::istream& operator>>(std::istream& input, Enrollment& enrollment);
 
 
-struct CourseComparator {
-	bool operator()(const std::unique_ptr<Course>& course1, 
-					const std::unique_ptr<Course>& course2) const {
-		return *course1 < *course2;
-	}
-};
-
+struct CourseComparator;
 
 using course_container_t = std::set<std::unique_ptr<Course>, CourseComparator>;
 using student_container_t = std::vector<Student>;
@@ -39,6 +33,14 @@ student_container_t ReadStudents(std::istream& student_stream);
 // courses a student took.
 course_container_t ReadEnrollment(std::istream& enrollment_stream,
 								  student_container_t& students);
+
+
+struct CourseComparator {
+	bool operator()(const std::unique_ptr<Course>& course1, 
+					const std::unique_ptr<Course>& course2) const {
+		return *course1 < *course2;
+	}
+};
 
 
 #endif  // TAB_READER_H

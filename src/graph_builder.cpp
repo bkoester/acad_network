@@ -17,15 +17,16 @@
 
 #include "course.hpp"
 #include "course_network.hpp"
+#include "mem_usage.hpp"
 #include "student.hpp"
 #include "student_network.hpp"
 #include "tab_reader.hpp"
-#include "utility.cpp"
+#include "utility.hpp"
 
 
 using std::begin; using std::end; using std::istream_iterator;
 using std::cerr; using std::cout; using std::endl;
-using std::cref; using std::ref; 
+using std::cref; using std::ref; using std::bind; using std::placeholders::_1;
 using std::istream;
 using std::lock_guard; using std::mutex;
 using std::make_pair; using std::pair;
@@ -146,6 +147,7 @@ class StudentNetworkBuilder {
 			cerr << num_pairs_ << " " << chr::duration_cast<chr::seconds>(
 				chr::system_clock::now() - 
 				beginning_pairs_time_).count() << endl;
+			cerr << "Mem usage: " << GetMemoryUsage() << endl;
 		}
 
 		// Return if we don't hit the end when incrementing the second iterator.
@@ -189,7 +191,7 @@ StudentNetwork BuildStudentNetworkFromStudents(
 	}
 
 	// wait for all threads to complete
-	for (auto& t : thread_pool) { t.join(); }
+	for_each(begin(thread_pool), end(thread_pool), bind(&thread::join, _1));
 
 	return network;
 }

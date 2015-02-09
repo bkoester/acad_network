@@ -93,15 +93,15 @@ TEST_F(CourseTest, Input) {
 	stringstream input_stream{
 		"PHYSICS\t260\tNA\t4\t3.60454545454545\t3.66538461538462\t26\t95.3"
 		"\t4\t201403\n"
-		"NURS\t220\tNA\t4\t3.60454545454545\t3.66538461538462\t26\t95.3\t3\t"
+		"LHC\t250\tNA\t4\t3.60454545454545\t3.66538461538462\t26.5\t95.3\t1.5\t"
 		"201303\n"
 	};
 
 	Course input_course1, input_course2;
 	input_stream >> input_course1 >> input_course2;
 	EXPECT_EQ(Course("PHYSICS", 260, 201403), input_course1);
-	EXPECT_EQ(Course("NURS", 220, 201303), input_course2);
+	EXPECT_EQ(Course("LHC", 250, 201303), input_course2);
 
 	EXPECT_EQ(4, input_course1.num_credits());
-	EXPECT_EQ(3, input_course2.num_credits());
+	EXPECT_EQ(1.5, input_course2.num_credits());
 }

@@ -2,8 +2,10 @@ set(SRCS
 	course.cpp
 	course_network.cpp
 	graph_builder.cpp
+	mem_usage.cpp
 	student.cpp
-	tab_reader.cpp)
+	tab_reader.cpp
+	utility.cpp)
 
 set(BUILD_MAIN_SRC build_main.cpp)
 set(LOAD_MAIN_SRC load_main.cpp)

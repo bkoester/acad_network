@@ -20,7 +20,7 @@ class Course {
 	Course(std::string subject, short number, int term) :
 		subject_{subject}, number_{number}, term_{term}, num_credits_{0} {}
 
-	Course(std::string subject, short number, int term, short num_credits) :
+	Course(std::string subject, short number, int term, double num_credits) :
 		subject_{subject}, number_{number}, term_{term}, 
 		num_credits_{num_credits} {}
 
@@ -28,7 +28,7 @@ class Course {
 	std::string subject() const { return subject_; }
 	short number() const { return number_; }
 	int term() const { return term_; }
-	short num_credits() const { return num_credits_; }
+	double num_credits() const { return num_credits_; }
 
 	bool operator==(const Course& other) const {
 		return other.subject_ == subject_ && other.number_ == number_ && 
@@ -69,7 +69,7 @@ class Course {
 	std::string subject_;
 	short number_;
 	int term_;
-	short num_credits_;
+	double num_credits_;
 	std::set<const Student*> students_enrolled_;
 
 	static const std::string undefined_subject;

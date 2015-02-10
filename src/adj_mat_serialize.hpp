@@ -41,14 +41,15 @@ inline void save(Archive & ar,
 	BGL_FORALL_VERTICES_T(v, graph, Graph) {
 		indices[v] = num++;
 		ar << serialization::make_nvp(
-				"vertex_property", get(vertex_all_t(), graph, v) );
+				"vertex_property", get(vertex_all_t{}, graph, v));
 	}
 
 	// write edges
 	BGL_FORALL_EDGES_T(e, graph, Graph) {
-		ar << serialization::make_nvp("u" , indices[source(e,graph)]);
-		ar << serialization::make_nvp("v" , indices[target(e,graph)]);
-		ar << serialization::make_nvp("edge_property", get(edge_all_t(), graph, e) );
+		ar << serialization::make_nvp("u", indices[source(e,graph)]);
+		ar << serialization::make_nvp("v", indices[target(e,graph)]);
+		ar << serialization::make_nvp(
+				"edge_property", get(edge_all_t{}, graph, e));
 	}
 }
 
@@ -73,21 +74,21 @@ inline void load(Archive & ar,
 	// read vertices
 	std::vector<Vertex> verts(V);
 	long index{0};
-	while (V-- > 0){
+	while (V-- > 0) {
 		Vertex v{vertex(index, tmp)};
 		verts[index++] = v;
 		ar >> serialization::make_nvp(
-				"vertex_property", get(vertex_all_t(), tmp, v));
+				"vertex_property", get(vertex_all_t{}, tmp, v));
 	}
 
 	// read edges
-	while (E-- > 0){
+	while (E-- > 0) {
 		long u{0}; long v{0};
 		ar >> BOOST_SERIALIZATION_NVP(u);
 		ar >> BOOST_SERIALIZATION_NVP(v);
 		Edge e{add_edge(verts[u], verts[v], EP{}, tmp).first};
 		ar >> serialization::make_nvp(
-				"edge_property", get(edge_all_t(), tmp, e));
+				"edge_property", get(edge_all_t{}, tmp, e));
 	}
 
 	// assign the temporary graph object to the input graph object

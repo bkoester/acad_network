@@ -66,6 +66,21 @@ int main(int argc, char* argv[]) {
 	if (network_to_load == NetworkType_e::Student) {
 		ifstream student_archive{student_archive_path};
 		StudentNetwork student_network{student_archive};
+		// output all edges
+		for (const auto& edge_d : student_network.GetEdgeDescriptors()) {
+			cout << student_network.GetSourceValue(edge_d) << "\t"
+				 << student_network.GetTargetValue(edge_d) << "\t"
+				 << student_network[edge_d] << endl;
+		}
+		// output weighted and unweighted degree for every vertex
+		for (const auto& vertex_d : student_network.GetVertexDescriptors()) {
+			auto out_edges = student_network.GetOutEdgeValues(vertex_d);
+			auto weighted_degree = accumulate(
+					begin(out_edges), end(out_edges), 0);
+			auto unweighted_degree = out_edges.size();
+			cout << student_network[vertex_d] << "\t" << unweighted_degree 
+				 << "\t" << weighted_degree << endl;
+		}
 	}
 
 	/*

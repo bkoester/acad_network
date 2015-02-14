@@ -72,6 +72,7 @@ int main(int argc, char* argv[]) {
 				 << student_network.GetTargetValue(edge_d) << "\t"
 				 << student_network[edge_d] << endl;
 		}
+		cout << "Degrees" << endl;
 		// output weighted and unweighted degree for every vertex
 		for (const auto& vertex_d : student_network.GetVertexDescriptors()) {
 			auto out_edges = student_network.GetOutEdgeValues(vertex_d);

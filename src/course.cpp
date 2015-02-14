@@ -21,6 +21,10 @@ using std::string;
 using std::transform;
 
 
+CourseId::CourseId() : subject{Course::undefined_subject}, 
+	number{Course::undefined_number}, term{Course::undefined_term} {}
+
+
 bool Course::operator<(const Course& other) const {
 	// "Undefined" subjects are always at the beginning
 	if (subject() == undefined_subject) { return true; }
@@ -34,6 +38,12 @@ bool Course::operator<(const Course& other) const {
 	return term() < other.term();
 }
 
+
+ostream& operator<<(ostream& output, const CourseId& course_id) {
+	output << course_id.subject << " " << course_id.number << " "
+		   << course_id.term;
+	return output;
+}
 
 ostream& operator<<(ostream& output, const Course& course) {
 	output << course.subject() << " " << course.number() << " " << course.term();
@@ -54,21 +64,17 @@ istream& operator>>(istream& input, Course& course) {
 	string subject, course_code;
 	int term;
 	short course_number;
-	double grade, gpa_other, cumulative_gpa, total_credits, total_grade_points,
-			course_credit;
+	/* for now, read these into strings
+	double grade, gpa_other, cumulative_gpa, total_credits, total_grade_points; 
+	*/
+	double course_credit;
 
 	// try and read the data, skip the data we're not interested in
 	input >> subject >> course_number;
+	/*
 	input >> course_code >> grade >> gpa_other 
 		  >> cumulative_gpa >> total_credits >> total_grade_points;
-	assert(!course_code.empty() || course_code.empty());
-	assert(grade != 0.0 || grade == 0.0); 
-	assert(gpa_other != 0.0 || gpa_other == 0.0); 
-	assert(cumulative_gpa != 0.0 || cumulative_gpa == 0.0);
-	assert(total_grade_points != 0.0 || total_grade_points == 0.0); 
-	assert(total_credits != 0.0 || total_credits == 0.0); 
 	// ignore the fields we don't want for now
-	/*
 	input.ignore(numeric_limits<streamsize>::max(), '\t');
 	input.ignore(numeric_limits<streamsize>::max(), '\t');
 	input.ignore(numeric_limits<streamsize>::max(), '\t');
@@ -76,7 +82,12 @@ istream& operator>>(istream& input, Course& course) {
 	input.ignore(numeric_limits<streamsize>::max(), '\t');
 	input.ignore(numeric_limits<streamsize>::max(), '\t');
 	input.ignore(numeric_limits<streamsize>::max(), '\t');
-	input.ignore(numeric_limits<streamsize>::max(), '\t'); */
+	input.ignore(numeric_limits<streamsize>::max(), '\t');
+	*/
+	string dummy;
+	input >> dummy >> dummy >> dummy >> dummy >> dummy >> dummy;
+	assert(dummy.empty() || !dummy.empty());
+
 	input >> course_credit >> term;
 	if (!input) { return input; }
 	SkipLine(input);

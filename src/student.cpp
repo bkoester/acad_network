@@ -25,8 +25,8 @@ ostream& operator<<(ostream& os, const Student& student) {
 	else { os << "ID: " << student.id(); }
 	os << " Classes: ";
 	transform(student.courses_taken_.cbegin(), --student.courses_taken_.cend(), 
-			  ostream_iterator<Course>{os, ", "}, 
-			  [](const Course* course) { return *course; });
+			  ostream_iterator<CourseId>{os, ", "}, 
+			  [](const Course* course) { return course->GetId(); });
 	os << *student.courses_taken_.rbegin();
 	os << endl;
 	return os;

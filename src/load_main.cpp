@@ -45,8 +45,8 @@ int main(int argc, char* argv[]) {
 		if (network_to_load == NetworkType_e::Student && 
 				student_archive_path.empty()) {
 			throw po::required_option{"Must provide student archive file!"}; 
-		} else if (course_archive_path.empty()) { 
-			assert(network_to_load == NetworkType_e::Course);
+		} else if (network_to_load == NetworkType_e::Course &&
+				course_archive_path.empty()) {
 			throw po::required_option{"Must provide course archive file!"};
 		}
 		po::notify(vm);

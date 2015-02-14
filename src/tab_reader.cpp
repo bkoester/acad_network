@@ -3,7 +3,6 @@
 #include <cassert>
 
 #include <algorithm>
-#include <iostream>
 #include <iterator>
 #include <set>
 
@@ -52,7 +51,6 @@ course_container_t ReadEnrollment(istream& enrollment_stream,
 		inserted_course->AddStudentEnrolled(&student);
 		student.AddCourseTaken(inserted_course);
 	}
-
 
 	return courses;
 }

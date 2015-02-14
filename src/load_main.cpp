@@ -76,22 +76,12 @@ int main(int argc, char* argv[]) {
 		for (const auto& vertex_d : student_network.GetVertexDescriptors()) {
 			auto out_edges = student_network.GetOutEdgeValues(vertex_d);
 			auto weighted_degree = accumulate(
-					begin(out_edges), end(out_edges), 0);
+					begin(out_edges), end(out_edges), 0.);
 			auto unweighted_degree = out_edges.size();
 			cout << student_network[vertex_d] << "\t" << unweighted_degree 
 				 << "\t" << weighted_degree << endl;
 		}
 	}
-
-	/*
-	for (const auto& vertex : course_network.GetVertices()) {
-		auto edge_it_pair = course_network.GetEdgeIterators(vertex);
-		int weighted_degree{0};
-		for (auto edge_it = edge_it_pair.first; edge_it != edge_it_pair.second;
-				++edge_it) { weighted_degree += course_network[*edge_it]; }
-		cout << course_network[vertex] << " " << course_network.Degree(vertex) 
-			 << " " << weighted_degree << endl;
-	} */
 
 	return 0;
 }

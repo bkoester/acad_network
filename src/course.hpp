@@ -12,6 +12,17 @@
 class Student;
 
 
+// An ID object for the course that uniquely identifies it.
+struct CourseId {
+	CourseId();
+	CourseId(std::string s, short n, int t) : subject{s}, number{n}, term{t} {}
+
+	std::string subject;
+	short number;
+	int term;
+};
+
+
 class Course {
  public:
 	Course() : subject_{undefined_subject}, number_{undefined_number},
@@ -58,11 +69,14 @@ class Course {
 	std::set<const Student*>::size_type GetNumStudentsEnrolled() const
 	{ return students_enrolled_.size(); }
 
+	CourseId GetId() const { return {subject_, number_, term_}; }
 
  private:
 	// unit testing class
 	friend class CourseTest;
 	friend class boost::serialization::access;
+	// ID class
+	friend class CourseId;
 	// read input from student course tab
 	friend std::istream& operator>>(std::istream& input, Course& course);
 
@@ -79,6 +93,7 @@ class Course {
 
 
 std::ostream& operator<<(std::ostream& output, const Course& course);
+std::ostream& operator<<(std::ostream& output, const CourseId& course_id);
 
 
 struct CourseHasher {

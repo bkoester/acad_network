@@ -93,8 +93,7 @@ TEST_F(CourseTest, Input) {
 	stringstream input_stream{
 		"PHYSICS\t260\tNA\t4\t3.60454545454545\t3.66538461538462\t26\t95.3"
 		"\t4\t201403\n"
-		"LHC\t250\tNA\t4\t3.60454545454545\t3.66538461538462\t26.5\t95.3\t1.5\t"
-		"201303\n"
+		"LHC\t250\tNA\t4\t3.60454545454545\tNA\t26.5\t95.3\t1.5\t201303\n"
 	};
 
 	Course input_course1, input_course2;

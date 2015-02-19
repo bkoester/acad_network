@@ -29,6 +29,8 @@ int main(int argc, char* argv[]) {
 		 "Set the path at which to find the archive student network")
 		("student_file", po::value<string>(&student_path)->required(),
 		 "Set the path at which to find the student file")
+		("enrollment_file", po::value<string>(&enrollment_path)->required(),
+		 "Set the path at which to find the enrollment file")
 		("network_to_load", 
 		 po::value<NetworkType_e>(&network_to_load)->default_value(
 			 NetworkType_e::Student), "Set the network to load "
@@ -78,10 +80,10 @@ int main(int argc, char* argv[]) {
 		StudentNetwork student_network{student_archive};
 
 		// Create a bunch of output streams.
-		ofstream gender_weighted{"data_gender_weighted.tab"};
-		ofstream gender_unweighted{"data_gender_unweighted.tab"};
-		ofstream term_weighted{"data_term_weighted.tab"};
-		ofstream term_unweighted{"data_term_unweighted.tab"};
+		ofstream gender_weighted{"output/gender_weighted.tab"};
+		ofstream gender_unweighted{"output/gender_unweighted.tab"};
+		ofstream term_weighted{"output/term_weighted.tab"};
+		ofstream term_unweighted{"output/term_unweighted.tab"};
 
 		// output weighted and unweighted degree for every vertex
 		for (const auto& vertex_d : student_network.GetVertexDescriptors()) {

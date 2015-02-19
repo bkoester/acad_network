@@ -42,9 +42,28 @@ TEST(TabRecordTest, ReadStudents) {
 	EXPECT_EQ(5u, students.size());
 }
 
+TEST(TabReaderTest, FindStudent) {
+	student_container_t students{Student{147195}, Student{312995}, 
+		Student{352468}, Student{500928}, Student{567890}};
+
+	const student_container_t const_students{students};
+
+	EXPECT_EQ(Student{147195}, FindStudent(147195, students));  
+	EXPECT_EQ(Student{312995}, FindStudent(312995, students));
+	EXPECT_EQ(Student{352468}, FindStudent(352468, students));
+	EXPECT_EQ(Student{500928}, FindStudent(500928, students));
+	EXPECT_EQ(Student{567890}, FindStudent(567890, students));
+
+	EXPECT_EQ(Student{147195}, FindStudent(147195, const_students));  
+	EXPECT_EQ(Student{312995}, FindStudent(312995, const_students));
+	EXPECT_EQ(Student{352468}, FindStudent(352468, const_students));
+	EXPECT_EQ(Student{500928}, FindStudent(500928, const_students));
+	EXPECT_EQ(Student{567890}, FindStudent(567890, const_students));
+}
+
 TEST(TabReaderTest, ReadEnrollment) {
 	student_container_t students{Student{147195}, Student{312995}, 
-		Student{352468}, Student{500928}, Student{5678890}};
+		Student{352468}, Student{500928}, Student{567890}};
 
 	stringstream enrollment_stream{enrollment_tab};
 	auto courses = ReadEnrollment(enrollment_stream, students);

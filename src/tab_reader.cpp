@@ -37,15 +37,10 @@ course_container_t ReadEnrollment(istream& enrollment_stream,
 	for (;enrollment_it != istream_iterator<Enrollment>{}; ++enrollment_it) {
 		const Enrollment& enrollment(*enrollment_it);
 
-		// Insert the course and get a pointer to it.
+		// Insert the course and find the student.
 		auto inserted_course = (*courses.insert(
 				make_unique<Course>(enrollment.course)).first).get();
-		
-		// Find the student.
-		auto student_it = lower_bound(begin(students), end(students),
-				Student{enrollment.student_id});
-		assert(student_it != students.end());
-		Student& student(*student_it);
+		Student& student(FindStudent(enrollment.student_id, students));
 
 		// Add the student to the course.
 		inserted_course->AddStudentEnrolled(&student);
@@ -53,6 +48,20 @@ course_container_t ReadEnrollment(istream& enrollment_stream,
 	}
 
 	return courses;
+}
+
+
+const Student& FindStudent(StudentId id, const student_container_t& students) {
+	auto student_it = lower_bound(begin(students), end(students), Student{id});
+	assert(student_it != end(students));
+	return *student_it;
+}
+
+
+Student& FindStudent(StudentId id, student_container_t& students) {
+	auto student_it = lower_bound(begin(students), end(students), Student{id});
+	assert(student_it != end(students));
+	return *student_it;
 }
 
 

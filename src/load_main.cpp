@@ -6,6 +6,7 @@
 
 #include "course_network.hpp"
 #include "student_network.hpp"
+#include "tab_reader.hpp"
 #include "utility.hpp"
 
 
@@ -18,13 +19,16 @@ namespace po = boost::program_options;
 int main(int argc, char* argv[]) {
 	po::options_description desc{"Options for network building binary:"};
 	NetworkType_e network_to_load;
-	string course_archive_path, student_archive_path;
+	string course_archive_path, student_archive_path, 
+		   student_path, enrollment_path;
 	desc.add_options()
 		("help,h", "Show this help message")
 		("course_archive", po::value<string>(&course_archive_path),
 		 "Set the path at which to find the archived course network")
 		("student_archive", po::value<string>(&student_archive_path),
 		 "Set the path at which to find the archive student network")
+		("student_file", po::value<string>(&student_path)->required(),
+		 "Set the path at which to find the student file")
 		("network_to_load", 
 		 po::value<NetworkType_e>(&network_to_load)->default_value(
 			 NetworkType_e::Student), "Set the network to load "
@@ -58,6 +62,12 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
+	// Read students and enrollment data.
+	ifstream student_stream{student_path};
+	ifstream enrollment_stream{enrollment_path};
+	student_container_t students{ReadStudents(student_stream)};
+	course_container_t courses{ReadEnrollment(enrollment_stream, students)};
+
 	// Do whatever work necessary
 	if (network_to_load == NetworkType_e::Course) {
 		ifstream course_archive{course_archive_path};
@@ -66,21 +76,26 @@ int main(int argc, char* argv[]) {
 	if (network_to_load == NetworkType_e::Student) {
 		ifstream student_archive{student_archive_path};
 		StudentNetwork student_network{student_archive};
-		// output all edges
-		for (const auto& edge_d : student_network.GetEdgeDescriptors()) {
-			cout << student_network.GetSourceValue(edge_d) << "\t"
-				 << student_network.GetTargetValue(edge_d) << "\t"
-				 << student_network[edge_d] << endl;
-		}
-		cout << "Degrees" << endl;
+
+		// Create a bunch of output streams.
+		ofstream gender_weighted{"data_gender_weighted.tab"};
+		ofstream gender_unweighted{"data_gender_unweighted.tab"};
+		ofstream term_weighted{"data_term_weighted.tab"};
+		ofstream term_unweighted{"data_term_unweighted.tab"};
+
 		// output weighted and unweighted degree for every vertex
 		for (const auto& vertex_d : student_network.GetVertexDescriptors()) {
 			auto out_edges = student_network.GetOutEdgeValues(vertex_d);
 			auto weighted_degree = accumulate(
 					begin(out_edges), end(out_edges), 0.);
 			auto unweighted_degree = out_edges.size();
-			cout << student_network[vertex_d] << "\t" << unweighted_degree 
-				 << "\t" << weighted_degree << endl;
+			auto student = FindStudent(student_network[vertex_d], students);
+
+			// Output information to the correct files.
+			gender_unweighted << student.gender() << "\t" << unweighted_degree;
+			gender_weighted << student.gender() << "\t" << weighted_degree;
+			term_unweighted << student.first_term() << "\t" << unweighted_degree;
+			term_weighted << student.first_term() << "\t" << weighted_degree;
 		}
 	}
 

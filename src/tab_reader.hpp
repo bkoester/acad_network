@@ -34,6 +34,9 @@ student_container_t ReadStudents(std::istream& student_stream);
 course_container_t ReadEnrollment(std::istream& enrollment_stream,
 								  student_container_t& students);
 
+// Finds a student with the given ID in the container of students
+const Student& FindStudent(StudentId id, const student_container_t& students);
+Student& FindStudent(StudentId id, student_container_t& students);
 
 struct CourseComparator {
 	bool operator()(const std::unique_ptr<Course>& course1, 

@@ -18,10 +18,20 @@ using StudentIdHasher = std::hash<int>;
 
 class Student {
  public:
-	Student() : id_{uninitialized_id} {}
-	Student(StudentId id) : id_{id} {}
+	enum class Gender { Male, Female, Unspecified };
+	using Ethnicity = short;
+
+	Student() : id_{uninitialized_id}, gender_{Gender::Unspecified}, 
+		ethnicity_{uninitialized_ethnicity},
+		first_term_{uninitialized_first_term} {}
+	Student(StudentId id) : id_{id}, gender_{Gender::Unspecified}, 
+		ethnicity_{uninitialized_ethnicity},
+		first_term_{uninitialized_first_term} {}
 
 	int id() const { return id_; }
+	Gender gender() const { return gender_; }
+	Ethnicity ethnicity() const { return ethnicity_; }
+	int first_term() const { return first_term_; }
 
 	bool operator==(const Student& other) const { return id() == other.id(); }
 	bool operator!=(const Student& other) const { return !(operator==(other)); }
@@ -45,9 +55,19 @@ class Student {
 	friend std::istream& operator>>(std::istream& input, Student& student);
 
 	StudentId id_;
+	Gender gender_;
+	Ethnicity ethnicity_;
+	int first_term_;
 	std::set<const Course*> courses_taken_;
 	static const int uninitialized_id;
+	static const int uninitialized_first_term;
+	static const Ethnicity uninitialized_ethnicity;
 };
+
+
+std::istream& operator>>(std::istream& input, Student::Gender& gender);
+std::ostream& operator<<(std::ostream& output, const Student::Gender& gender);
+
 
 struct StudentHasher {
 	size_t operator()(const Student& student) const 

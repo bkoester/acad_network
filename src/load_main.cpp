@@ -17,7 +17,7 @@ namespace po = boost::program_options;
 
 
 int main(int argc, char* argv[]) {
-	po::options_description desc{"Options for network building binary:"};
+	po::options_description desc{"Options for network loading binary:"};
 	NetworkType_e network_to_load;
 	string course_archive_path, student_archive_path, 
 		   student_path, enrollment_path;
@@ -47,15 +47,16 @@ int main(int argc, char* argv[]) {
 			cout << desc << endl;
 			return 0;
 		}
+		po::notify(vm);
+
 		// Make sure the appropriate input file is given.
 		if (network_to_load == NetworkType_e::Student && 
 				student_archive_path.empty()) {
-			throw po::required_option{"Must provide student archive file!"}; 
+			throw po::required_option{"student_archive"}; 
 		} else if (network_to_load == NetworkType_e::Course &&
 				course_archive_path.empty()) {
-			throw po::required_option{"Must provide course archive file!"};
+			throw po::required_option{"course_archive"};
 		}
-		po::notify(vm);
 	} catch (po::required_option& e) {
 		cerr << e.what() << endl;
 		return -1;

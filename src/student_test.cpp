@@ -15,11 +15,13 @@ using std::unique_ptr;
 class StudentTest : public ::testing::Test {
  public:
 	StudentTest() : 
-		student2{2}, student3{3}, uninitialized_id{Student::uninitialized_id} {}
+		student2{2}, student3{3}, uninitialized_id{Student::uninitialized_id},
+		uninitialized_first_term{Student::uninitialized_first_term} {}
 
  protected:
 	Student student1, student2, student3;	
 	const int uninitialized_id;
+	const int uninitialized_first_term;
 };
 
 
@@ -27,6 +29,9 @@ TEST_F(StudentTest, Construction) {
 	EXPECT_EQ(uninitialized_id, student1.id());
 	EXPECT_EQ(2, student2.id());
 	EXPECT_EQ(3, student3.id());
+
+	EXPECT_EQ(uninitialized_first_term, student1.first_term());
+	EXPECT_EQ(Student::Gender::Unspecified, student1.gender());
 }
 
 
@@ -58,13 +63,22 @@ TEST_F(StudentTest, Classes) {
 
 TEST_F(StudentTest, Input) {
 	stringstream input_stream{
-		"123\t\t\t  \t\t\tlots of stuff\n"
-		"  \t234    \tmore stuff\t\t\twhat\n"
+		"123\t\t\t  F  \t\t\t4    201107     lots of stuff\n"
+		"  \t234    \tM      6 201303\t\t\tmore stuff\t\t\twhat\n"
 	};
 
 
 	Student input_student1, input_student2;
 	input_stream >> input_student1 >> input_student2;
+
 	EXPECT_EQ(Student(123), input_student1);
+	EXPECT_EQ(123, input_student1.id());
+	EXPECT_EQ(Student::Gender::Female, input_student1.gender());
+	EXPECT_EQ(4, input_student1.ethnicity());
+	EXPECT_EQ(201107, input_student1.first_term());
+
 	EXPECT_EQ(Student(234), input_student2);
+	EXPECT_EQ(234, input_student2.id());
+	EXPECT_EQ(Student::Gender::Male, input_student2.gender());
+	EXPECT_EQ(201303, input_student2.first_term());
 }

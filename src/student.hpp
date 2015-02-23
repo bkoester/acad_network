@@ -32,6 +32,8 @@ class Student {
 	Gender gender() const { return gender_; }
 	Ethnicity ethnicity() const { return ethnicity_; }
 	int first_term() const { return first_term_; }
+	int degree_term() const { return degree_term_; }
+	bool transfer() const { return transfer_; }
 
 	bool operator==(const Student& other) const { return id() == other.id(); }
 	bool operator!=(const Student& other) const { return !(operator==(other)); }
@@ -58,6 +60,8 @@ class Student {
 	Gender gender_;
 	Ethnicity ethnicity_;
 	int first_term_;
+	int degree_term_;
+	bool transfer_;
 	std::set<const Course*> courses_taken_;
 	static const int uninitialized_id;
 	static const int uninitialized_first_term;

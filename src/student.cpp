@@ -51,9 +51,10 @@ istream& operator>>(istream& input, Student& student) {
 	StudentId id;
 	Student::Gender gender;
 	Student::Ethnicity ethnicity;
-	int first_term;
+	int first_term, degree_term;
+	char transfer;
 
-	input >> id >> gender >> ethnicity >> first_term;
+	input >> id >> gender >> ethnicity >> first_term >> degree_term >> transfer;
 	if (!input) { return input; }
 	SkipLine(input);
 
@@ -62,6 +63,8 @@ istream& operator>>(istream& input, Student& student) {
 	student.gender_ = gender;
 	student.ethnicity_ = ethnicity;
 	student.first_term_ = first_term;
+	student.degree_term_ = degree_term;
+	student.transfer_ = transfer == 'Y' ? true : false;
 
 	return input;
 }

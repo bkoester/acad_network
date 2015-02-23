@@ -95,10 +95,14 @@ int main(int argc, char* argv[]) {
 			auto student = FindStudent(student_network[vertex_d], students);
 
 			// Output information to the correct files.
-			gender_unweighted << student.gender() << "\t" << unweighted_degree;
-			gender_weighted << student.gender() << "\t" << weighted_degree;
-			term_unweighted << student.first_term() << "\t" << unweighted_degree;
-			term_weighted << student.first_term() << "\t" << weighted_degree;
+			gender_unweighted << student.gender() << "\t" << unweighted_degree 
+							  << endl;;
+			gender_weighted << student.gender() << "\t" << weighted_degree 
+							<< endl;
+			term_unweighted << student.first_term() << "\t" << unweighted_degree
+							<< endl;
+			term_weighted << student.first_term() << "\t" << weighted_degree
+						  << endl;
 		}
 	}
 

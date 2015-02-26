@@ -74,11 +74,12 @@ TEST_F(StudentTest, Input) {
 	EXPECT_EQ(Student(123), input_student1);
 	EXPECT_EQ(123, input_student1.id());
 	EXPECT_EQ(Student::Gender::Female, input_student1.gender());
-	EXPECT_EQ(4, input_student1.ethnicity());
+	EXPECT_EQ(Student::Ethnicity::Black, input_student1.ethnicity());
 	EXPECT_EQ(201107, input_student1.first_term());
 
 	EXPECT_EQ(Student(234), input_student2);
 	EXPECT_EQ(234, input_student2.id());
 	EXPECT_EQ(Student::Gender::Male, input_student2.gender());
+	EXPECT_EQ(Student::Ethnicity::White, input_student2.ethnicity());
 	EXPECT_EQ(201303, input_student2.first_term());
 }

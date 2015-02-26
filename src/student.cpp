@@ -108,6 +108,89 @@ ostream& operator<<(ostream& output, const Student::Gender& gender) {
 }
 
 
+istream& operator>>(istream& input, Student::Ethnicity& ethnicity) {
+	short ethnicity_code;
+	input >> ethnicity_code;
+	if (!input) { 
+		ethnicity = Student::Ethnicity::Unknown;
+		return input; 
+	}
+
+	// The textual representations are IPEDS conventions.
+	switch (ethnicity_code) {
+		case 1:
+			ethnicity = Student::Ethnicity::Hispanic_only;
+			break;
+		case 2:
+			ethnicity = Student::Ethnicity::American_Indian;
+			break;
+		case 3:
+			ethnicity = Student::Ethnicity::Asian;
+			break;
+		case 4:
+			ethnicity = Student::Ethnicity::Black;
+			break;
+		case 5:
+			ethnicity = Student::Ethnicity::Pacific_Islander;
+			break;
+		case 6:
+			ethnicity = Student::Ethnicity::White;
+			break;
+		case 7:
+			ethnicity = Student::Ethnicity::Multiracial;
+			break;
+		case 8:
+			ethnicity = Student::Ethnicity::Unknown;
+			break;
+		case 9:
+			ethnicity = Student::Ethnicity::Undocumented;
+			break;
+		default:
+			input.setstate(std::ios::failbit);
+			break;
+	}
+
+	return input;
+}
+
+
+ostream& operator<<(ostream& output, const Student::Ethnicity& ethnicity) {
+	// The textual representations are IPEDS conventions.
+	switch (ethnicity) {
+		case Student::Ethnicity::Hispanic_only:
+			output << "Hispanic only";
+			break;
+		case Student::Ethnicity::American_Indian:
+			output << "American Indian or Alaska Native";
+			break;
+		case Student::Ethnicity::Asian:
+			output << "Asian only";
+			break;
+		case Student::Ethnicity::Black:
+			output << "Black or African American";
+			break;
+		case Student::Ethnicity::Pacific_Islander:
+			output << "Hawaiian or other Pacific Islander";
+			break;
+		case Student::Ethnicity::White:
+			output << "White only";
+			break;
+		case Student::Ethnicity::Multiracial:
+			output << "Two or more races";
+			break;
+		case Student::Ethnicity::Undocumented:
+			output << "Nonresident alien";
+			break;
+		default:  // also for "Unknown"
+			output << "Unknown";
+			break;
+	}
+
+	return output;
+}
+
+
 const int Student::uninitialized_id{-1};
 const int Student::uninitialized_first_term{-1};
-const Student::Ethnicity Student::uninitialized_ethnicity{-1};
+const Student::Ethnicity Student::uninitialized_ethnicity{
+	Student::Ethnicity::Unknown};

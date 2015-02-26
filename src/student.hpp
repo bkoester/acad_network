@@ -19,7 +19,8 @@ using StudentIdHasher = std::hash<int>;
 class Student {
  public:
 	enum class Gender { Male, Female, Unspecified };
-	using Ethnicity = short;
+	enum class Ethnicity { Hispanic_only, American_Indian, Asian, Black, 
+		Pacific_Islander, White, Multiracial, Unknown, Undocumented };
 
 	Student() : id_{uninitialized_id}, gender_{Gender::Unspecified}, 
 		ethnicity_{uninitialized_ethnicity},
@@ -71,6 +72,10 @@ class Student {
 
 std::istream& operator>>(std::istream& input, Student::Gender& gender);
 std::ostream& operator<<(std::ostream& output, const Student::Gender& gender);
+std::istream& operator>>(std::istream& input, Student::Ethnicity& Ethnicity);
+std::ostream& operator<<(
+		std::ostream& output, const Student::Ethnicity& Ethnicity);
+
 
 
 struct StudentHasher {

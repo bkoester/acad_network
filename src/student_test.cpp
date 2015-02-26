@@ -63,8 +63,8 @@ TEST_F(StudentTest, Classes) {
 
 TEST_F(StudentTest, Input) {
 	stringstream input_stream{
-		"123\t\t\t  F  \t\t\t4    201107     lots of stuff\n"
-		"  \t234    \tM      6 201303\t\t\tmore stuff\t\t\twhat\n"
+		"123\t\t\t  F  \t\t\t4    201107     201303  Y \t\tof stuff\n"
+		"  \t234    \tM      6 201303\t\t\t201403  N \t\t\tstuff\t\t\twhat\n"
 	};
 
 

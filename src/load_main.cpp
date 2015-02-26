@@ -85,6 +85,10 @@ int main(int argc, char* argv[]) {
 		ofstream gender_unweighted{"output/gender_unweighted.tab"};
 		ofstream term_weighted{"output/term_weighted.tab"};
 		ofstream term_unweighted{"output/term_unweighted.tab"};
+		ofstream ethnicity_weighted{"output/ethnicity_weighted.tab"};
+		ofstream ethnicity_unweighted{"output/ethnicity_unweighted.tab"};
+		ofstream transfer_weighted{"output/transfer_weighted.tab"};
+		ofstream transfer_unweighted{"output/transfer_unweighted.tab"};
 
 		// output weighted and unweighted degree for every vertex
 		for (const auto& vertex_d : student_network.GetVertexDescriptors()) {
@@ -103,6 +107,14 @@ int main(int argc, char* argv[]) {
 							<< endl;
 			term_weighted << student.first_term() << "\t" << weighted_degree
 						  << endl;
+			ethnicity_unweighted << student.ethnicity() << "\t" 
+								 << unweighted_degree << endl;
+			ethnicity_weighted << student.ethnicity() << "\t" 
+							   << weighted_degree << endl;
+			transfer_unweighted << student.transfer() << "\t" 
+								<< unweighted_degree << endl;
+			transfer_weighted << student.transfer() << "\t" 
+							  << weighted_degree << endl;
 		}
 	}
 

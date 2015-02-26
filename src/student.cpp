@@ -50,7 +50,7 @@ istream& operator>>(istream& input, Student& student) {
 	// read the input data we're interested in, skip the rest of the line
 	StudentId id;
 	Student::Gender gender;
-	Student::Ethnicity ethnicity;
+	Student::Ethnicity ethnicity{Student::Ethnicity::Unknown};
 	int first_term, degree_term;
 	char transfer;
 

@@ -140,6 +140,7 @@ istream& operator>>(istream& input, Student::Ethnicity& ethnicity) {
 			ethnicity = Student::Ethnicity::Multiracial;
 			break;
 		case 8:
+		case 0: // Not sure what this is supposed to be.
 			ethnicity = Student::Ethnicity::Unknown;
 			break;
 		case 9:

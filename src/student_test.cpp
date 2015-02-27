@@ -32,6 +32,7 @@ TEST_F(StudentTest, Construction) {
 
 	EXPECT_EQ(uninitialized_first_term, student1.first_term());
 	EXPECT_EQ(Student::Gender::Unspecified, student1.gender());
+	EXPECT_EQ(Student::Ethnicity::Unknown, student1.ethnicity());
 }
 
 

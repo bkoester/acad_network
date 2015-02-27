@@ -72,9 +72,9 @@ class Student {
 
 std::istream& operator>>(std::istream& input, Student::Gender& gender);
 std::ostream& operator<<(std::ostream& output, const Student::Gender& gender);
-std::istream& operator>>(std::istream& input, Student::Ethnicity& Ethnicity);
+std::istream& operator>>(std::istream& input, Student::Ethnicity& ethnicity);
 std::ostream& operator<<(
-		std::ostream& output, const Student::Ethnicity& Ethnicity);
+		std::ostream& output, const Student::Ethnicity& ethnicity);
 
 
 

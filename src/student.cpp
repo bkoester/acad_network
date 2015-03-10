@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include <algorithm>
+#include <functional>
 #include <iostream>
 #include <iterator>
 
@@ -10,6 +11,7 @@
 #include "utility.hpp"
 
 
+using std::bind; using std::placeholders::_1;
 using std::begin; using std::end;
 using std::copy; using std::transform;
 using std::ostream; using std::istream; using std::endl;
@@ -19,6 +21,12 @@ using std::ostream_iterator; using std::inserter;
 void Student::AddCoursesTaken(std::initializer_list<const Course*> courses) { 
 	copy(begin(courses), end(courses), 
 			inserter(courses_taken_, end(courses_taken_)));
+}
+
+double Student::GetTotalCreditsTaken() const {
+	return accumulate(begin(courses_taken_), end(courses_taken_), 0.,
+			[](double credits, const Course* course)
+			{ return credits + course->num_credits(); });
 }
 
 

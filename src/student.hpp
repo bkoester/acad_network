@@ -51,6 +51,8 @@ class Student {
 	const std::set<const Course*>& courses_taken() const
 	{ return courses_taken_; }
 
+	double GetTotalCreditsTaken() const;
+
  private:
 	friend class StudentTest;
 	friend class boost::serialization::access;

@@ -62,6 +62,23 @@ TEST_F(StudentTest, Classes) {
 }
 
 
+TEST_F(StudentTest, GetTotalCreditsTaken) {
+	auto course1 = Course{"ENGLISH", 125, 0, 3};
+	auto course2 = Course{"EECS", 381, 0, 4};
+	auto course3 = Course{"PHYSICS", 260, 0, 1.5};
+
+	student1.AddCourseTaken(&course1);
+	student1.AddCourseTaken(&course2);
+	student1.AddCourseTaken(&course3);
+
+	student3.AddCourseTaken(&course3);
+
+	EXPECT_EQ(8.5, student1.GetTotalCreditsTaken());
+	EXPECT_EQ(0., student2.GetTotalCreditsTaken());
+	EXPECT_EQ(1.5, student3.GetTotalCreditsTaken());
+}
+
+
 TEST_F(StudentTest, Input) {
 	stringstream input_stream{
 		"123\t\t\t  F  \t\t\t4    201107     201303  Y \t\tof stuff\n"

@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
 
 			// get a major status
 			auto major_status = string{"Undeclared"};
-			if (student.major1() != student.major2()) {
+			if (bool(student.major1()) != bool(student.major2())) {
 				major_status = "One major"; 
 			} else if (student.major1() && student.major2()) {
 				major_status = "Double major";

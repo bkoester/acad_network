@@ -10,7 +10,7 @@
 
 using std::equal;
 using std::istream; using std::ostream;
-using std::string;
+using std::string; using std::getline;
 using std::tolower;
 namespace po = boost::program_options;
 
@@ -48,6 +48,13 @@ istream& operator>>(istream& input, NetworkType_e& network_type) {
 
 
 void SkipLine(istream& input) { while (input.get() != '\n'); }
+
+
+void SkipTabField(istream& input) {
+	string dummy;
+	getline(input, dummy, '\t');
+}
+
 
 bool icompare(const std::string& first, const std::string& second) {
     return first.size() == second.size() &&

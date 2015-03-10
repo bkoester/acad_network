@@ -82,39 +82,99 @@ int main(int argc, char* argv[]) {
 
 		// Create a bunch of output streams.
 		ofstream gender_weighted{"output/gender_weighted.tab"};
+		ofstream gender_weighted_norm{"output/gender_weighted_norm.tab"};
 		ofstream gender_unweighted{"output/gender_unweighted.tab"};
 		ofstream term_weighted{"output/term_weighted.tab"};
+		ofstream term_weighted_norm{"output/term_weighted_norm.tab"};
 		ofstream term_unweighted{"output/term_unweighted.tab"};
 		ofstream ethnicity_weighted{"output/ethnicity_weighted.tab"};
+		ofstream ethnicity_weighted_norm{"output/ethnicity_weighted_norm.tab"};
 		ofstream ethnicity_unweighted{"output/ethnicity_unweighted.tab"};
 		ofstream transfer_weighted{"output/transfer_weighted.tab"};
+		ofstream transfer_weighted_norm{"output/transfer_weighted_norm.tab"};
 		ofstream transfer_unweighted{"output/transfer_unweighted.tab"};
+		ofstream major1_weighted{"output/major1_weighted.tab"};
+		ofstream major1_weighted_norm{"output/major1_weighted_norm.tab"};
+		ofstream major1_unweighted{"output/major1_unweighted.tab"};
+		ofstream major2_weighted{"output/major2_weighted.tab"};
+		ofstream major2_weighted_norm{"output/major2_weighted_norm.tab"};
+		ofstream major2_unweighted{"output/major2_unweighted.tab"};
+		ofstream major_status_weighted{"output/major_status_weighted.tab"};
+		ofstream major_status_weighted_norm{
+			"output/major_status_weighted_norm.tab"};
+		ofstream major_status_unweighted{"output/major_status_unweighted.tab"};
+		ofstream school_weighted{"output/school_weighted.tab"};
+		ofstream school_weighted_norm{"output/school_weighted_norm.tab"};
+		ofstream school_unweighted{"output/school_unweighted.tab"};
 
 		// output weighted and unweighted degree for every vertex
 		for (const auto& vertex_d : student_network.GetVertexDescriptors()) {
+			auto student = FindStudent(student_network[vertex_d], students);
 			auto out_edges = student_network.GetOutEdgeValues(vertex_d);
 			auto weighted_degree = accumulate(
 					begin(out_edges), end(out_edges), 0.);
+			auto weighted_degree_norm = 
+				weighted_degree / student.GetTotalCreditsTaken();
 			auto unweighted_degree = out_edges.size();
-			auto student = FindStudent(student_network[vertex_d], students);
+
+			// get a major status
+			auto major_status = string{"Undeclared"};
+			if (student.major1() != student.major2()) {
+				major_status = "One major"; 
+			} else if (student.major1() && student.major2()) {
+				major_status = "Double major";
+			}
 
 			// Output information to the correct files.
-			gender_unweighted << student.gender() << "\t" << unweighted_degree 
-							  << endl;;
 			gender_weighted << student.gender() << "\t" << weighted_degree 
 							<< endl;
-			term_unweighted << student.first_term() << "\t" << unweighted_degree
-							<< endl;
+			gender_weighted_norm << student.gender() << "\t"
+								 << weighted_degree_norm  << endl;
+			gender_unweighted << student.gender() << "\t" << unweighted_degree 
+							  << endl;;
 			term_weighted << student.first_term() << "\t" << weighted_degree
 						  << endl;
-			ethnicity_unweighted << student.ethnicity() << "\t" 
-								 << unweighted_degree << endl;
+			term_weighted_norm << student.first_term() << "\t"
+							   << weighted_degree_norm << endl;
+			term_unweighted << student.first_term() << "\t" << unweighted_degree
+							<< endl;
 			ethnicity_weighted << student.ethnicity() << "\t" 
 							   << weighted_degree << endl;
-			transfer_unweighted << student.transfer() << "\t" 
-								<< unweighted_degree << endl;
+			ethnicity_weighted_norm << student.ethnicity() << "\t" 
+							   << weighted_degree_norm << endl;
+			ethnicity_unweighted << student.ethnicity() << "\t" 
+								 << unweighted_degree << endl;
 			transfer_weighted << student.transfer() << "\t" 
 							  << weighted_degree << endl;
+			transfer_weighted_norm << student.transfer() << "\t" 
+							  << weighted_degree_norm << endl;
+			transfer_unweighted << student.transfer() << "\t" 
+								<< unweighted_degree << endl;
+			major1_weighted << student.GetMajor1Description() << "\t" 
+							<< weighted_degree << endl;
+			major1_weighted_norm << student.GetMajor1Description() << "\t" 
+							<< weighted_degree_norm << endl;
+			major1_unweighted << student.GetMajor1Description() << "\t" 
+							  << unweighted_degree << endl;
+			major2_weighted << student.GetMajor2Description() << "\t" 
+							<< weighted_degree << endl;
+			major2_weighted_norm << student.GetMajor2Description() << "\t" 
+							<< weighted_degree_norm << endl;
+			major2_unweighted << student.GetMajor2Description() << "\t" 
+							  << unweighted_degree << endl;
+			major_status_weighted << major_status << "\t" 
+								  << weighted_degree << endl;
+			major_status_weighted_norm << major_status << "\t" 
+								  << weighted_degree_norm << endl;
+			major_status_unweighted << major_status << "\t" 
+									<< unweighted_degree << endl;
+			school_weighted << student.school() << "\t" 
+							<< weighted_degree << endl;
+			school_weighted_norm << student.school() << "\t" 
+								 << weighted_degree_norm << endl;
+			school_unweighted << student.school() << "\t" 
+							  << unweighted_degree << endl;
+
 		}
 	}
 

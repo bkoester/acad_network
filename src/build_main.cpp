@@ -66,9 +66,11 @@ int main(int argc, char* argv[]) {
 		// build the student network
 		student_container_t students{ReadStudents(student_stream)};
 		course_container_t courses{ReadEnrollment(enrollment_stream, students)};
+		cout << "Size of student network is " << students.size() << endl;
+		/*
 		StudentNetwork student_network{
 			BuildStudentNetworkFromStudents(students)};
-		student_network.Save(cout);
+		student_network.Save(cout); */
 	}
 
 	return 0;

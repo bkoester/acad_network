@@ -74,19 +74,15 @@ istream& operator>>(istream& input, Course& course) {
 	/*
 	input >> course_code >> grade >> gpa_other 
 		  >> cumulative_gpa >> total_credits >> total_grade_points;
-	// ignore the fields we don't want for now
-	input.ignore(numeric_limits<streamsize>::max(), '\t');
-	input.ignore(numeric_limits<streamsize>::max(), '\t');
-	input.ignore(numeric_limits<streamsize>::max(), '\t');
-	input.ignore(numeric_limits<streamsize>::max(), '\t');
-	input.ignore(numeric_limits<streamsize>::max(), '\t');
-	input.ignore(numeric_limits<streamsize>::max(), '\t');
-	input.ignore(numeric_limits<streamsize>::max(), '\t');
-	input.ignore(numeric_limits<streamsize>::max(), '\t');
 	*/
-	string dummy;
-	input >> dummy >> dummy >> dummy >> dummy >> dummy >> dummy;
-	assert(dummy.empty() || !dummy.empty());
+	// ignore the fields we don't want for now
+	SkipTabField(input);
+	SkipTabField(input);
+	SkipTabField(input);
+	SkipTabField(input);
+	SkipTabField(input);
+	SkipTabField(input);
+	SkipTabField(input);
 
 	input >> course_credit >> term;
 	if (!input) { return input; }

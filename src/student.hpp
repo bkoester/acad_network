@@ -5,7 +5,10 @@
 #include <iosfwd>
 #include <initializer_list>
 #include <set>
+#include <string>
+#include <unordered_map>
 
+#include <boost/optional.hpp>
 #include <boost/serialization/utility.hpp>
 
 
@@ -35,6 +38,12 @@ class Student {
 	int first_term() const { return first_term_; }
 	int degree_term() const { return degree_term_; }
 	bool transfer() const { return transfer_; }
+	boost::optional<double> major1() const { return major1_; }
+	boost::optional<double> major2() const { return major2_; }
+	std::string school() const { return school_; }
+
+	std::string GetMajor1Description() const;
+	std::string GetMajor2Description() const;
 
 	bool operator==(const Student& other) const { return id() == other.id(); }
 	bool operator!=(const Student& other) const { return !(operator==(other)); }
@@ -65,10 +74,14 @@ class Student {
 	int first_term_;
 	int degree_term_;
 	bool transfer_;
+	boost::optional<double> major1_;
+	boost::optional<double> major2_;
+	std::string school_;
 	std::set<const Course*> courses_taken_;
 	static const int uninitialized_id;
 	static const int uninitialized_first_term;
 	static const Ethnicity uninitialized_ethnicity;
+	static const std::unordered_map<double, std::string> major_code_map;
 };
 
 
@@ -77,7 +90,6 @@ std::ostream& operator<<(std::ostream& output, const Student::Gender& gender);
 std::istream& operator>>(std::istream& input, Student::Ethnicity& ethnicity);
 std::ostream& operator<<(
 		std::ostream& output, const Student::Ethnicity& ethnicity);
-
 
 
 struct StudentHasher {

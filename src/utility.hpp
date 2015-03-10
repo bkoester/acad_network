@@ -24,6 +24,9 @@ std::istream& operator>>(std::istream& input, NetworkType_e& network_type);
 // Ignore any line in the given istream
 void SkipLine(std::istream& input);
 
+// Skip a field delimited by a tab.
+void SkipTabField(std::istream& input);
+
 
 template <typename InputIt>
 bool HasIntersection(

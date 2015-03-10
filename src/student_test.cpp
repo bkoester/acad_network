@@ -81,10 +81,12 @@ TEST_F(StudentTest, GetTotalCreditsTaken) {
 
 TEST_F(StudentTest, Input) {
 	stringstream input_stream{
-		"123\t\t\t  F  \t\t\t4    201107     201303  Y \t\tof stuff\n"
-		"  \t234    \tM      6 201303\t\t\t201403  N \t\t\tstuff\t\t\twhat\n"
+		"123\t\t\t  F  \t\t\t4    201107     201303  Y\t42.2706\tNA\t"
+		"Physiological Psychology/Psych\tNA\tlol\tw/e\tduncare\tN\t24\t25\t24\t"
+		"ULSA\n"
+		"  \t234    \tM      6 201303\t\t\t201403  N\tNA\tNA\tNA\tNA\tNA\tNA\t"
+		"NA\tN\t31\t34\t31\tUARC\n"
 	};
-
 
 	Student input_student1, input_student2;
 	input_stream >> input_student1 >> input_student2;
@@ -94,10 +96,20 @@ TEST_F(StudentTest, Input) {
 	EXPECT_EQ(Student::Gender::Female, input_student1.gender());
 	EXPECT_EQ(Student::Ethnicity::Black, input_student1.ethnicity());
 	EXPECT_EQ(201107, input_student1.first_term());
+	EXPECT_TRUE(bool(input_student1.major1()));
+	EXPECT_EQ(42.2706, input_student1.major1().get());
+	EXPECT_FALSE(bool(input_student1.major2()));
+	EXPECT_EQ("Physiological Psychology/Psychology",
+			  input_student1.GetMajor1Description());
+	EXPECT_EQ("NA", input_student1.GetMajor2Description());
 
 	EXPECT_EQ(Student(234), input_student2);
 	EXPECT_EQ(234, input_student2.id());
 	EXPECT_EQ(Student::Gender::Male, input_student2.gender());
 	EXPECT_EQ(Student::Ethnicity::White, input_student2.ethnicity());
 	EXPECT_EQ(201303, input_student2.first_term());
+	EXPECT_FALSE(bool(input_student2.major1()));
+	EXPECT_FALSE(bool(input_student2.major2()));
+	EXPECT_EQ("NA", input_student2.GetMajor1Description());
+	EXPECT_EQ("NA", input_student2.GetMajor2Description());
 }

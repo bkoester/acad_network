@@ -102,6 +102,7 @@ TEST_F(StudentTest, Input) {
 	EXPECT_EQ("Physiological Psychology/Psychology",
 			  input_student1.GetMajor1Description());
 	EXPECT_EQ("NA", input_student1.GetMajor2Description());
+	EXPECT_EQ("ULSA", input_student1.school());
 
 	EXPECT_EQ(Student(234), input_student2);
 	EXPECT_EQ(234, input_student2.id());
@@ -112,4 +113,5 @@ TEST_F(StudentTest, Input) {
 	EXPECT_FALSE(bool(input_student2.major2()));
 	EXPECT_EQ("NA", input_student2.GetMajor1Description());
 	EXPECT_EQ("NA", input_student2.GetMajor2Description());
+	EXPECT_EQ("UARC", input_student2.school());
 }

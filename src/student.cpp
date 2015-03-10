@@ -93,15 +93,16 @@ istream& operator>>(istream& input, Student& student) {
 		  >> major1 >> major2;
 	if (!input) { return input; }
 
-	SkipTabField(input);  // major1 description
-	SkipTabField(input);  // major2 description
-	SkipTabField(input);  // first declare code
-	SkipTabField(input);  // first declare description
-	SkipTabField(input);  // first declare term
-	SkipTabField(input);  // pell status
-	SkipTabField(input);  // ACT english
-	SkipTabField(input);  // ACT math
-	SkipTabField(input);  // ACT comp
+	SkipTabField(input);  // pre-major1 description tab
+	SkipTabField(input);  // pre-major2 description tab
+	SkipTabField(input);  // pre-first declare code tab
+	SkipTabField(input);  // pre-first declare description tab
+	SkipTabField(input);  // pre-first declare term tab
+	SkipTabField(input);  // pre-pell status tab
+	SkipTabField(input);  // pre-ACT english tab
+	SkipTabField(input);  // pre-ACT math tab
+	SkipTabField(input);  // pre-ACT comp tab
+	SkipTabField(input);  // post-ACT comp tab
 
 	string school;
 	input >> school;

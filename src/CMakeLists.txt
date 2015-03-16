@@ -5,6 +5,7 @@ set(SRCS
 	mem_usage.cpp
 	student.cpp
 	tab_reader.cpp
+	student_segmentation.cpp
 	utility.cpp)
 
 set(BUILD_MAIN_SRC build_main.cpp)
@@ -18,6 +19,7 @@ set(UNITTEST_SRCS
 	network_structure_test.cpp
 	student_test.cpp
 	student_network_test.cpp
+	student_segmentation_test.cpp
 	tab_reader_test.cpp
 	utility_test.cpp)
 

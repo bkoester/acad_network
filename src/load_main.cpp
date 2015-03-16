@@ -6,14 +6,20 @@
 
 #include "course_network.hpp"
 #include "student_network.hpp"
+#include "student_segmentation.hpp"
 #include "tab_reader.hpp"
 #include "utility.hpp"
 
 
 using std::cerr; using std::cin; using std::cout; using std::endl;
 using std::ifstream; using std::ofstream; 
-using std::string;
+using std::string; using std::to_string;
 namespace po = boost::program_options;
+
+
+static void SegmentStudents(const StudentNetwork& network,
+							const student_container_t& students, 
+							const course_container_t& courses);
 
 
 int main(int argc, char* argv[]) {
@@ -80,103 +86,122 @@ int main(int argc, char* argv[]) {
 		ifstream student_archive{student_archive_path};
 		StudentNetwork student_network{student_archive};
 
-		// Create a bunch of output streams.
-		ofstream gender_weighted{"output/gender_weighted.tab"};
-		ofstream gender_weighted_norm{"output/gender_weighted_norm.tab"};
-		ofstream gender_unweighted{"output/gender_unweighted.tab"};
-		ofstream term_weighted{"output/term_weighted.tab"};
-		ofstream term_weighted_norm{"output/term_weighted_norm.tab"};
-		ofstream term_unweighted{"output/term_unweighted.tab"};
-		ofstream ethnicity_weighted{"output/ethnicity_weighted.tab"};
-		ofstream ethnicity_weighted_norm{"output/ethnicity_weighted_norm.tab"};
-		ofstream ethnicity_unweighted{"output/ethnicity_unweighted.tab"};
-		ofstream transfer_weighted{"output/transfer_weighted.tab"};
-		ofstream transfer_weighted_norm{"output/transfer_weighted_norm.tab"};
-		ofstream transfer_unweighted{"output/transfer_unweighted.tab"};
-		ofstream major1_weighted{"output/major1_weighted.tab"};
-		ofstream major1_weighted_norm{"output/major1_weighted_norm.tab"};
-		ofstream major1_unweighted{"output/major1_unweighted.tab"};
-		ofstream major2_weighted{"output/major2_weighted.tab"};
-		ofstream major2_weighted_norm{"output/major2_weighted_norm.tab"};
-		ofstream major2_unweighted{"output/major2_unweighted.tab"};
-		ofstream major_status_weighted{"output/major_status_weighted.tab"};
-		ofstream major_status_weighted_norm{
-			"output/major_status_weighted_norm.tab"};
-		ofstream major_status_unweighted{"output/major_status_unweighted.tab"};
-		ofstream school_weighted{"output/school_weighted.tab"};
-		ofstream school_weighted_norm{"output/school_weighted_norm.tab"};
-		ofstream school_unweighted{"output/school_unweighted.tab"};
-
-		// output weighted and unweighted degree for every vertex
-		for (const auto& vertex_d : student_network.GetVertexDescriptors()) {
-			auto student = FindStudent(student_network[vertex_d], students);
-			auto out_edges = student_network.GetOutEdgeValues(vertex_d);
-			auto weighted_degree = accumulate(
-					begin(out_edges), end(out_edges), 0.);
-			auto weighted_degree_norm = 
-				weighted_degree / student.GetTotalCreditsTaken();
-			auto unweighted_degree = out_edges.size();
-
-			// get a major status
-			auto major_status = string{"Undeclared"};
-			if (bool(student.major1()) != bool(student.major2())) {
-				major_status = "One major"; 
-			} else if (student.major1() && student.major2()) {
-				major_status = "Double major";
-			}
-
-			// Output information to the correct files.
-			gender_weighted << student.gender() << "\t" << weighted_degree 
-							<< endl;
-			gender_weighted_norm << student.gender() << "\t"
-								 << weighted_degree_norm  << endl;
-			gender_unweighted << student.gender() << "\t" << unweighted_degree 
-							  << endl;;
-			term_weighted << student.first_term() << "\t" << weighted_degree
-						  << endl;
-			term_weighted_norm << student.first_term() << "\t"
-							   << weighted_degree_norm << endl;
-			term_unweighted << student.first_term() << "\t" << unweighted_degree
-							<< endl;
-			ethnicity_weighted << student.ethnicity() << "\t" 
-							   << weighted_degree << endl;
-			ethnicity_weighted_norm << student.ethnicity() << "\t" 
-							   << weighted_degree_norm << endl;
-			ethnicity_unweighted << student.ethnicity() << "\t" 
-								 << unweighted_degree << endl;
-			transfer_weighted << student.transfer() << "\t" 
-							  << weighted_degree << endl;
-			transfer_weighted_norm << student.transfer() << "\t" 
-							  << weighted_degree_norm << endl;
-			transfer_unweighted << student.transfer() << "\t" 
-								<< unweighted_degree << endl;
-			major1_weighted << student.GetMajor1Description() << "\t" 
-							<< weighted_degree << endl;
-			major1_weighted_norm << student.GetMajor1Description() << "\t" 
-							<< weighted_degree_norm << endl;
-			major1_unweighted << student.GetMajor1Description() << "\t" 
-							  << unweighted_degree << endl;
-			major2_weighted << student.GetMajor2Description() << "\t" 
-							<< weighted_degree << endl;
-			major2_weighted_norm << student.GetMajor2Description() << "\t" 
-							<< weighted_degree_norm << endl;
-			major2_unweighted << student.GetMajor2Description() << "\t" 
-							  << unweighted_degree << endl;
-			major_status_weighted << major_status << "\t" 
-								  << weighted_degree << endl;
-			major_status_weighted_norm << major_status << "\t" 
-								  << weighted_degree_norm << endl;
-			major_status_unweighted << major_status << "\t" 
-									<< unweighted_degree << endl;
-			school_weighted << student.school() << "\t" 
-							<< weighted_degree << endl;
-			school_weighted_norm << student.school() << "\t" 
-								 << weighted_degree_norm << endl;
-			school_unweighted << student.school() << "\t" 
-							  << unweighted_degree << endl;
-
-		}
+		SegmentStudents(student_network, students, courses);
 	}
 
 	return 0;
 }
+
+
+// segments students according to various attributes and puts information in
+// separate output files
+static void SegmentStudents(const StudentNetwork& network,
+							const student_container_t& students, 
+							const course_container_t& courses) {
+		// streams
+	
+
+	using VertexData = StudentSegmenter::VertexData;
+	StudentSegmenter segmenter;
+
+	auto weighted_func = [](const VertexData& data)
+		{ return to_string(data.weighted_degree); };
+	auto weighted_norm_func = [](const VertexData& data)
+		{ return to_string(data.weighted_degree_norm); };
+	auto unweighted_func = [](const VertexData& data)
+		{ return to_string(data.unweighted_degree); };
+
+	// gender
+	ofstream gender_weighted{"output/gender_weighted.tab"};
+	ofstream gender_weighted_norm{"output/gender_weighted_norm.tab"};
+	ofstream gender_unweighted{"output/gender_unweighted.tab"};
+	auto gender_func = [](const Student& student) 
+		{ return Student::to_string(student.gender()); };
+	segmenter.AddSegment(gender_weighted, gender_func, weighted_func);
+	segmenter.AddSegment(gender_weighted_norm, gender_func, weighted_norm_func);
+	segmenter.AddSegment(gender_unweighted, gender_func, unweighted_func);
+
+	// term
+	ofstream term_weighted{"output/term_weighted.tab"};
+	ofstream term_weighted_norm{"output/term_weighted_norm.tab"};
+	ofstream term_unweighted{"output/term_unweighted.tab"};
+	auto first_term_func = [](const Student& student)
+		{ return to_string(student.first_term()); };
+	segmenter.AddSegment(term_weighted, first_term_func, weighted_func);
+	segmenter.AddSegment(
+			term_weighted_norm, first_term_func, weighted_norm_func);
+	segmenter.AddSegment(term_unweighted, first_term_func, unweighted_func);
+
+	// ethnicity
+	ofstream ethnicity_weighted{"output/ethnicity_weighted.tab"};
+	ofstream ethnicity_weighted_norm{"output/ethnicity_weighted_norm.tab"};
+	ofstream ethnicity_unweighted{"output/ethnicity_unweighted.tab"};
+	auto ethnicity_func = [](const Student& student)
+		{ return Student::to_string(student.ethnicity()); };
+	segmenter.AddSegment(ethnicity_weighted, ethnicity_func, weighted_func);
+	segmenter.AddSegment(
+			ethnicity_weighted_norm, ethnicity_func, weighted_norm_func);
+	segmenter.AddSegment(ethnicity_unweighted, ethnicity_func, unweighted_func);
+
+	// transfer
+	ofstream transfer_weighted{"output/transfer_weighted.tab"};
+	ofstream transfer_weighted_norm{"output/transfer_weighted_norm.tab"};
+	ofstream transfer_unweighted{"output/transfer_unweighted.tab"};
+	auto transfer_func = 
+		[](const Student& student)
+		{ return student.transfer() ? "Transfer" : "Non-transfer"; };
+	segmenter.AddSegment(transfer_weighted, transfer_func, weighted_func);
+	segmenter.AddSegment(
+			transfer_weighted_norm, transfer_func, weighted_norm_func);
+	segmenter.AddSegment(transfer_unweighted, transfer_func, unweighted_func);
+
+	// major 1
+	ofstream major1_weighted{"output/major1_weighted.tab"};
+	ofstream major1_weighted_norm{"output/major1_weighted_norm.tab"};
+	ofstream major1_unweighted{"output/major1_unweighted.tab"};
+	auto major1_func = [](const Student& student)
+		{ return student.GetMajor1Description(); };
+	segmenter.AddSegment(major1_weighted, major1_func, weighted_func);
+	segmenter.AddSegment(major1_weighted_norm, major1_func, weighted_norm_func);
+	segmenter.AddSegment(major1_unweighted, major1_func, unweighted_func);
+
+	// major 2
+	ofstream major2_weighted{"output/major2_weighted.tab"};
+	ofstream major2_weighted_norm{"output/major2_weighted_norm.tab"};
+	ofstream major2_unweighted{"output/major2_unweighted.tab"};
+	auto major2_func = [](const Student& student)
+		{ return student.GetMajor2Description(); };
+	segmenter.AddSegment(major2_weighted, major2_func, weighted_func);
+	segmenter.AddSegment(major2_weighted_norm, major2_func, weighted_norm_func);
+	segmenter.AddSegment(major2_unweighted, major2_func, unweighted_func);
+
+	// major status
+	ofstream major_status_weighted{"output/major_status_weighted.tab"};
+	ofstream major_status_weighted_norm{
+		"output/major_status_weighted_norm.tab"};
+	ofstream major_status_unweighted{"output/major_status_unweighted.tab"};
+	auto major_status = [](const Student& student) {
+		auto major_status = string{"Undeclared"};
+		if (bool(student.major1()) != bool(student.major2())) {
+			major_status = "One major"; 
+		} else if (bool(student.major1()) && bool(student.major2())) {
+			major_status = "Double major";
+		}
+		return major_status;
+	};
+	segmenter.AddSegment(major_status_weighted, major_status, weighted_func);
+	segmenter.AddSegment(
+			major_status_weighted_norm, major_status, weighted_norm_func);
+	segmenter.AddSegment(
+			major_status_unweighted, major_status, unweighted_func);
+
+	// school
+	ofstream school_weighted{"output/school_weighted.tab"};
+	ofstream school_weighted_norm{"output/school_weighted_norm.tab"};
+	ofstream school_unweighted{"output/school_unweighted.tab"};
+	auto school_func = [](const Student& student) { return student.school(); };
+	segmenter.AddSegment(school_weighted, school_func, weighted_func);
+	segmenter.AddSegment(school_weighted_norm, school_func, weighted_norm_func);
+	segmenter.AddSegment(school_unweighted, school_func, unweighted_func);
+}
+

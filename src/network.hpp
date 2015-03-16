@@ -184,7 +184,7 @@ class Network {
 	out_edge_values_t GetOutEdgeValues(vertex_t vertex)
 	{ return out_edge_values_t{OutEdgesAdaptor{vertex, graph_}, graph_}; }
 	const_out_edge_values_t GetOutEdgeValues(vertex_t vertex) const
-	{ return out_edge_values_t{OutEdgesAdaptor{vertex, graph_}, graph_}; }
+	{ return const_out_edge_values_t{OutEdgesAdaptor{vertex, graph_}, graph_}; }
 
  private:
 	class VertexAdaptor {

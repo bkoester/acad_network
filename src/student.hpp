@@ -25,6 +25,9 @@ class Student {
 	enum class Ethnicity { Hispanic_only, American_Indian, Asian, Black, 
 		Pacific_Islander, White, Multiracial, Unknown, Undocumented };
 
+	static std::string to_string(const Gender& gender);
+	static std::string to_string(const Ethnicity& ethnicity);
+
 	Student() : id_{uninitialized_id}, gender_{Gender::Unspecified}, 
 		ethnicity_{uninitialized_ethnicity},
 		first_term_{uninitialized_first_term} {}

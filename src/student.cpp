@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 
@@ -17,6 +18,7 @@
 using std::begin; using std::end;
 using std::copy; using std::transform;
 using std::ostream; using std::istream; using std::endl;
+using std::ostringstream;
 using std::ostream_iterator; using std::inserter;
 using std::string; using std::stod;
 using std::unordered_map;
@@ -70,12 +72,14 @@ ostream& operator<<(ostream& os, const Student& student) {
 	os << "; Major(s): ";
 	if (student.major1()) { os << student.GetMajor1Description(); }
 	if (student.major2()) { os << ", " << student.GetMajor2Description(); }
-	os << "; Classes: ";
-	transform(student.courses_taken_.cbegin(), --student.courses_taken_.cend(), 
-			  ostream_iterator<CourseId>{os, ", "}, 
-			  [](const Course* course) { return course->GetId(); });
-	os << *student.courses_taken_.rbegin();
-	os << endl;
+	if (!student.courses_taken_.empty()) {
+		os << "; Classes: ";
+		transform(student.courses_taken_.cbegin(), --student.courses_taken_.cend(), 
+				  ostream_iterator<CourseId>{os, ", "}, 
+				  [](const Course* course) { return course->GetId(); });
+		os << *student.courses_taken_.rbegin();
+		os << endl;
+	}
 	return os;
 }
 
@@ -162,6 +166,12 @@ ostream& operator<<(ostream& output, const Student::Gender& gender) {
 }
 
 
+std::string Student::to_string(const Gender& gender) {
+	ostringstream out;
+	out << gender;
+	return out.str();
+}
+
 istream& operator>>(istream& input, Student::Ethnicity& ethnicity) {
 	short ethnicity_code;
 	input >> ethnicity_code;
@@ -242,6 +252,13 @@ ostream& operator<<(ostream& output, const Student::Ethnicity& ethnicity) {
 	}
 
 	return output;
+}
+
+
+std::string Student::to_string(const Ethnicity& ethnicity) {
+	ostringstream out;
+	out << ethnicity;
+	return out.str();
 }
 
 

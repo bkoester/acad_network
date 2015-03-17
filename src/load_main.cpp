@@ -5,6 +5,7 @@
 #include <boost/program_options.hpp>
 
 #include "course_network.hpp"
+#include "reduce_network.hpp"
 #include "student_network.hpp"
 #include "student_segmentation.hpp"
 #include "tab_reader.hpp"
@@ -20,6 +21,10 @@ namespace po = boost::program_options;
 static void SegmentStudents(const StudentNetwork& network,
 							const student_container_t& students, 
 							const course_container_t& courses);
+
+static void ReduceStudentNetwork(const StudentNetwork& network,
+								 const student_container_t& students,
+								 const course_container_t& courses);
 
 
 int main(int argc, char* argv[]) {
@@ -87,20 +92,55 @@ int main(int argc, char* argv[]) {
 		StudentNetwork student_network{student_archive};
 
 		SegmentStudents(student_network, students, courses);
+		ReduceStudentNetwork(student_network, students, courses);
 	}
 
 	return 0;
 }
 
 
+// reduces network to see the interaction between various segments
+void ReduceStudentNetwork(const StudentNetwork& network,
+						  const student_container_t& students,
+						  const course_container_t& courses) {
+	auto weighted_func = [](double edge, double current_edge) 
+				{ return edge + current_edge; };
+	auto unweighted_func = [](double edge, int current_edge) 
+				{ return 1 + current_edge; };
+
+	// major
+	auto major1_func = [&students](const StudentId& id)
+		{ return FindStudent(id, students).GetMajor1Description(); };
+	auto weighted_major_network = ReduceNetwork(
+			network, major1_func, weighted_func, 0.);
+	ofstream weighted_major_network_file{"output/weighted_major_network.tab"};
+	weighted_major_network.SaveEdgewise(weighted_major_network_file);
+	auto unweighted_major_network = ReduceNetwork(
+			network, major1_func, unweighted_func, 0);
+	ofstream unweighted_major_network_file{
+		"output/unweighted_major_network.tab"};
+	unweighted_major_network.SaveEdgewise(unweighted_major_network_file);
+
+	// school
+	auto school_func = [&students](const StudentId& id)
+		{ return FindStudent(id, students).school(); };
+	auto weighted_school_network = ReduceNetwork(
+			network, school_func, weighted_func, 0.);
+	ofstream weighted_school_network_file{"output/weighted_school_network.tab"};
+	weighted_school_network.SaveEdgewise(weighted_school_network_file);
+	auto unweighted_school_network = ReduceNetwork(
+			network, school_func, unweighted_func, 0);
+	ofstream unweighted_school_network_file{
+		"output/unweighted_school_network.tab"};
+	unweighted_school_network.SaveEdgewise(unweighted_school_network_file);
+}
+
+
 // segments students according to various attributes and puts information in
 // separate output files
-static void SegmentStudents(const StudentNetwork& network,
-							const student_container_t& students, 
-							const course_container_t& courses) {
-		// streams
-	
-
+void SegmentStudents(const StudentNetwork& network,
+					 const student_container_t& students, 
+					 const course_container_t& courses) {
 	using VertexData = StudentSegmenter::VertexData;
 	StudentSegmenter segmenter;
 

@@ -4,8 +4,8 @@ set(SRCS
 	graph_builder.cpp
 	mem_usage.cpp
 	student.cpp
-	tab_reader.cpp
 	student_segmentation.cpp
+	tab_reader.cpp
 	utility.cpp)
 
 set(BUILD_MAIN_SRC build_main.cpp)
@@ -17,6 +17,7 @@ set(UNITTEST_SRCS
 	graph_builder_test.cpp
 	network_test.cpp
 	network_structure_test.cpp
+	reduce_network_test.cpp
 	student_test.cpp
 	student_network_test.cpp
 	student_segmentation_test.cpp

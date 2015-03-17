@@ -10,7 +10,7 @@
 #PBS -V
 
 WORKING_DIR=/tmp/$PBS_JOBID
-DEPLOY_DIR=$HOME/thesis
+DEPLOY_DIR=$HOME/thesis/data
 ENROLLMENT_FILENAME=enrollment.tab
 STUDENT_FILENAME=student.tab
 STUDENT_ARCHIVE_FILENAME=student_network.txt
@@ -31,7 +31,7 @@ cd $WORKING_DIR
 	 --enrollment_file=${ENROLLMENT_FILENAME}
 
 # copy any output data out
-cp -R output/ ${DEPLOY_DIR}/output${PBS_JOBID}
+cp -R output/ ${DEPLOY_DIR}/generated${PBS_JOBID}
 
 # remove the directory
 rm -rf $WORKING_DIR

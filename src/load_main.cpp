@@ -133,6 +133,20 @@ void ReduceStudentNetwork(const StudentNetwork& network,
 	ofstream unweighted_school_network_file{
 		"output/unweighted_school_network.tab"};
 	unweighted_school_network.SaveEdgewise(unweighted_school_network_file);
+
+	// ethnicity
+	auto ethnicity_func = [&students](const StudentId& id)
+		{ return FindStudent(id, students).ethnicity(); };
+	auto weighted_ethnicity_network = ReduceNetwork(
+			network, ethnicity_func, weighted_func, 0.);
+	ofstream weighted_ethnicity_network_file{
+		"output/weighted_ethnicity_network.tab"};
+	weighted_ethnicity_network.SaveEdgewise(weighted_ethnicity_network_file);
+	auto unweighted_ethnicity_network = ReduceNetwork(
+			network, ethnicity_func, unweighted_func, 0);
+	ofstream unweighted_ethnicity_network_file{
+		"output/unweighted_ethnicity_network.tab"};
+	unweighted_ethnicity_network.SaveEdgewise(unweighted_ethnicity_network_file);
 }
 
 

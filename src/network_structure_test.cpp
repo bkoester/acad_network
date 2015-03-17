@@ -31,6 +31,8 @@ void TestCourseNetworkStructure(const CourseNetwork& network) {
 	CourseNetwork::vertex_t math425_vertex{network.GetVertex(
 			Course{"MATH", 425, 0})};
 
+	// test edge to itself
+	EXPECT_EQ(0, network.CalculateValue(english125_vertex, english125_vertex));
 	// test edges that exist
 	EXPECT_EQ(2, network.CalculateValue(english125_vertex, chem210_vertex));
 
@@ -41,19 +43,23 @@ void TestCourseNetworkStructure(const CourseNetwork& network) {
 	EXPECT_EQ(2, network.CalculateValue(english125_vertex, aaptis277_vertex));
 	EXPECT_EQ(2, network.CalculateValue(english125_vertex, environ311_vertex));
 
+	EXPECT_EQ(0, network.CalculateValue(chem210_vertex, chem210_vertex));
 	EXPECT_EQ(1, network.CalculateValue(chem210_vertex, chem211_vertex));
 	EXPECT_EQ(1, network.CalculateValue(chem210_vertex, aaptis277_vertex));
 	EXPECT_EQ(0, network.CalculateValue(chem210_vertex, environ311_vertex));
 	// test non-existent edge both ways
 	EXPECT_EQ(0, network.CalculateValue(environ311_vertex, chem210_vertex));
 
+	EXPECT_EQ(0, network.CalculateValue(chem211_vertex, chem211_vertex));
 	EXPECT_EQ(1, network.CalculateValue(chem211_vertex, aaptis277_vertex));
 	EXPECT_EQ(0, network.CalculateValue(chem211_vertex, environ311_vertex));
 	EXPECT_EQ(0, network.CalculateValue(chem211_vertex, math425_vertex));
 	
+	EXPECT_EQ(0, network.CalculateValue(aaptis277_vertex, aaptis277_vertex));
 	EXPECT_EQ(1, network.CalculateValue(aaptis277_vertex, environ311_vertex));
 	EXPECT_EQ(0, network.CalculateValue(aaptis277_vertex, math425_vertex));
 
+	EXPECT_EQ(0, network.CalculateValue(environ311_vertex, environ311_vertex));
 	EXPECT_EQ(1, network.CalculateValue(environ311_vertex, math425_vertex));
 }
 
@@ -65,18 +71,25 @@ void TestStudentNetworkStructure(const StudentNetwork& network) {
 	StudentNetwork::vertex_t student5{FindStudentId(network, StudentId{567890})};
 
 
+	EXPECT_THROW(network.Get(student1, student1), NoEdgeException);
 	EXPECT_EQ(3.0, network.Get(student1, student2));
 	EXPECT_EQ(3.0, network.Get(student1, student3));
 	EXPECT_EQ(1.0, network.Get(student1, student4));
 	EXPECT_THROW(network.Get(student1, student5), NoEdgeException);
 
+	EXPECT_THROW(network.Get(student2, student2), NoEdgeException);
 	EXPECT_EQ(1.0, network.Get(student2, student3));
 	EXPECT_EQ(1.0, network.Get(student2, student4));
 	EXPECT_THROW(network.Get(student2, student5), NoEdgeException);
 
+	EXPECT_THROW(network.Get(student3, student3), NoEdgeException);
 	EXPECT_EQ(3.0, network.Get(student3, student4));
 	EXPECT_THROW(network.Get(student3, student5), NoEdgeException);
+
+	EXPECT_THROW(network.Get(student4, student4), NoEdgeException);
 	EXPECT_EQ(1.5, network.Get(student4, student5));
+
+	EXPECT_THROW(network.Get(student5, student5), NoEdgeException);
 
 	/*
 	auto edge1 = network.Get(student1, student2);

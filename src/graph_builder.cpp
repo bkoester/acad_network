@@ -200,8 +200,10 @@ StudentNetwork BuildStudentNetworkFromStudents(
 void CalculateStudentNetworkEdges(const StudentNetwork& network,
 		const student_container_t& students,
 		StudentNetworkBuilder& builder) {
-	auto it_pair = builder.GetNextIteratorPair();
-	while (!builder.ReachedEndOfStudents(it_pair.first)) {
+	for (auto it_pair = builder.GetNextIteratorPair(); 
+			!builder.ReachedEndOfStudents(it_pair.first);
+			it_pair = builder.GetNextIteratorPair()) {
+		if (it_pair.first == it_pair.second) { continue; }
 		// Get the courses each of the students have taken.
 		const Student& student1(*lower_bound(begin(students), end(students), 
 				network[*it_pair.first]));
@@ -228,7 +230,6 @@ void CalculateStudentNetworkEdges(const StudentNetwork& network,
 		if (!courses_in_common.empty()) {
 			builder.AddEdge(*it_pair.first, *it_pair.second, connection); 
 		}
-		it_pair = builder.GetNextIteratorPair();
 	}
 }
 

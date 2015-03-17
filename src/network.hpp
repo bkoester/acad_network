@@ -16,6 +16,7 @@
 #include "bgl_value_iterator.hpp"
 
 class NoEdgeException{};
+class NoVertexException{};
 
 // Define abstract templated class for Network.
 template <typename Vertex, typename Edge>
@@ -60,6 +61,9 @@ class Network {
 	boost::optional<edge_t> GetEdgeDescriptor(
 			const vertex_t& source, const vertex_t& target) const;
 
+	// find the descriptor for a vertex given its value, takes O(|V|) time
+	vertex_t GetVertexDescriptor(const Vertex& vertex) const;
+
 	Edge& operator[](const edge_t& edge) { return graph_[edge]; }
 	const Edge& operator[](const edge_t& edge) const { return graph_[edge]; }
 
@@ -74,11 +78,14 @@ class Network {
 	Edge& Get(const vertex_t& source, const vertex_t& target);
 
 	// Returns the data structure at the edge, creates edge if it doesn't exist.
-	const Edge& operator()(const vertex_t& source, const vertex_t& target) const;
+	Edge& operator()(const vertex_t& source, const vertex_t& target, Edge init);
 	Edge& operator()(const vertex_t& source, const vertex_t& target);
+	Edge& operator()(const Vertex& source, const Vertex& target, Edge init);
+	Edge& operator()(const Vertex& source, const Vertex& target);
 
 	void Save(std::ostream& output_graph_archive) const;
 	void Load(std::istream& input_graph_archive);
+	void SaveEdgewise(std::ostream& output) const;
 
 	// classes declared to provide iterator access to vertices
 	// constructors are private to require access through GetVertices() and
@@ -243,7 +250,7 @@ Network<Vertex, Edge>::Network(long unsigned int num_vertices) :
 template <typename Vertex, typename Edge>
 template <typename ForwardIt>
 Network<Vertex, Edge>::Network(ForwardIt first, ForwardIt last) : 
-		graph_{std::distance(first, last)} {
+		graph_{static_cast<long unsigned int>(std::distance(first, last))} {
 	auto it = first;
 	for (auto& vertex : GetVertexValues()) { vertex = *it++; }
 }
@@ -318,14 +325,47 @@ Edge& Network<Vertex, Edge>::Get(
 
 template <typename Vertex, typename Edge>
 Edge& Network<Vertex, Edge>::operator()(
-		const vertex_t& source, const vertex_t& target) {
+		const vertex_t& source, const vertex_t& target, Edge init) {
 	// add the edge if necessary
 	if (!GetEdgeDescriptor(source, target))
-	{ boost::add_edge(source, target, Edge{}, graph_); }
+	{ boost::add_edge(source, target, init, graph_); }
 
 	// get a reference to the Edge
 	boost::optional<edge_t> edge_option{GetEdgeDescriptor(source, target)};
 	return operator[](edge_option.get());
+}
+
+
+template <typename Vertex, typename Edge>
+Edge& Network<Vertex, Edge>::operator()(
+		const vertex_t& source, const vertex_t& target) 
+{ return operator()(source, target, Edge{}); }
+
+template <typename Vertex, typename Edge>
+Edge& Network<Vertex, Edge>::operator()(
+		const Vertex& source, const Vertex& target, Edge init) {
+	auto source_vertex = GetVertexDescriptor(source);
+	auto target_vertex = GetVertexDescriptor(target);
+	return operator()(source_vertex, target_vertex, init);
+}
+
+
+template <typename Vertex, typename Edge>
+Edge& Network<Vertex, Edge>::operator()(
+		const Vertex& source, const Vertex& target) 
+{ return operator()(source, target, Edge{}); }
+
+
+template <typename Vertex, typename Edge>
+typename Network<Vertex, Edge>::vertex_t
+Network<Vertex, Edge>::GetVertexDescriptor(const Vertex& vertex) const {
+	auto vertex_it = std::find_if(std::begin(GetVertexDescriptors()),
+			std::end(GetVertexDescriptors()), [&vertex, this](vertex_t vertex_d)
+			{ return operator[](vertex_d) == vertex; });
+
+	if (vertex_it == std::end(GetVertexDescriptors()))
+	{ throw NoVertexException{}; }
+	return *vertex_it;
 }
 
 
@@ -341,6 +381,15 @@ template <typename Vertex, typename Edge>
 void Network<Vertex, Edge>::Load(std::istream& input_graph_archive) {
 	boost::archive::text_iarchive archive{input_graph_archive};
 	archive >> graph_;
+}
+
+template <typename Vertex, typename Edge>
+void Network<Vertex, Edge>::SaveEdgewise(std::ostream& output) const {
+	// output all edges in "vertex1 vertex2 edge" form
+	for (const auto& edge_d : GetEdgeDescriptors()) {
+		output << GetSourceValue(edge_d) << "\t" << GetTargetValue(edge_d)
+			   << "\t" << operator[](edge_d) << std::endl;
+	}
 }
 
 

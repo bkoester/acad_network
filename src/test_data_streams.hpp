@@ -51,17 +51,17 @@ const std::string enrollment_tab{
 
 /* Student tab in an easier to read format
 ID	GENDER	ETHNICITY	FIRST_TERM	DEGREE_TERM	TRANSFER	MAJOR1	MAJOR2	MAJOR1_LONG	MAJOR2_LONG	FIRST_DECLARE	FIRST_DECLARE_LONG	FIRST_DECLARE_TERM	PELL_STATUS	ACT_ENGL	ACT_MATH	ACT_COMP	COA
-147195	F	2	200607	201003	N	9.0101	42.2704	Communication Studies/Speech C	Experimental Psychology	NA	NA	NA	N	NA	NA	NA	ULSA
+147195	M	2	200607	201003	N	9.0101	42.2704	Communication Studies/Speech C	Experimental Psychology	NA	NA	NA	N	NA	NA	NA	ULSA
 312995	F	3	200807	201205	N	42.2706	NA	Physiological Psychology/Psych	NA	42.2706	Physiological Psychology/Psych	201103	N	24	25	24	ULSA
 352468	F	1	201207	201303	N	NA	NA	NA	NA	NA	NA	NA	N	36	36	35	NA
 500928	F	6	200707	201103	N	16.0905	45.0201	Spanish Language and Literatur	Anthropology	16.0905	Spanish Language and Literatur	200807	N	NA	NA	NA	ULSA
-567890	F	6	200707	201103	N	16.0905	45.0201	Spanish Language and Literatur	Anthropology	16.0905	Spanish Language and		Literatur	200807	N	NA	NA	NA	ULSA
+567890	M	6	200707	201103	N	16.0905	45.0201	Spanish Language and Literatur	Anthropology	16.0905	Spanish Language and		Literatur	200807	N	NA	NA	NA	ULSA
 */
 const std::string student_tab{
 "ID\tGENDER\tETHNICITY\tFIRST_TERM\tDEGREE_TERM\tTRANSFER\tMAJOR1\tMAJOR2\t"
 "MAJOR1_LONG\tMAJOR2_LONG\tFIRST_DECLARE\tFIRST_DECLARE_LONG\t"
 "FIRST_DECLARE_TERM\tPELL_STATUS\tACT_ENGL\tACT_MATH\tACT_COMP\tCOA\n"
-"147195\tF\t2\t200607\t201003\tN\t9.0101\t42.2704\t"
+"147195\tM\t2\t200607\t201003\tN\t9.0101\t42.2704\t"
 "Communication Studies/Speech C\tExperimental Psychology\tNA\tNA\tNA\tN\tNA\tNA"
 "\tNA\tULSA\n"
 "312995\tF\t3\t200807\t201205\tN\t42.2706\tNA\tPhysiological Psychology/Psych\tNA\t"
@@ -71,7 +71,7 @@ const std::string student_tab{
 "500928\tF\t6\t200707\t201103\tN\t16.0905\t45.0201\t"
 "Spanish Language and Literatur\tAnthropology\t16.0905\tSpanish Language and "
 "Literatur\t200807\tN\tNA\tNA\tNA\tULSA\n"
-"567890\tF\t6\t200707\t201103\tN\t16.0905\t45.0201\t"
+"567890\tM\t6\t200707\t201103\tN\t16.0905\t45.0201\t"
 "Spanish Language and Literatur\tAnthropology\t16.0905\tSpanish Language and "
 "Literatur\t200807\tN\tNA\tNA\tNA\tULSA\n"
 };

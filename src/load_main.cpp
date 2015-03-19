@@ -151,8 +151,7 @@ void MakeReducedNetwork(const StudentNetwork& network, string segment,
 						Init init) {
 	auto reduced_network = ReduceNetwork(
 			network, segment_func, accumulate_func, init);
-	ofstream output{"output/network_" + to_string(segment) + "_" + 
-		to_string(weightedness) + ".tsv"};
+	ofstream output{"output/network_" + segment + "_" + weightedness + ".tsv"};
 	reduced_network.SaveEdgewise(output);
 }
 

@@ -152,6 +152,8 @@ void MakeReducedNetwork(const StudentNetwork& network, string segment,
 	auto reduced_network = ReduceNetwork(
 			network, segment_func, accumulate_func, init);
 	ofstream output{"output/network_" + segment + "_" + weightedness + ".tsv"};
+	output << segment << "1" << '\t' << segment << "2" << '\t' << "count" 
+		   << endl;
 	reduced_network.SaveEdgewise(output);
 }
 
@@ -263,4 +265,6 @@ void SegmentStudents(const StudentNetwork& network,
 	segmenter.AddSegment(school_weighted, school_func, weighted_func);
 	segmenter.AddSegment(school_weighted_norm, school_func, weighted_norm_func);
 	segmenter.AddSegment(school_unweighted, school_func, unweighted_func);
+
+	segmenter.RunSegmentation(network, students);
 }

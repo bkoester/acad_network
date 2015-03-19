@@ -26,6 +26,13 @@ static void ReduceStudentNetwork(const StudentNetwork& network,
 								 const student_container_t& students,
 								 const course_container_t& courses);
 
+template <typename SegmentFunc, typename AccumulateFunc, typename Init>
+static void MakeReducedNetwork(const StudentNetwork& network, string segment, 
+							   string weightedness, SegmentFunc segment_func, 
+							   AccumulateFunc accumulate_func, 
+							   Init init);
+
+
 
 int main(int argc, char* argv[]) {
 	po::options_description desc{"Options for network loading binary:"};
@@ -111,42 +118,42 @@ void ReduceStudentNetwork(const StudentNetwork& network,
 	// major
 	auto major1_func = [&students](const StudentId& id)
 		{ return FindStudent(id, students).GetMajor1Description(); };
-	auto weighted_major_network = ReduceNetwork(
-			network, major1_func, weighted_func, 0.);
-	ofstream weighted_major_network_file{"output/weighted_major_network.tab"};
-	weighted_major_network.SaveEdgewise(weighted_major_network_file);
-	auto unweighted_major_network = ReduceNetwork(
-			network, major1_func, unweighted_func, 0);
-	ofstream unweighted_major_network_file{
-		"output/unweighted_major_network.tab"};
-	unweighted_major_network.SaveEdgewise(unweighted_major_network_file);
-
+	MakeReducedNetwork(
+			network, "major1", "weighted", major1_func, weighted_func, 0.);
+	MakeReducedNetwork(
+			network, "major1", "unweighted", major1_func, unweighted_func, 0);
+	
 	// school
 	auto school_func = [&students](const StudentId& id)
 		{ return FindStudent(id, students).school(); };
 	auto weighted_school_network = ReduceNetwork(
 			network, school_func, weighted_func, 0.);
-	ofstream weighted_school_network_file{"output/weighted_school_network.tab"};
-	weighted_school_network.SaveEdgewise(weighted_school_network_file);
-	auto unweighted_school_network = ReduceNetwork(
-			network, school_func, unweighted_func, 0);
-	ofstream unweighted_school_network_file{
-		"output/unweighted_school_network.tab"};
-	unweighted_school_network.SaveEdgewise(unweighted_school_network_file);
+	MakeReducedNetwork(
+			network, "school", "weighted", school_func, weighted_func, 0.);
+	MakeReducedNetwork(
+			network, "school", "unweighted", school_func, unweighted_func, 0);
 
 	// ethnicity
 	auto ethnicity_func = [&students](const StudentId& id)
 		{ return FindStudent(id, students).ethnicity(); };
 	auto weighted_ethnicity_network = ReduceNetwork(
 			network, ethnicity_func, weighted_func, 0.);
-	ofstream weighted_ethnicity_network_file{
-		"output/weighted_ethnicity_network.tab"};
-	weighted_ethnicity_network.SaveEdgewise(weighted_ethnicity_network_file);
-	auto unweighted_ethnicity_network = ReduceNetwork(
-			network, ethnicity_func, unweighted_func, 0);
-	ofstream unweighted_ethnicity_network_file{
-		"output/unweighted_ethnicity_network.tab"};
-	unweighted_ethnicity_network.SaveEdgewise(unweighted_ethnicity_network_file);
+	MakeReducedNetwork(
+			network, "ethnicity", "weighted", ethnicity_func, weighted_func, 0.);
+	MakeReducedNetwork(network, "ethnicity", "unweighted", ethnicity_func, 
+					   unweighted_func, 0);
+}
+
+template <typename SegmentFunc, typename AccumulateFunc, typename Init>
+void MakeReducedNetwork(const StudentNetwork& network, string segment, 
+						string weightedness, SegmentFunc segment_func, 
+						AccumulateFunc accumulate_func, 
+						Init init) {
+	auto reduced_network = ReduceNetwork(
+			network, segment_func, accumulate_func, init);
+	ofstream output{"output/network_" + to_string(segment) + "_" + 
+		to_string(weightedness) + ".tsv"};
+	reduced_network.SaveEdgewise(output);
 }
 
 
@@ -166,9 +173,9 @@ void SegmentStudents(const StudentNetwork& network,
 		{ return to_string(data.unweighted_degree); };
 
 	// gender
-	ofstream gender_weighted{"output/gender_weighted.tab"};
-	ofstream gender_weighted_norm{"output/gender_weighted_norm.tab"};
-	ofstream gender_unweighted{"output/gender_unweighted.tab"};
+	ofstream gender_weighted{"output/gender_weighted.tsv"};
+	ofstream gender_weighted_norm{"output/gender_weighted_norm.tsv"};
+	ofstream gender_unweighted{"output/gender_unweighted.tsv"};
 	auto gender_func = [](const Student& student) 
 		{ return Student::to_string(student.gender()); };
 	segmenter.AddSegment(gender_weighted, gender_func, weighted_func);
@@ -176,9 +183,9 @@ void SegmentStudents(const StudentNetwork& network,
 	segmenter.AddSegment(gender_unweighted, gender_func, unweighted_func);
 
 	// term
-	ofstream term_weighted{"output/term_weighted.tab"};
-	ofstream term_weighted_norm{"output/term_weighted_norm.tab"};
-	ofstream term_unweighted{"output/term_unweighted.tab"};
+	ofstream term_weighted{"output/term_weighted.tsv"};
+	ofstream term_weighted_norm{"output/term_weighted_norm.tsv"};
+	ofstream term_unweighted{"output/term_unweighted.tsv"};
 	auto first_term_func = [](const Student& student)
 		{ return to_string(student.first_term()); };
 	segmenter.AddSegment(term_weighted, first_term_func, weighted_func);
@@ -187,9 +194,9 @@ void SegmentStudents(const StudentNetwork& network,
 	segmenter.AddSegment(term_unweighted, first_term_func, unweighted_func);
 
 	// ethnicity
-	ofstream ethnicity_weighted{"output/ethnicity_weighted.tab"};
-	ofstream ethnicity_weighted_norm{"output/ethnicity_weighted_norm.tab"};
-	ofstream ethnicity_unweighted{"output/ethnicity_unweighted.tab"};
+	ofstream ethnicity_weighted{"output/ethnicity_weighted.tsv"};
+	ofstream ethnicity_weighted_norm{"output/ethnicity_weighted_norm.tsv"};
+	ofstream ethnicity_unweighted{"output/ethnicity_unweighted.tsv"};
 	auto ethnicity_func = [](const Student& student)
 		{ return Student::to_string(student.ethnicity()); };
 	segmenter.AddSegment(ethnicity_weighted, ethnicity_func, weighted_func);
@@ -198,9 +205,9 @@ void SegmentStudents(const StudentNetwork& network,
 	segmenter.AddSegment(ethnicity_unweighted, ethnicity_func, unweighted_func);
 
 	// transfer
-	ofstream transfer_weighted{"output/transfer_weighted.tab"};
-	ofstream transfer_weighted_norm{"output/transfer_weighted_norm.tab"};
-	ofstream transfer_unweighted{"output/transfer_unweighted.tab"};
+	ofstream transfer_weighted{"output/transfer_weighted.tsv"};
+	ofstream transfer_weighted_norm{"output/transfer_weighted_norm.tsv"};
+	ofstream transfer_unweighted{"output/transfer_unweighted.tsv"};
 	auto transfer_func = 
 		[](const Student& student)
 		{ return student.transfer() ? "Transfer" : "Non-transfer"; };
@@ -210,9 +217,9 @@ void SegmentStudents(const StudentNetwork& network,
 	segmenter.AddSegment(transfer_unweighted, transfer_func, unweighted_func);
 
 	// major 1
-	ofstream major1_weighted{"output/major1_weighted.tab"};
-	ofstream major1_weighted_norm{"output/major1_weighted_norm.tab"};
-	ofstream major1_unweighted{"output/major1_unweighted.tab"};
+	ofstream major1_weighted{"output/major1_weighted.tsv"};
+	ofstream major1_weighted_norm{"output/major1_weighted_norm.tsv"};
+	ofstream major1_unweighted{"output/major1_unweighted.tsv"};
 	auto major1_func = [](const Student& student)
 		{ return student.GetMajor1Description(); };
 	segmenter.AddSegment(major1_weighted, major1_func, weighted_func);
@@ -220,9 +227,9 @@ void SegmentStudents(const StudentNetwork& network,
 	segmenter.AddSegment(major1_unweighted, major1_func, unweighted_func);
 
 	// major 2
-	ofstream major2_weighted{"output/major2_weighted.tab"};
-	ofstream major2_weighted_norm{"output/major2_weighted_norm.tab"};
-	ofstream major2_unweighted{"output/major2_unweighted.tab"};
+	ofstream major2_weighted{"output/major2_weighted.tsv"};
+	ofstream major2_weighted_norm{"output/major2_weighted_norm.tsv"};
+	ofstream major2_unweighted{"output/major2_unweighted.tsv"};
 	auto major2_func = [](const Student& student)
 		{ return student.GetMajor2Description(); };
 	segmenter.AddSegment(major2_weighted, major2_func, weighted_func);
@@ -230,10 +237,10 @@ void SegmentStudents(const StudentNetwork& network,
 	segmenter.AddSegment(major2_unweighted, major2_func, unweighted_func);
 
 	// major status
-	ofstream major_status_weighted{"output/major_status_weighted.tab"};
+	ofstream major_status_weighted{"output/major_status_weighted.tsv"};
 	ofstream major_status_weighted_norm{
-		"output/major_status_weighted_norm.tab"};
-	ofstream major_status_unweighted{"output/major_status_unweighted.tab"};
+		"output/major_status_weighted_norm.tsv"};
+	ofstream major_status_unweighted{"output/major_status_unweighted.tsv"};
 	auto major_status = [](const Student& student) {
 		auto major_status = string{"Undeclared"};
 		if (bool(student.major1()) != bool(student.major2())) {
@@ -250,12 +257,11 @@ void SegmentStudents(const StudentNetwork& network,
 			major_status_unweighted, major_status, unweighted_func);
 
 	// school
-	ofstream school_weighted{"output/school_weighted.tab"};
-	ofstream school_weighted_norm{"output/school_weighted_norm.tab"};
-	ofstream school_unweighted{"output/school_unweighted.tab"};
+	ofstream school_weighted{"output/school_weighted.tsv"};
+	ofstream school_weighted_norm{"output/school_weighted_norm.tsv"};
+	ofstream school_unweighted{"output/school_unweighted.tsv"};
 	auto school_func = [](const Student& student) { return student.school(); };
 	segmenter.AddSegment(school_weighted, school_func, weighted_func);
 	segmenter.AddSegment(school_weighted_norm, school_func, weighted_norm_func);
 	segmenter.AddSegment(school_unweighted, school_func, unweighted_func);
 }
-

@@ -74,8 +74,9 @@ ostream& operator<<(ostream& os, const Student& student) {
 	if (student.major2()) { os << ", " << student.GetMajor2Description(); }
 	if (!student.courses_taken_.empty()) {
 		os << "; Classes: ";
-		transform(student.courses_taken_.cbegin(), --student.courses_taken_.cend(), 
-				  ostream_iterator<CourseId>{os, ", "}, 
+		transform(student.courses_taken_.cbegin(),
+				  --student.courses_taken_.cend(),
+				  ostream_iterator<CourseId>{os, ", "},
 				  [](const Course* course) { return course->GetId(); });
 		os << *student.courses_taken_.rbegin();
 		os << endl;

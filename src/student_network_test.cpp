@@ -97,6 +97,14 @@ TEST_F(StudentNetworkTest, FindUnweightedDistance) {
 }
 
 
-/* TODO: This function
-TEST_F(StudentNetworkTest, FindUnweightedDistance) {
-} */
+TEST_F(StudentNetworkTest, FindWeightedDistance) {
+	auto distances = network.FindWeightedDistances(network.GetVertexDescriptor(
+				StudentId(312995)));
+
+	EXPECT_EQ(5u, distances.size());
+	EXPECT_DOUBLE_EQ(0., distances[StudentId(312995)]);
+	EXPECT_DOUBLE_EQ(2., distances[StudentId(500928)]);
+	EXPECT_DOUBLE_EQ(3., distances[StudentId(147195)]);
+	EXPECT_DOUBLE_EQ(1., distances[StudentId(352468)]);
+	EXPECT_DOUBLE_EQ(2.5, distances[StudentId(567890)]);
+}

@@ -90,9 +90,9 @@ class Network {
 	// more complex algorithms
 	// Returns the number of steps to get from start to any other vertex.
 	std::map<Vertex, int> FindUnweightedDistances(vertex_t start) const;
-	template <typename WeightFunc>
-	std::map<Vertex, int> FindWeightedDistances(
-			vertex_t start, WeightFunc weight_getter) const;
+	// Returns the weighted distance to get from start to any other vertex.
+	// Uses bundled edge property as weight.
+	std::map<Vertex, Edge> FindWeightedDistances(vertex_t start) const;
 
 	void Save(std::ostream& output_graph_archive) const;
 	void Load(std::istream& input_graph_archive);
@@ -405,20 +405,19 @@ std::map<Vertex, int> Network<Vertex, Edge>::FindUnweightedDistances(
 }
 
 template <typename Vertex, typename Edge>
-template <typename WeightFunc>
-std::map<Vertex, int> Network<Vertex, Edge>::FindWeightedDistances(
-		vertex_t start, WeightFunc weight_getter) const {
-	std::vector<double> distances(GetVertexValues().size(), 0);
+std::map<Vertex, Edge> Network<Vertex, Edge>::FindWeightedDistances(
+		vertex_t start) const {
+	std::vector<Edge> distances(GetVertexValues().size(), 0);
 	// perform a BFS on the vertex
 	boost::dijkstra_shortest_paths(graph_, start, 
-			boost::weight_map(boost::get(weight_getter, graph_)).
+			boost::weight_map(boost::get(boost::edge_bundle, graph_)).
 			distance_map(boost::make_iterator_property_map(
 					std::begin(distances),
 					get(boost::vertex_index, graph_))));
 
-	std::map<Vertex, double> value_distances;
+	std::map<Vertex, Edge> value_distances;
 	// distances indices are vertex descriptors, so no std algorithm here
-	for (int vertex_descriptor{0}; vertex_descriptor < distances.size(); 
+	for (auto vertex_descriptor = 0u; vertex_descriptor < distances.size(); 
 			++vertex_descriptor) {
 		value_distances[operator[](vertex_descriptor)] = 
 			distances[vertex_descriptor];

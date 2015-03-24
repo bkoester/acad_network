@@ -68,3 +68,35 @@ TEST_F(StudentNetworkTest, Serialization) {
 	loaded_network.Load(archive);
 	TestStudentNetworkStructure(loaded_network);
 }
+
+
+TEST_F(StudentNetworkTest, GetVertexDescriptor) {
+	StudentId student_id1{312995};
+	StudentId student_id2{500928};
+	
+	StudentId found_id1{network[network.GetVertexDescriptor(student_id1)]};
+	StudentId found_id2{network[network.GetVertexDescriptor(student_id2)]};
+
+	EXPECT_EQ(student_id1, found_id1);
+	EXPECT_EQ(student_id2, found_id2);
+
+	EXPECT_THROW(network.GetVertexDescriptor(StudentId(0)), NoVertexException);
+}
+
+
+TEST_F(StudentNetworkTest, FindUnweightedDistance) {
+	auto distances = network.FindUnweightedDistances(network.GetVertexDescriptor(
+				StudentId(312995)));
+
+	EXPECT_EQ(5u, distances.size());
+	EXPECT_EQ(0, distances[StudentId(312995)]);
+	EXPECT_EQ(1, distances[StudentId(500928)]);
+	EXPECT_EQ(1, distances[StudentId(147195)]);
+	EXPECT_EQ(1, distances[StudentId(352468)]);
+	EXPECT_EQ(2, distances[StudentId(567890)]);
+}
+
+
+/* TODO: This function
+TEST_F(StudentNetworkTest, FindUnweightedDistance) {
+} */

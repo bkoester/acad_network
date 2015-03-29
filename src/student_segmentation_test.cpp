@@ -32,8 +32,8 @@ class StudentSegmentationTest : public ::testing::Test {
 	}
 
  protected:
-	student_container_t students;
-	course_container_t enrollment;
+	Student::container_t students;
+	Course::container_t enrollment;
 	StudentNetwork network;
 	StudentSegmenter segmentation;
 };

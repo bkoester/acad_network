@@ -21,7 +21,7 @@ using std::string;
 using std::transform;
 
 
-CourseId::CourseId() : subject{Course::undefined_subject}, 
+Course::Id::Id() : subject{Course::undefined_subject}, 
 	number{Course::undefined_number}, term{Course::undefined_term} {}
 
 
@@ -39,7 +39,7 @@ bool Course::operator<(const Course& other) const {
 }
 
 
-ostream& operator<<(ostream& output, const CourseId& course_id) {
+ostream& operator<<(ostream& output, const Course::Id& course_id) {
 	output << course_id.subject << " " << course_id.number << " "
 		   << course_id.term;
 	return output;
@@ -52,7 +52,7 @@ ostream& operator<<(ostream& output, const Course& course) {
 	output << " ";
 	transform(begin(course.students_enrolled()), 
 			--end(course.students_enrolled()),
-			ostream_iterator<StudentId>{output, ", "},
+			ostream_iterator<Student::Id>{output, ", "},
 			[](const Student* student) { return student->id(); });
 	output << (*course.students_enrolled().rbegin())->id();
 	return output;

@@ -28,15 +28,15 @@ class StudentNetworkTest : public ::testing::Test {
 
 		 // add vertices
 		 auto student1 = vertex(0, graph);
-		 graph[student1] = StudentId{312995};
+		 graph[student1] = Student::Id{147195};
  		 auto student2 = vertex(1, graph);
-		 graph[student2] = StudentId{500928};
+		 graph[student2] = Student::Id{312995};
  		 auto student3 = vertex(2, graph);
-		 graph[student3] = StudentId{147195};
+		 graph[student3] = Student::Id{352468};
  		 auto student4 = vertex(3, graph);
-		 graph[student4] = StudentId{352468};
+		 graph[student4] = Student::Id{500928};
  		 auto student5 = vertex(4, graph);
-		 graph[student5] = StudentId{567890};
+		 graph[student5] = Student::Id{567890};
 
 		 // add edges
 		 add_edge(student1, student2, 3.0, graph);
@@ -44,10 +44,10 @@ class StudentNetworkTest : public ::testing::Test {
 		 add_edge(student1, student4, 1.0, graph);
 
 		 add_edge(student2, student3, 1.0, graph);
-		 add_edge(student2, student4, 1.0, graph);
+		 add_edge(student2, student4, 3.0, graph);
 
-		 add_edge(student3, student4, 3.0, graph);
-		 add_edge(student4, student5, 1.5, graph);
+		 add_edge(student3, student4, 1.0, graph);
+		 add_edge(student3, student5, 1.5, graph);
 
 		 network = StudentNetwork{graph};
 	 }
@@ -71,40 +71,40 @@ TEST_F(StudentNetworkTest, Serialization) {
 
 
 TEST_F(StudentNetworkTest, GetVertexDescriptor) {
-	StudentId student_id1{312995};
-	StudentId student_id2{500928};
+	Student::Id student_id1{312995};
+	Student::Id student_id2{500928};
 	
-	StudentId found_id1{network[network.GetVertexDescriptor(student_id1)]};
-	StudentId found_id2{network[network.GetVertexDescriptor(student_id2)]};
+	Student::Id found_id1{network[network.GetVertexDescriptor(student_id1)]};
+	Student::Id found_id2{network[network.GetVertexDescriptor(student_id2)]};
 
 	EXPECT_EQ(student_id1, found_id1);
 	EXPECT_EQ(student_id2, found_id2);
 
-	EXPECT_THROW(network.GetVertexDescriptor(StudentId(0)), NoVertexException);
+	EXPECT_THROW(network.GetVertexDescriptor(Student::Id(0)), NoVertexException);
 }
 
 
 TEST_F(StudentNetworkTest, FindUnweightedDistance) {
 	auto distances = network.FindUnweightedDistances(network.GetVertexDescriptor(
-				StudentId(312995)));
+				Student::Id(312995)));
 
 	EXPECT_EQ(5u, distances.size());
-	EXPECT_EQ(0, distances[StudentId(312995)]);
-	EXPECT_EQ(1, distances[StudentId(500928)]);
-	EXPECT_EQ(1, distances[StudentId(147195)]);
-	EXPECT_EQ(1, distances[StudentId(352468)]);
-	EXPECT_EQ(2, distances[StudentId(567890)]);
+	EXPECT_EQ(0, distances[Student::Id(312995)]);
+	EXPECT_EQ(1, distances[Student::Id(500928)]);
+	EXPECT_EQ(1, distances[Student::Id(147195)]);
+	EXPECT_EQ(1, distances[Student::Id(352468)]);
+	EXPECT_EQ(2, distances[Student::Id(567890)]);
 }
 
 
 TEST_F(StudentNetworkTest, FindWeightedDistance) {
 	auto distances = network.FindWeightedDistances(network.GetVertexDescriptor(
-				StudentId(312995)));
+				Student::Id(312995)));
 
 	EXPECT_EQ(5u, distances.size());
-	EXPECT_DOUBLE_EQ(0., distances[StudentId(312995)]);
-	EXPECT_DOUBLE_EQ(2., distances[StudentId(500928)]);
-	EXPECT_DOUBLE_EQ(3., distances[StudentId(147195)]);
-	EXPECT_DOUBLE_EQ(1., distances[StudentId(352468)]);
-	EXPECT_DOUBLE_EQ(2.5, distances[StudentId(567890)]);
+	EXPECT_DOUBLE_EQ(0., distances[Student::Id(312995)]);
+	EXPECT_DOUBLE_EQ(2., distances[Student::Id(500928)]);
+	EXPECT_DOUBLE_EQ(3., distances[Student::Id(147195)]);
+	EXPECT_DOUBLE_EQ(1., distances[Student::Id(352468)]);
+	EXPECT_DOUBLE_EQ(2.5, distances[Student::Id(567890)]);
 }

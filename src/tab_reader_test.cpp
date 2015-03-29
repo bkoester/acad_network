@@ -43,10 +43,10 @@ TEST(TabRecordTest, ReadStudents) {
 }
 
 TEST(TabReaderTest, FindStudent) {
-	student_container_t students{Student{147195}, Student{312995}, 
+	Student::container_t students{Student{147195}, Student{312995}, 
 		Student{352468}, Student{500928}, Student{567890}};
 
-	const student_container_t const_students{students};
+	const Student::container_t const_students{students};
 
 	EXPECT_EQ(Student{147195}, FindStudent(147195, students));  
 	EXPECT_EQ(Student{312995}, FindStudent(312995, students));
@@ -62,7 +62,7 @@ TEST(TabReaderTest, FindStudent) {
 }
 
 TEST(TabReaderTest, ReadEnrollment) {
-	student_container_t students{Student{147195}, Student{312995}, 
+	Student::container_t students{Student{147195}, Student{312995}, 
 		Student{352468}, Student{500928}, Student{567890}};
 
 	stringstream enrollment_stream{enrollment_tab};

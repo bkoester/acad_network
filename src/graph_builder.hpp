@@ -17,7 +17,7 @@ StudentNetwork BuildStudentNetworkFromEnrollment(
 		std::istream& enrollment_stream);
 
 StudentNetwork BuildStudentNetworkFromStudents(
-		const student_container_t& students);
+		const Student::container_t& students);
 
 #endif  // GRAPH_BUILDER_H
 

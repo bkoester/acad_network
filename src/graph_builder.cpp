@@ -42,12 +42,12 @@ namespace chr = std::chrono;
 const int timing_modulus{10000000};
 
 
-static unordered_map<StudentId, unordered_set<Course, CourseHasher>> 
+static unordered_map<Student::Id, unordered_set<Course, Course::Hasher>> 
 GetStudentIdsToCourses(istream& enrollment_stream);
 
 class StudentNetworkBuilder;
 void CalculateStudentNetworkEdges(const StudentNetwork& network,
-		const student_container_t& students,
+		const Student::container_t& students,
 		StudentNetworkBuilder& builder);
 
 
@@ -79,9 +79,9 @@ CourseNetwork BuildCourseNetworkFromEnrollment(istream& enrollment_stream) {
 	auto student_to_courses = GetStudentIdsToCourses(enrollment_stream);
 
 	// aggregate pairs of courses
-	unordered_map<DistinctUnorderedPair<Course>, int, PairHasher<CourseHasher>> 
+	unordered_map<DistinctUnorderedPair<Course>, int, PairHasher<Course::Hasher>> 
 		edge_weights;
-	unordered_set<Course, CourseHasher> courses;
+	unordered_set<Course, Course::Hasher> courses;
 	for (const auto& elt : student_to_courses) {
 		if (elt.second.size() == 1) { courses.insert(*elt.second.begin()); }
 
@@ -121,7 +121,7 @@ CourseNetwork BuildCourseNetworkFromEnrollment(istream& enrollment_stream) {
 class StudentNetworkBuilder {
  public:
 	StudentNetworkBuilder(
-			StudentNetwork& network, const student_container_t& students) :
+			StudentNetwork& network, const Student::container_t& students) :
 				network_(network), num_pairs_{0},
 				beginning_pairs_time_{chr::system_clock::now()} {
 		// assign the vertices in the network
@@ -179,7 +179,7 @@ class StudentNetworkBuilder {
 
 
 StudentNetwork BuildStudentNetworkFromStudents(
-		const student_container_t& students) {
+		const Student::container_t& students) {
 
 	// spawn threads to iterate through each pair of students
 	StudentNetwork network{students.size()};
@@ -198,7 +198,7 @@ StudentNetwork BuildStudentNetworkFromStudents(
 
 	
 void CalculateStudentNetworkEdges(const StudentNetwork& network,
-		const student_container_t& students,
+		const Student::container_t& students,
 		StudentNetworkBuilder& builder) {
 	for (auto it_pair = builder.GetNextIteratorPair(); 
 			!builder.ReachedEndOfStudents(it_pair.first);
@@ -235,12 +235,12 @@ void CalculateStudentNetworkEdges(const StudentNetwork& network,
 
 
 // Gets a hash table of students => set of courses they have taken
-unordered_map<StudentId, unordered_set<Course, CourseHasher>> 
+unordered_map<Student::Id, unordered_set<Course, Course::Hasher>> 
 GetStudentIdsToCourses(istream& enrollment_stream) {
 	SkipLine(enrollment_stream);
 	istream_iterator<Enrollment> enrollment_it{enrollment_stream};
 
-	unordered_map<StudentId, unordered_set<Course, CourseHasher>> 
+	unordered_map<Student::Id, unordered_set<Course, Course::Hasher>> 
 		student_to_courses;
 
 	// make a map of student id => courses taken

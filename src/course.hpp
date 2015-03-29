@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <iosfwd>
+#include <memory>
 #include <set>
 #include <string>
 
@@ -10,21 +11,32 @@
 
 
 class Student;
-
-
-// An ID object for the course that uniquely identifies it.
-struct CourseId {
-	CourseId();
-	CourseId(std::string s, short n, int t) : subject{s}, number{n}, term{t} {}
-
-	std::string subject;
-	short number;
-	int term;
-};
+struct CourseComparator;
 
 
 class Course {
  public:
+	// An ID object for the course that uniquely identifies it.
+	struct Id {
+		Id();
+		Id(std::string s, short n, int t) : subject{s}, number{n}, term{t} {}
+
+		std::string subject;
+		short number;
+		int term;
+	};
+
+	struct Hasher {
+		int operator()(const Course& course) const {
+			return std::hash<std::string>()(course.subject()) ^
+				std::hash<short>()(course.number()) ^ 
+				std::hash<short>()(course.term());
+		}
+	};
+
+	using container_t = std::set<std::unique_ptr<Course>, CourseComparator>;
+
+
 	Course() : subject_{undefined_subject}, number_{undefined_number},
 		term_{undefined_term}, num_credits_{0} {}
 
@@ -69,14 +81,14 @@ class Course {
 	std::set<const Student*>::size_type GetNumStudentsEnrolled() const
 	{ return students_enrolled_.size(); }
 
-	CourseId GetId() const { return {subject_, number_, term_}; }
+	Course::Id GetId() const { return {subject_, number_, term_}; }
 
  private:
 	// unit testing class
 	friend class CourseTest;
 	friend class boost::serialization::access;
 	// ID class
-	friend class CourseId;
+	friend class Course::Id;
 	// read input from student course tab
 	friend std::istream& operator>>(std::istream& input, Course& course);
 
@@ -93,16 +105,16 @@ class Course {
 
 
 std::ostream& operator<<(std::ostream& output, const Course& course);
-std::ostream& operator<<(std::ostream& output, const CourseId& course_id);
+std::ostream& operator<<(std::ostream& output, const Course::Id& course_id);
 
 
-struct CourseHasher {
-	int operator()(const Course& course) const {
-		return std::hash<std::string>()(course.subject()) ^
-			std::hash<short>()(course.number()) ^ 
-			std::hash<short>()(course.term());
+struct CourseComparator {
+	bool operator()(const std::unique_ptr<Course>& course1, 
+					const std::unique_ptr<Course>& course2) const {
+		return *course1 < *course2;
 	}
 };
+
 
 
 #endif  // COURSE_H

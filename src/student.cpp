@@ -76,7 +76,7 @@ ostream& operator<<(ostream& os, const Student& student) {
 		os << "; Classes: ";
 		transform(student.courses_taken_.cbegin(),
 				  --student.courses_taken_.cend(),
-				  ostream_iterator<CourseId>{os, ", "},
+				  ostream_iterator<Course::Id>{os, ", "},
 				  [](const Course* course) { return course->GetId(); });
 		os << *student.courses_taken_.rbegin();
 		os << endl;
@@ -87,7 +87,7 @@ ostream& operator<<(ostream& os, const Student& student) {
 
 istream& operator>>(istream& input, Student& student) {
 	// read the input data we're interested in, skip the rest of the line
-	StudentId id;
+	Student::Id id;
 	Student::Gender gender;
 	Student::Ethnicity ethnicity{Student::Ethnicity::Unknown};
 	int first_term, degree_term;
@@ -253,6 +253,21 @@ ostream& operator<<(ostream& output, const Student::Ethnicity& ethnicity) {
 	}
 
 	return output;
+}
+
+
+const Student& FindStudent(
+		Student::Id id, const Student::container_t& students) {
+	auto student_it = lower_bound(begin(students), end(students), Student{id});
+	assert(student_it != end(students));
+	return *student_it;
+}
+
+
+Student& FindStudent(Student::Id id, Student::container_t& students) {
+	auto student_it = lower_bound(begin(students), end(students), Student{id});
+	assert(student_it != end(students));
+	return *student_it;
 }
 
 

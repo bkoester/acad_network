@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <string>
 
 #include <boost/program_options.hpp>
@@ -15,22 +16,24 @@
 using std::cerr; using std::cin; using std::cout; using std::endl;
 using std::ifstream; using std::ofstream; 
 using std::string; using std::to_string;
+using std::unique_ptr;
 namespace po = boost::program_options;
 
 
+/*
 static void SegmentStudents(const StudentNetwork& network,
-							const student_container_t& students, 
-							const course_container_t& courses);
+							const Student::container_t& students, 
+							const Course::container_t& courses);
 
 static void ReduceStudentNetwork(const StudentNetwork& network,
-								 const student_container_t& students,
-								 const course_container_t& courses);
+								 const Student::container_t& students,
+								 const Course::container_t& courses);
 
 template <typename SegmentFunc, typename AccumulateFunc, typename Init>
 static void MakeReducedNetwork(const StudentNetwork& network, string segment, 
 							   string weightedness, SegmentFunc segment_func, 
 							   AccumulateFunc accumulate_func, 
-							   Init init);
+							   Init init); */
 
 
 
@@ -55,7 +58,6 @@ int main(int argc, char* argv[]) {
 		 "('student' or 'course')")
 		("threads,t", po::value<int>(&num_threads)->default_value(1),
 		 "Number of threads to use to build the network");
-
 
 	po::variables_map vm;
 
@@ -86,8 +88,8 @@ int main(int argc, char* argv[]) {
 	// Read students and enrollment data.
 	ifstream student_stream{student_path};
 	ifstream enrollment_stream{enrollment_path};
-	student_container_t students{ReadStudents(student_stream)};
-	course_container_t courses{ReadEnrollment(enrollment_stream, students)};
+	Student::container_t students{ReadStudents(student_stream)};
+	Course::container_t courses{ReadEnrollment(enrollment_stream, students)};
 
 	// Do whatever work necessary
 	if (network_to_load == NetworkType_e::Course) {
@@ -95,28 +97,42 @@ int main(int argc, char* argv[]) {
 		CourseNetwork course_network{course_archive};
 	}
 	if (network_to_load == NetworkType_e::Student) {
-		ifstream student_archive{student_archive_path};
-		StudentNetwork student_network{student_archive};
+		//ifstream student_archive{student_archive_path};
+		//StudentNetwork student_network{student_archive};
 
-		SegmentStudents(student_network, students, courses);
-		ReduceStudentNetwork(student_network, students, courses);
+		auto enrollment_credits = accumulate(begin(courses), end(courses), 0, 
+				[](int old_value, const unique_ptr<Course>& course) {
+					return old_value + (course->students_enrolled().size() *
+					course->num_credits());
+				});
+		auto enrollment_square = accumulate(begin(courses), end(courses), 0, 
+				[](int old_value, const unique_ptr<Course>& course) {
+					return old_value + (course->students_enrolled().size() *
+					course->students_enrolled().size());
+				});
+
+		cout << "Enrollment and num credits summation: " << enrollment_credits
+			 << "Enrollment square summation: " << enrollment_square << endl;
+
+		//SegmentStudents(student_network, students, courses);
+		//ReduceStudentNetwork(student_network, students, courses);
 	}
 
 	return 0;
 }
 
-
+/*
 // reduces network to see the interaction between various segments
 void ReduceStudentNetwork(const StudentNetwork& network,
-						  const student_container_t& students,
-						  const course_container_t& courses) {
+						  const Student::container_t& students,
+						  const Course::container_t& courses) {
 	auto weighted_func = [](double edge, double current_edge) 
 				{ return edge + current_edge; };
 	auto unweighted_func = [](double edge, int current_edge) 
 				{ return 1 + current_edge; };
 
 	// major
-	auto major1_func = [&students](const StudentId& id)
+	auto major1_func = [&students](const Student::Id& id)
 		{ return FindStudent(id, students).GetMajor1Description(); };
 	MakeReducedNetwork(
 			network, "major1", "weighted", major1_func, weighted_func, 0.);
@@ -124,7 +140,7 @@ void ReduceStudentNetwork(const StudentNetwork& network,
 			network, "major1", "unweighted", major1_func, unweighted_func, 0);
 	
 	// school
-	auto school_func = [&students](const StudentId& id)
+	auto school_func = [&students](const Student::Id& id)
 		{ return FindStudent(id, students).school(); };
 	auto weighted_school_network = ReduceNetwork(
 			network, school_func, weighted_func, 0.);
@@ -134,7 +150,7 @@ void ReduceStudentNetwork(const StudentNetwork& network,
 			network, "school", "unweighted", school_func, unweighted_func, 0);
 
 	// ethnicity
-	auto ethnicity_func = [&students](const StudentId& id)
+	auto ethnicity_func = [&students](const Student::Id& id)
 		{ return FindStudent(id, students).ethnicity(); };
 	auto weighted_ethnicity_network = ReduceNetwork(
 			network, ethnicity_func, weighted_func, 0.);
@@ -161,8 +177,8 @@ void MakeReducedNetwork(const StudentNetwork& network, string segment,
 // segments students according to various attributes and puts information in
 // separate output files
 void SegmentStudents(const StudentNetwork& network,
-					 const student_container_t& students, 
-					 const course_container_t& courses) {
+					 const Student::container_t& students, 
+					 const Course::container_t& courses) {
 	using VertexData = StudentSegmenter::VertexData;
 	StudentSegmenter segmenter;
 
@@ -268,3 +284,4 @@ void SegmentStudents(const StudentNetwork& network,
 
 	segmenter.RunSegmentation(network, students);
 }
+*/

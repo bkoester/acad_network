@@ -6,10 +6,8 @@
 
 #include "gtest/gtest.h"
 
-#include "graph_builder.hpp"
 #include "student_network.hpp"
 #include "test_data_streams.hpp"
-#include "tab_reader.hpp"
 
 
 using std::begin;
@@ -20,26 +18,59 @@ using std::stringstream;
 class ReduceNetworkTest : public ::testing::Test {
  public:
 	void SetUp() override {
-		// yes, this should be mocked, but mocking is a lot of work
-		stringstream student_stream{student_tab};
-		students = ReadStudents(student_stream);
-		stringstream enrollment_stream{enrollment_tab};
-		enrollment = ReadEnrollment(enrollment_stream, students);
-		network = BuildStudentNetworkFromStudents(students);
+		StudentNetwork::graph_t graph{5};
+
+		// add vertices
+		auto student1 = vertex(0, graph);
+		graph[student1] = Student::Id{312995};
+		auto student2 = vertex(1, graph);
+		graph[student2] = Student::Id{500928};
+		auto student3 = vertex(2, graph);
+		graph[student3] = Student::Id{147195};
+		auto student4 = vertex(3, graph);
+		graph[student4] = Student::Id{352468};
+		auto student5 = vertex(4, graph);
+		graph[student5] = Student::Id{567890};
+
+		// add edges
+		add_edge(student1, student2, 3.0, graph);
+		add_edge(student1, student3, 3.0, graph);
+		add_edge(student1, student4, 1.0, graph);
+
+		add_edge(student2, student3, 1.0, graph);
+		add_edge(student2, student4, 1.0, graph);
+
+		add_edge(student3, student4, 3.0, graph);
+		add_edge(student4, student5, 1.5, graph);
+
+		network = StudentNetwork{graph};
+
+		students = {
+			Student{147195, Student::Gender::Male, Student::Ethnicity::Unknown,
+				0, 0, false, ""},
+			Student{312995, Student::Gender::Female, Student::Ethnicity::Unknown,
+				0, 0, false, ""},
+			Student{352468, Student::Gender::Female, Student::Ethnicity::Unknown,
+				0, 0, false, ""},
+			Student{500928, Student::Gender::Female, Student::Ethnicity::Unknown,
+				0, 0, false, ""},
+			Student{567890, Student::Gender::Male, Student::Ethnicity::Unknown,
+				0, 0, false, ""}
+		};
 	}
+
  protected:
-	student_container_t students;
-	course_container_t enrollment;
+	Student::container_t students;
 	StudentNetwork network;
 };
 
 TEST_F(ReduceNetworkTest, ReduceNework) {
 	auto weighted_gender_network = ReduceNetwork(network,
-			[this](const StudentId& id)
+			[this](const Student::Id& id)
 			{ return FindStudent(id, students).gender(); },
 			plus<double>{}, 0.);
 	auto unweighted_gender_network = ReduceNetwork(network,
-			[this](const StudentId& id)
+			[this](const Student::Id& id)
 			{ return FindStudent(id, students).gender(); },
 			[](double, int old_value) { return 1 + old_value; }, 0);
 

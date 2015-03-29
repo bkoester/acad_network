@@ -4,23 +4,26 @@
 #include <functional>
 #include <iosfwd>
 #include <initializer_list>
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include <boost/optional.hpp>
 #include <boost/serialization/utility.hpp>
 
 
 class Course;
-
-
-using StudentId = int;
-using StudentIdHasher = std::hash<int>;
+struct CourseComparator;
 
 
 class Student {
  public:
+	using Id = int;
+	using IdHasher = std::hash<int>;
+	using container_t = std::vector<Student>;
+
 	enum class Gender { Male, Female, Unspecified };
 	enum class Ethnicity { Hispanic_only, American_Indian, Asian, Black, 
 		Pacific_Islander, White, Multiracial, Unknown, Undocumented };
@@ -31,9 +34,13 @@ class Student {
 	Student() : id_{uninitialized_id}, gender_{Gender::Unspecified}, 
 		ethnicity_{uninitialized_ethnicity},
 		first_term_{uninitialized_first_term} {}
-	Student(StudentId id) : id_{id}, gender_{Gender::Unspecified}, 
+	Student(Student::Id id) : id_{id}, gender_{Gender::Unspecified}, 
 		ethnicity_{uninitialized_ethnicity},
 		first_term_{uninitialized_first_term} {}
+	Student(Student::Id id, Gender gender, Ethnicity ethnicity, int first_term,
+			int degree_term, bool transfer, std::string school) : 
+		id_{id}, gender_{gender}, ethnicity_{ethnicity}, first_term_{first_term},
+		degree_term_{degree_term}, transfer_{transfer}, school_{school} {}
 
 	int id() const { return id_; }
 	Gender gender() const { return gender_; }
@@ -71,7 +78,7 @@ class Student {
 	friend std::ostream& operator<<(std::ostream& os, const Student& student);
 	friend std::istream& operator>>(std::istream& input, Student& student);
 
-	StudentId id_;
+	Id id_;
 	Gender gender_;
 	Ethnicity ethnicity_;
 	int first_term_;
@@ -93,6 +100,10 @@ std::ostream& operator<<(std::ostream& output, const Student::Gender& gender);
 std::istream& operator>>(std::istream& input, Student::Ethnicity& ethnicity);
 std::ostream& operator<<(
 		std::ostream& output, const Student::Ethnicity& ethnicity);
+
+// Finds a student with the given ID in the container of students
+const Student& FindStudent(Student::Id id, const Student::container_t& students);
+Student& FindStudent(Student::Id id, Student::container_t& students);
 
 
 struct StudentHasher {

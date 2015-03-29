@@ -29,7 +29,7 @@ void StudentSegmenter::AddSegment(Segment&& segment)
 
 
 void StudentSegmenter::RunSegmentation(
-		const StudentNetwork& network, const student_container_t& students) {
+		const StudentNetwork& network, const Student::container_t& students) {
 	for (const auto& vertex_d : network.GetVertexDescriptors()) {
 		VertexData data{vertex_d, network, students};
 		for (auto& segment : segments_) {
@@ -42,7 +42,7 @@ void StudentSegmenter::RunSegmentation(
 
 StudentSegmenter::VertexData::VertexData(
 		StudentNetwork::vertex_t vertex_d, const StudentNetwork& network,
-		const student_container_t& students) :
+		const Student::container_t& students) :
 	student{FindStudent(network[vertex_d], students)} {
 
 	auto out_edges = network.GetOutEdgeValues(vertex_d);

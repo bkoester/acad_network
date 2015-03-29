@@ -43,7 +43,7 @@ TEST_F(GraphBuilderTest, BuildStudentNetworkFromStudents) {
 	Student student5{567890};
 	student5.AddCourseTaken(&course6);
 	// put them in a container
-	student_container_t students{
+	Student::container_t students{
 		student1, student2, student3, student4, student5};
 
 	course1.AddStudentEnrolled(&students[0]);

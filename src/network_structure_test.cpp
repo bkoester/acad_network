@@ -14,7 +14,7 @@ using std::find_if;
 
 
 static StudentNetwork::vertex_t FindStudentId(
-		const StudentNetwork& network, StudentId student);
+		const StudentNetwork& network, Student::Id student);
 
 
 void TestCourseNetworkStructure(const CourseNetwork& network) {
@@ -64,11 +64,11 @@ void TestCourseNetworkStructure(const CourseNetwork& network) {
 }
 
 void TestStudentNetworkStructure(const StudentNetwork& network) {
-	StudentNetwork::vertex_t student1{FindStudentId(network, StudentId{312995})};
-	StudentNetwork::vertex_t student2{FindStudentId(network, StudentId{500928})};
-	StudentNetwork::vertex_t student3{FindStudentId(network, StudentId{147195})};
-	StudentNetwork::vertex_t student4{FindStudentId(network, StudentId{352468})};
-	StudentNetwork::vertex_t student5{FindStudentId(network, StudentId{567890})};
+	StudentNetwork::vertex_t student1{FindStudentId(network, Student::Id{312995})};
+	StudentNetwork::vertex_t student2{FindStudentId(network, Student::Id{500928})};
+	StudentNetwork::vertex_t student3{FindStudentId(network, Student::Id{147195})};
+	StudentNetwork::vertex_t student4{FindStudentId(network, Student::Id{352468})};
+	StudentNetwork::vertex_t student5{FindStudentId(network, Student::Id{567890})};
 
 
 	EXPECT_THROW(network.Get(student1, student1), NoEdgeException);
@@ -133,7 +133,7 @@ void TestStudentNetworkStructure(const StudentNetwork& network) {
 
 
 StudentNetwork::vertex_t FindStudentId(
-		const StudentNetwork& network, StudentId student) {
+		const StudentNetwork& network, Student::Id student) {
 	auto it = find_if(network.GetVertexDescriptors().begin(),
 			network.GetVertexDescriptors().end(),
 			[&network, student](StudentNetwork::vertex_t vertex_descriptor)

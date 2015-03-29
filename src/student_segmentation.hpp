@@ -23,12 +23,12 @@ class StudentSegmenter {
 	void AddSegment(Segment&& segment);
 
 	void RunSegmentation(const StudentNetwork& network,
-						 const student_container_t& students);
+						 const Student::container_t& students);
 
 	struct VertexData {
 		VertexData(StudentNetwork::vertex_t vertex_d, 
 				   const StudentNetwork& network,
-				   const student_container_t& students);
+				   const Student::container_t& students);
 
 		Student student;
 		double weighted_degree;

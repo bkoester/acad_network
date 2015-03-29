@@ -35,7 +35,7 @@ class CourseNetwork : public Network<Course, int> {
 	// Fill out the hash table of courses => vertices.
 	void BuildCourseToVertexMap();
 
-	std::unordered_map<Course, vertex_t, CourseHasher> course_to_vertex_;
+	std::unordered_map<Course, vertex_t, Course::Hasher> course_to_vertex_;
 };
 
 std::ostream& operator<<(

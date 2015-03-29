@@ -20,7 +20,6 @@ using std::unique_ptr;
 namespace po = boost::program_options;
 
 
-/*
 static void SegmentStudents(const StudentNetwork& network,
 							const Student::container_t& students, 
 							const Course::container_t& courses);
@@ -33,7 +32,7 @@ template <typename SegmentFunc, typename AccumulateFunc, typename Init>
 static void MakeReducedNetwork(const StudentNetwork& network, string segment, 
 							   string weightedness, SegmentFunc segment_func, 
 							   AccumulateFunc accumulate_func, 
-							   Init init); */
+							   Init init);
 
 
 
@@ -97,31 +96,16 @@ int main(int argc, char* argv[]) {
 		CourseNetwork course_network{course_archive};
 	}
 	if (network_to_load == NetworkType_e::Student) {
-		//ifstream student_archive{student_archive_path};
-		//StudentNetwork student_network{student_archive};
-
-		auto enrollment_credits = accumulate(begin(courses), end(courses), 0, 
-				[](int old_value, const unique_ptr<Course>& course) {
-					return old_value + (course->students_enrolled().size() *
-					course->num_credits());
-				});
-		auto enrollment_square = accumulate(begin(courses), end(courses), 0, 
-				[](int old_value, const unique_ptr<Course>& course) {
-					return old_value + (course->students_enrolled().size() *
-					course->students_enrolled().size());
-				});
-
-		cout << "Enrollment and num credits summation: " << enrollment_credits
-			 << "Enrollment square summation: " << enrollment_square << endl;
-
-		//SegmentStudents(student_network, students, courses);
-		//ReduceStudentNetwork(student_network, students, courses);
+		ifstream student_archive{student_archive_path};
+		StudentNetwork student_network{student_archive};
+		
+		SegmentStudents(student_network, students, courses);
+		ReduceStudentNetwork(student_network, students, courses);
 	}
 
 	return 0;
 }
 
-/*
 // reduces network to see the interaction between various segments
 void ReduceStudentNetwork(const StudentNetwork& network,
 						  const Student::container_t& students,
@@ -284,4 +268,3 @@ void SegmentStudents(const StudentNetwork& network,
 
 	segmenter.RunSegmentation(network, students);
 }
-*/

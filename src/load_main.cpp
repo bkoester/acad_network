@@ -1,3 +1,4 @@
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -8,6 +9,7 @@
 #include <boost/program_options.hpp>
 
 #include "course_network.hpp"
+#include "mem_usage.hpp"
 #include "reduce_network.hpp"
 #include "student_network.hpp"
 #include "student_segmentation.hpp"
@@ -22,6 +24,7 @@ using std::pair;
 using std::string; using std::to_string;
 using std::unique_ptr;
 namespace po = boost::program_options;
+namespace chr = std::chrono;
 
 
 static void ComputeStudentStats(const StudentNetwork& network);
@@ -37,7 +40,6 @@ static void MakeReducedNetwork(const StudentNetwork& network, string segment,
 							   AccumulateFunc accumulate_func, 
 							   Init init);
 							   */
-
 
 
 int main(int argc, char* argv[]) {
@@ -113,10 +115,13 @@ int main(int argc, char* argv[]) {
 void ComputeStudentStats(const StudentNetwork& network) {
 	ofstream dijkstra_file{"output/stats_dijkstra.tsv"};
 	ofstream bfs_file{"output/stats_bfs.tsv"};
+	auto beginning_time = chr::system_clock::now();
+	int num_students{0};
 	for (auto vertex_d : network.GetVertexDescriptors()) {
 		dijkstra_file << network[vertex_d] << "\t";
 		bfs_file << network[vertex_d] << "\t";
-		// find distances to other vertices
+
+		// unweighted distance stats
 		auto unweighted_distances = network.FindUnweightedDistances(vertex_d);
 		ostream_iterator<int> bfs_it{bfs_file, " "};
 		transform(begin(unweighted_distances), end(unweighted_distances), 
@@ -124,12 +129,20 @@ void ComputeStudentStats(const StudentNetwork& network) {
 				{ return elt.second; });
 		bfs_file << endl;
 		
+		// weighted distance stats
 		auto weighted_distances = network.FindWeightedDistances(vertex_d);
 		ostream_iterator<double> dijkstra_it{dijkstra_file, " "};
 		transform(begin(weighted_distances), end(weighted_distances), 
 				dijkstra_it, [](pair<Student::Id, double> elt)
 				{ return elt.second; });
 		dijkstra_file << endl;
+
+		// output timing information
+		if (++num_students % 1000) {
+			cerr << num_students << "\t" << chr::duration_cast<chr::seconds>(
+				chr::system_clock::now() - beginning_time).count() << endl;
+			cerr << "Mem usage: " << GetMemoryUsage() << endl;
+		}
 	}
 
 }

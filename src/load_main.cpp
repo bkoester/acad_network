@@ -27,6 +27,10 @@ namespace po = boost::program_options;
 namespace chr = std::chrono;
 
 
+
+static void PrintIndividualStudentNetwork(const StudentNetwork& network, 
+		StudentNetwork::vertex_t student_d, const string& file_name);
+
 static void ComputeWeightedDistances(const StudentNetwork& network);
 static void ComputeUnweightedDistances(const StudentNetwork& network);
 
@@ -107,9 +111,26 @@ int main(int argc, char* argv[]) {
 		ComputeWeightedDistances(student_network);
 		ComputeUnweightedDistances(student_network);
 		ReduceStudentNetwork(student_network, students, courses);
+		for (const auto& student_d : student_network.GetVertexDescriptors()) {
+			const auto& student = FindStudent(
+					student_network[student_d], students);
+			auto file_name = 
+				"output/individual_" + to_string(student.id()) + ".tsv";
+			PrintIndividualStudentNetwork(student_network, student_d, file_name);
+		}
 	}
 
 	return 0;
+}
+
+
+void PrintIndividualStudentNetwork(const StudentNetwork& network, 
+		StudentNetwork::vertex_t student_d, const string& file_name) {
+	ofstream individual_network{file_name};
+	for (const auto& edge_d : network.GetOutEdgeDescriptors(student_d)) {
+		individual_network << network.GetTargetValue(edge_d) << "\t"
+						   << network[edge_d] << endl;
+	}
 }
 
 

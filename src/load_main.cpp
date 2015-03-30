@@ -27,9 +27,9 @@ namespace po = boost::program_options;
 namespace chr = std::chrono;
 
 
-static void ComputeStudentStats(const StudentNetwork& network);
+static void ComputeWeightedDistances(const StudentNetwork& network);
+static void ComputeUnweightedDistances(const StudentNetwork& network);
 
-/*
 static void ReduceStudentNetwork(const StudentNetwork& network,
 								 const Student::container_t& students,
 								 const Course::container_t& courses);
@@ -39,7 +39,6 @@ static void MakeReducedNetwork(const StudentNetwork& network, string segment,
 							   string weightedness, SegmentFunc segment_func, 
 							   AccumulateFunc accumulate_func, 
 							   Init init);
-							   */
 
 
 int main(int argc, char* argv[]) {
@@ -105,20 +104,45 @@ int main(int argc, char* argv[]) {
 		ifstream student_archive{student_archive_path};
 		StudentNetwork student_network{student_archive};
 	
-		ComputeStudentStats(student_network);
-		//ReduceStudentNetwork(student_network, students, courses);
+		ComputeWeightedDistances(student_network);
+		ComputeUnweightedDistances(student_network);
+		ReduceStudentNetwork(student_network, students, courses);
 	}
 
 	return 0;
 }
 
-void ComputeStudentStats(const StudentNetwork& network) {
+
+void ComputeWeightedDistances(const StudentNetwork& network) {
 	ofstream dijkstra_file{"output/stats_dijkstra.tsv"};
-	ofstream bfs_file{"output/stats_bfs.tsv"};
 	auto beginning_time = chr::system_clock::now();
 	int num_students{0};
 	for (auto vertex_d : network.GetVertexDescriptors()) {
 		dijkstra_file << network[vertex_d] << "\t";
+
+		// weighted distance stats
+		auto weighted_distances = network.FindWeightedDistances(vertex_d);
+		ostream_iterator<double> dijkstra_it{dijkstra_file, " "};
+		transform(begin(weighted_distances), end(weighted_distances), 
+				dijkstra_it, [](pair<Student::Id, double> elt)
+				{ return elt.second; });
+		dijkstra_file << endl;
+
+		// output timing information
+		if (++num_students % 10 == 0) {
+			cerr << num_students << "\t" << chr::duration_cast<chr::seconds>(
+				chr::system_clock::now() - beginning_time).count() << endl;
+		}
+		if (num_students > 500) { break; }
+	}
+}
+
+
+void ComputeUnweightedDistances(const StudentNetwork& network) {
+	ofstream bfs_file{"output/stats_bfs.tsv"};
+	auto beginning_time = chr::system_clock::now();
+	int num_students{0};
+	for (auto vertex_d : network.GetVertexDescriptors()) {
 		bfs_file << network[vertex_d] << "\t";
 
 		// unweighted distance stats
@@ -129,26 +153,16 @@ void ComputeStudentStats(const StudentNetwork& network) {
 				{ return elt.second; });
 		bfs_file << endl;
 		
-		// weighted distance stats
-		auto weighted_distances = network.FindWeightedDistances(vertex_d);
-		ostream_iterator<double> dijkstra_it{dijkstra_file, " "};
-		transform(begin(weighted_distances), end(weighted_distances), 
-				dijkstra_it, [](pair<Student::Id, double> elt)
-				{ return elt.second; });
-		dijkstra_file << endl;
-
 		// output timing information
-		if (++num_students % 1000) {
+		if (++num_students % 10 == 0) {
 			cerr << num_students << "\t" << chr::duration_cast<chr::seconds>(
 				chr::system_clock::now() - beginning_time).count() << endl;
-			cerr << "Mem usage: " << GetMemoryUsage() << endl;
 		}
+		if (num_students > 500) { break; }
 	}
-
 }
 
 
-/*
 // reduces network to see the interaction between various segments
 void ReduceStudentNetwork(const StudentNetwork& network,
 						  const Student::container_t& students,
@@ -198,4 +212,4 @@ void MakeReducedNetwork(const StudentNetwork& network, string segment,
 	output << segment << "1" << '\t' << segment << "2" << '\t' << "count" 
 		   << endl;
 	reduced_network.SaveEdgewise(output);
-} */
+}

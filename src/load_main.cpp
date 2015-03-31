@@ -111,12 +111,14 @@ int main(int argc, char* argv[]) {
 		ComputeWeightedDistances(student_network);
 		ComputeUnweightedDistances(student_network);
 		ReduceStudentNetwork(student_network, students, courses);
+		auto num_students = 0;
 		for (const auto& student_d : student_network.GetVertexDescriptors()) {
 			const auto& student = FindStudent(
 					student_network[student_d], students);
 			auto file_name = 
 				"output/individual_" + to_string(student.id()) + ".tsv";
 			PrintIndividualStudentNetwork(student_network, student_d, file_name);
+			if (++num_students == 100) { break; }
 		}
 	}
 

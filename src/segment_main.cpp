@@ -1,12 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <functional>
+#include <memory>
+#include <sstream>
 #include <string>
 #include <unordered_map>
+#include <utility>
 
 #include <boost/program_options.hpp>
-#define CSV_IO_NO_THREAD // turn off threading for the csv library
-#include "third_party/csv.hpp"
 
 #include "course.hpp"
 #include "student.hpp"
@@ -15,10 +16,13 @@
 
 
 using std::cout; using std::cerr; using std::cin; using std::endl; 
+using std::getline; using std::string; 
 using std::ifstream;
 using std::function;
+using std::move;
 using std::ostream;
-using std::string;
+using std::stringstream;
+using std::unique_ptr;
 using std::unordered_map;
 namespace po = boost::program_options;
 
@@ -38,12 +42,14 @@ segmenters{
 
 int main(int argc, char* argv[]) {
 	po::options_description desc{"Options for student segmenting binary:"};
-	string segment, student_path, enrollment_path, segment_path;
+	string segment, student_path, enrollment_path, input_path;
+	unique_ptr<ifstream> given_input_file;  // owns input file if path given
+	auto input_stream = &cin;  // pointer to the input stream to use
 	desc.add_options()
 		("help,h", "Show this help message")
 		("segment,s", po::value<string>(&segment)->required(),
 		 "Field by which to segment data")
-		("segment_file", po::value<string>(&segment_path)->required(),
+		("input_file", po::value<string>(&input_path),
 		 "File that contains data to be segmented")
 		("student_file", po::value<string>(&student_path)->required(),
 		 "Set the path at which to find the student file")
@@ -59,6 +65,11 @@ int main(int argc, char* argv[]) {
 		}
 		po::notify(vm);
 
+		if (!input_path.empty()) {
+			given_input_file = ::make_unique<ifstream>(input_path);
+			input_stream = given_input_file.get();
+		}
+
 		if (!segmenters.count(segment))
 		{ throw po::invalid_option_value{segment}; }
 
@@ -73,15 +84,19 @@ int main(int argc, char* argv[]) {
 	Student::container_t students{ReadStudents(student_stream)};
 	Course::container_t courses{ReadEnrollment(enrollment_stream, students)};
 
-	// read data to segment from standard input
-	io::CSVReader<2, io::trim_chars<' '>, io::no_quote_escape<'\t'>> reader{
-		segment_path};
-	reader.set_header("student_id", "data");
-	Student::Id student_id{0};
-	string data;
+	// read data to segment from the input stream
 	auto segmentation_func = segmenters.find(segment)->second;
-	while (reader.read_row(student_id, data)) {
-		segmentation_func(cout, student_id);
-		cout << data << endl;
+	for (string line; getline(*input_stream, line);) {
+		stringstream line_stream{line};
+		auto field_num = 0;
+		for (string field; getline(line_stream, field, '\t');) {
+			if (field_num++ != 0) { 
+				cout << '\t' << field; 
+				break;
+			}
+			Student::Id student_id{stoi(field)};
+			segmentation_func(cout, FindStudent(student_id, students));
+		}
+		cout << endl;
 	}
 }

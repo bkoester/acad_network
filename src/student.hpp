@@ -34,7 +34,7 @@ class Student {
 	Student() : id_{uninitialized_id}, gender_{Gender::Unspecified}, 
 		ethnicity_{uninitialized_ethnicity},
 		first_term_{uninitialized_first_term} {}
-	Student(Student::Id id) : id_{id}, gender_{Gender::Unspecified}, 
+	explicit Student(Student::Id id) : id_{id}, gender_{Gender::Unspecified}, 
 		ethnicity_{uninitialized_ethnicity},
 		first_term_{uninitialized_first_term} {}
 	Student(Student::Id id, Gender gender, Ethnicity ethnicity, int first_term,
@@ -48,8 +48,8 @@ class Student {
 	int first_term() const { return first_term_; }
 	int degree_term() const { return degree_term_; }
 	bool transfer() const { return transfer_; }
-	boost::optional<double> major1() const { return major1_; }
-	boost::optional<double> major2() const { return major2_; }
+	const boost::optional<double>& major1() const { return major1_; }
+	const boost::optional<double>& major2() const { return major2_; }
 	std::string school() const { return school_; }
 
 	std::string GetMajor1Description() const;
@@ -104,6 +104,18 @@ std::ostream& operator<<(
 // Finds a student with the given ID in the container of students
 const Student& FindStudent(Student::Id id, const Student::container_t& students);
 Student& FindStudent(Student::Id id, Student::container_t& students);
+
+
+class StudentNotFound : public std::exception {
+ public:
+	StudentNotFound(Student::Id id) : 
+		error_message_{"Student " + std::to_string(id) + " not found!"} {}
+	const char* what() const noexcept { return error_message_.c_str(); }
+
+ private:
+	std::string error_message_;
+
+};
 
 
 struct StudentHasher {

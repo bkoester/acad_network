@@ -1,6 +1,7 @@
 #include "tab_reader.hpp"
 
 #include <algorithm>
+#include <iostream>
 #include <iterator>
 
 #include "course.hpp"
@@ -38,11 +39,13 @@ Course::container_t ReadEnrollment(istream& enrollment_stream,
 		// Insert the course and find the student.
 		auto inserted_course = (*courses.insert(
 				make_unique<Course>(enrollment.course)).first).get();
-		Student& student(FindStudent(enrollment.student_id, students));
+		try {
+			Student& student(FindStudent(enrollment.student_id, students));
 
-		// Add the student to the course.
-		inserted_course->AddStudentEnrolled(&student);
-		student.AddCourseTaken(inserted_course);
+			// Add the student to the course.
+			inserted_course->AddStudentEnrolled(&student);
+			student.AddCourseTaken(inserted_course);
+		} catch (StudentNotFound&) {}
 	}
 
 	return courses;

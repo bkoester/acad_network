@@ -4,11 +4,12 @@
 
 #include <boost/program_options.hpp>
 
+#include "course_container.hpp"
 #include "course_network.hpp"
 #include "graph_builder.hpp"
 #include "mem_usage.hpp"
+#include "student_container.hpp"
 #include "student_network.hpp"
-#include "tab_reader.hpp"
 #include "utility.hpp"
 
 
@@ -54,18 +55,18 @@ int main(int argc, char* argv[]) {
 
 	ifstream student_stream{student_path};
 	ifstream enrollment_stream{enrollment_path};
+	StudentContainer students{student_stream};
+	CourseContainer courses{enrollment_stream, students};
 
 	if (network_to_build == NetworkType_e::Course) {
 		// build the course network
 		CourseNetwork course_network{
-			BuildCourseNetworkFromEnrollment(enrollment_stream)};
+			BuildCourseNetworkFromEnrollment(students)};
 		course_network.Save(cout);
 	} else {
 		assert(network_to_build == NetworkType_e::Student);
 
 		// build the student network
-		Student::container_t students{ReadStudents(student_stream)};
-		Course::container_t courses{ReadEnrollment(enrollment_stream, students)};
 		cout << "Size of student network is " << students.size() << endl;
 		/*
 		StudentNetwork student_network{

@@ -10,8 +10,9 @@
 #include <boost/program_options.hpp>
 
 #include "course.hpp"
+#include "course_container.hpp"
 #include "student.hpp"
-#include "tab_reader.hpp"
+#include "student_container.hpp"
 #include "utility.hpp"
 
 
@@ -81,8 +82,8 @@ int main(int argc, char* argv[]) {
 	// read students and enrollment data
 	ifstream student_stream{student_path};
 	ifstream enrollment_stream{enrollment_path};
-	Student::container_t students{ReadStudents(student_stream)};
-	Course::container_t courses{ReadEnrollment(enrollment_stream, students)};
+	StudentContainer students{student_stream};
+	CourseContainer courses{enrollment_stream, students};
 
 	// read data to segment from the input stream
 	auto segmentation_func = segmenters.find(segment)->second;
@@ -95,7 +96,7 @@ int main(int argc, char* argv[]) {
 				break;
 			}
 			Student::Id student_id{stoi(field)};
-			segmentation_func(cout, FindStudent(student_id, students));
+			segmentation_func(cout, students.Find(student_id));
 		}
 		cout << endl;
 	}

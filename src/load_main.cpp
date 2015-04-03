@@ -8,12 +8,13 @@
 
 #include <boost/program_options.hpp>
 
+#include "course_container.hpp"
 #include "course_network.hpp"
 #include "mem_usage.hpp"
 #include "reduce_network.hpp"
+#include "student_container.hpp"
 #include "student_network.hpp"
 #include "student_segmentation.hpp"
-#include "tab_reader.hpp"
 #include "utility.hpp"
 
 
@@ -35,8 +36,8 @@ static void ComputeWeightedDistances(const StudentNetwork& network);
 static void ComputeUnweightedDistances(const StudentNetwork& network);
 
 static void ReduceStudentNetwork(const StudentNetwork& network,
-								 const Student::container_t& students,
-								 const Course::container_t& courses);
+								 const StudentContainer& students,
+								 const CourseContainer& courses);
 
 template <typename SegmentFunc, typename AccumulateFunc, typename Init>
 static void MakeReducedNetwork(const StudentNetwork& network, string segment, 
@@ -96,8 +97,8 @@ int main(int argc, char* argv[]) {
 	// Read students and enrollment data.
 	ifstream student_stream{student_path};
 	ifstream enrollment_stream{enrollment_path};
-	Student::container_t students{ReadStudents(student_stream)};
-	Course::container_t courses{ReadEnrollment(enrollment_stream, students)};
+	StudentContainer students{student_stream};
+	CourseContainer courses{enrollment_stream, students};
 
 	// Do whatever work necessary
 	if (network_to_load == NetworkType_e::Course) {
@@ -113,8 +114,7 @@ int main(int argc, char* argv[]) {
 		ReduceStudentNetwork(student_network, students, courses);
 		auto num_students = 0;
 		for (const auto& student_d : student_network.GetVertexDescriptors()) {
-			const auto& student = FindStudent(
-					student_network[student_d], students);
+			const auto& student = students.Find(student_network[student_d]);
 			auto file_name = 
 				"output/individual_" + to_string(student.id()) + ".tsv";
 			PrintIndividualStudentNetwork(student_network, student_d, file_name);
@@ -188,8 +188,8 @@ void ComputeUnweightedDistances(const StudentNetwork& network) {
 
 // reduces network to see the interaction between various segments
 void ReduceStudentNetwork(const StudentNetwork& network,
-						  const Student::container_t& students,
-						  const Course::container_t& courses) {
+						  const StudentContainer& students,
+						  const CourseContainer& courses) {
 	auto weighted_func = [](double edge, double current_edge) 
 				{ return edge + current_edge; };
 	auto unweighted_func = [](double edge, int current_edge) 
@@ -197,7 +197,7 @@ void ReduceStudentNetwork(const StudentNetwork& network,
 
 	// major
 	auto major1_func = [&students](const Student::Id& id)
-		{ return FindStudent(id, students).GetMajor1Description(); };
+		{ return students.Find(id).GetMajor1Description(); };
 	MakeReducedNetwork(
 			network, "major1", "weighted", major1_func, weighted_func, 0.);
 	MakeReducedNetwork(
@@ -205,7 +205,7 @@ void ReduceStudentNetwork(const StudentNetwork& network,
 	
 	// school
 	auto school_func = [&students](const Student::Id& id)
-		{ return FindStudent(id, students).school(); };
+		{ return students.Find(id).school(); };
 	auto weighted_school_network = ReduceNetwork(
 			network, school_func, weighted_func, 0.);
 	MakeReducedNetwork(
@@ -215,7 +215,7 @@ void ReduceStudentNetwork(const StudentNetwork& network,
 
 	// ethnicity
 	auto ethnicity_func = [&students](const Student::Id& id)
-		{ return FindStudent(id, students).ethnicity(); };
+		{ return students.Find(id).ethnicity(); };
 	auto weighted_ethnicity_network = ReduceNetwork(
 			network, ethnicity_func, weighted_func, 0.);
 	MakeReducedNetwork(

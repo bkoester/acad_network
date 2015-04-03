@@ -16,11 +16,12 @@
 #include <vector>
 
 #include "course.hpp"
+#include "course_container.hpp"
 #include "course_network.hpp"
 #include "mem_usage.hpp"
 #include "student.hpp"
+#include "student_container.hpp"
 #include "student_network.hpp"
-#include "tab_reader.hpp"
 #include "utility.hpp"
 
 
@@ -43,11 +44,11 @@ const int timing_modulus{10000000};
 
 
 static unordered_map<Student::Id, unordered_set<Course, Course::Hasher>> 
-GetStudentIdsToCourses(istream& enrollment_stream);
+GetStudentIdsToCourses(const StudentContainer& students);
 
 class StudentNetworkBuilder;
 void CalculateStudentNetworkEdges(const StudentNetwork& network,
-		const Student::container_t& students,
+		const StudentContainer& students,
 		StudentNetworkBuilder& builder);
 
 
@@ -75,8 +76,9 @@ struct PairHasher {
 };
 
 
-CourseNetwork BuildCourseNetworkFromEnrollment(istream& enrollment_stream) {
-	auto student_to_courses = GetStudentIdsToCourses(enrollment_stream);
+CourseNetwork BuildCourseNetworkFromEnrollment(
+		const StudentContainer& students) {
+	auto student_to_courses = GetStudentIdsToCourses(students);
 
 	// aggregate pairs of courses
 	unordered_map<DistinctUnorderedPair<Course>, int, PairHasher<Course::Hasher>> 
@@ -121,11 +123,11 @@ CourseNetwork BuildCourseNetworkFromEnrollment(istream& enrollment_stream) {
 class StudentNetworkBuilder {
  public:
 	StudentNetworkBuilder(
-			StudentNetwork& network, const Student::container_t& students) :
+			StudentNetwork& network, const StudentContainer& students) :
 				network_(network), num_pairs_{0},
 				beginning_pairs_time_{chr::system_clock::now()} {
 		// assign the vertices in the network
-		auto student_it = students.begin();
+		auto student_it = begin(students);
 		for (auto vertex_it = network_.GetVertexValues().begin();
 				vertex_it != network_.GetVertexValues().end();
 				++vertex_it, ++student_it) {
@@ -179,7 +181,7 @@ class StudentNetworkBuilder {
 
 
 StudentNetwork BuildStudentNetworkFromStudents(
-		const Student::container_t& students) {
+		const StudentContainer& students) {
 
 	// spawn threads to iterate through each pair of students
 	StudentNetwork network{students.size()};
@@ -198,17 +200,15 @@ StudentNetwork BuildStudentNetworkFromStudents(
 
 	
 void CalculateStudentNetworkEdges(const StudentNetwork& network,
-		const Student::container_t& students,
-		StudentNetworkBuilder& builder) {
+								  const StudentContainer& students,
+								  StudentNetworkBuilder& builder) {
 	for (auto it_pair = builder.GetNextIteratorPair(); 
 			!builder.ReachedEndOfStudents(it_pair.first);
 			it_pair = builder.GetNextIteratorPair()) {
 		if (it_pair.first == it_pair.second) { continue; }
 		// Get the courses each of the students have taken.
-		const Student& student1(*lower_bound(begin(students), end(students), 
-				network[*it_pair.first]));
-		const Student& student2(*lower_bound(begin(students), end(students), 
-				network[*it_pair.second]));
+		const Student& student1(students.Find(network[*it_pair.first]));
+		const Student& student2(students.Find(network[*it_pair.second]));
 		const set<const Course*>& student1_courses(student1.courses_taken());
 		const set<const Course*>& student2_courses(student2.courses_taken());
 
@@ -236,17 +236,15 @@ void CalculateStudentNetworkEdges(const StudentNetwork& network,
 
 // Gets a hash table of students => set of courses they have taken
 unordered_map<Student::Id, unordered_set<Course, Course::Hasher>> 
-GetStudentIdsToCourses(istream& enrollment_stream) {
-	SkipLine(enrollment_stream);
-	istream_iterator<Enrollment> enrollment_it{enrollment_stream};
-
+GetStudentIdsToCourses(const StudentContainer& students) {
 	unordered_map<Student::Id, unordered_set<Course, Course::Hasher>> 
 		student_to_courses;
 
 	// make a map of student id => courses taken
-	for (;enrollment_it != istream_iterator<Enrollment>{}; ++enrollment_it) {
-		const Enrollment& enrollment(*enrollment_it);
-		student_to_courses[enrollment.student_id].insert(enrollment.course);
+	for (const auto& student : students) {
+		for (const auto& course : student.courses_taken()) {
+			student_to_courses[student.id()].insert(Course{*course});
+		}
 	}
 	
 	return student_to_courses;

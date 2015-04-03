@@ -263,23 +263,6 @@ ostream& operator<<(ostream& output, const Student::Ethnicity& ethnicity) {
 }
 
 
-const Student& FindStudent(
-		Student::Id id, const Student::container_t& students) {
-	auto student_it = lower_bound(begin(students), end(students), Student{id});
-	if (student_it == end(students) || student_it->id() != id)
-	{ throw StudentNotFound{id}; }
-	return *student_it;
-}
-
-
-Student& FindStudent(Student::Id id, Student::container_t& students) {
-	auto student_it = lower_bound(begin(students), end(students), Student{id});
-	if (student_it == end(students) || student_it->id() != id)
-	{ throw StudentNotFound{id}; }
-	return *student_it;
-}
-
-
 std::string Student::to_string(const Ethnicity& ethnicity) {
 	ostringstream out;
 	out << ethnicity;

@@ -6,6 +6,7 @@
 
 #include "gtest/gtest.h"
 
+#include "student_container.hpp"
 #include "student_network.hpp"
 #include "test_data_streams.hpp"
 
@@ -45,7 +46,7 @@ class ReduceNetworkTest : public ::testing::Test {
 
 		network = StudentNetwork{graph};
 
-		students = {
+		students.Insert({
 			Student{147195, Student::Gender::Male, Student::Ethnicity::Unknown,
 				0, 0, false, ""},
 			Student{312995, Student::Gender::Female, Student::Ethnicity::Unknown,
@@ -56,22 +57,22 @@ class ReduceNetworkTest : public ::testing::Test {
 				0, 0, false, ""},
 			Student{567890, Student::Gender::Male, Student::Ethnicity::Unknown,
 				0, 0, false, ""}
-		};
+		});
 	}
 
  protected:
-	Student::container_t students;
+	StudentContainer students;
 	StudentNetwork network;
 };
 
 TEST_F(ReduceNetworkTest, ReduceNework) {
 	auto weighted_gender_network = ReduceNetwork(network,
 			[this](const Student::Id& id)
-			{ return FindStudent(id, students).gender(); },
+			{ return students.Find(id).gender(); },
 			plus<double>{}, 0.);
 	auto unweighted_gender_network = ReduceNetwork(network,
 			[this](const Student::Id& id)
-			{ return FindStudent(id, students).gender(); },
+			{ return students.Find(id).gender(); },
 			[](double, int old_value) { return 1 + old_value; }, 0);
 
 	// find the vertices for weighted network

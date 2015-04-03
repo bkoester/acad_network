@@ -22,7 +22,6 @@ class Student {
  public:
 	using Id = int;
 	using IdHasher = std::hash<int>;
-	using container_t = std::vector<Student>;
 
 	enum class Gender { Male, Female, Unspecified };
 	enum class Ethnicity { Hispanic_only, American_Indian, Asian, Black, 
@@ -100,23 +99,6 @@ std::ostream& operator<<(std::ostream& output, const Student::Gender& gender);
 std::istream& operator>>(std::istream& input, Student::Ethnicity& ethnicity);
 std::ostream& operator<<(
 		std::ostream& output, const Student::Ethnicity& ethnicity);
-
-// Finds a student with the given ID in the container of students
-const Student& FindStudent(Student::Id id, const Student::container_t& students);
-Student& FindStudent(Student::Id id, Student::container_t& students);
-
-
-class StudentNotFound : public std::exception {
- public:
-	StudentNotFound(Student::Id id) : 
-		error_message_{"Student " + std::to_string(id) + " not found!"} {}
-	const char* what() const noexcept { return error_message_.c_str(); }
-
- private:
-	std::string error_message_;
-
-};
-
 
 struct StudentHasher {
 	size_t operator()(const Student& student) const 

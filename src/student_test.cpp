@@ -1,6 +1,5 @@
 #include "student.hpp"
 
-#include <algorithm>
 #include <memory>
 #include <sstream>
 
@@ -9,7 +8,6 @@
 #include "course.hpp"
 
 
-using std::sort;
 using std::stringstream;
 using std::unique_ptr;
 
@@ -80,16 +78,6 @@ TEST_F(StudentTest, GetTotalCreditsTaken) {
 	EXPECT_EQ(8.5, student1.GetTotalCreditsTaken());
 	EXPECT_EQ(0., student2.GetTotalCreditsTaken());
 	EXPECT_EQ(1.5, student3.GetTotalCreditsTaken());
-}
-
-
-TEST_F(StudentTest, FindStudent) {
-	Student::container_t students{student1, student2, student3};
-	sort(begin(students), end(students));
-	EXPECT_EQ(student1.id(), FindStudent(student1.id(), students).id());
-	EXPECT_EQ(student2.id(), FindStudent(student2.id(), students).id());
-	EXPECT_EQ(student3.id(), FindStudent(student3.id(), students).id());
-	EXPECT_THROW(FindStudent(unused_id, students), StudentNotFound);
 }
 
 

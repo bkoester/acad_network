@@ -34,7 +34,6 @@ class Course {
 		}
 	};
 
-	using container_t = std::set<std::unique_ptr<Course>, CourseComparator>;
 
 
 	Course() : subject_{undefined_subject}, number_{undefined_number},

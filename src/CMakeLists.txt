@@ -1,38 +1,39 @@
 set(SRCS
 	course.cpp
+	course_container.cpp
 	course_network.cpp
 	mem_usage.cpp
 	student.cpp
-	tab_reader.cpp
+	student_container.cpp
 	utility.cpp
 	)
 
-set(BUILD_MAIN_SRCS 
-	build_main.cpp
+set(BUILD_SRCS
 	graph_builder.cpp
 	)
 
-set(LOAD_MAIN_SRCS 
-	load_main.cpp
+set(BUILD_MAIN_SRC build_main.cpp)
+
+
+set(LOAD_SRCS
 	student_segmentation.cpp
 	)
 
-set(SEGMENT_SRCS 
-	segment_main.cpp
-	)
+set(LOAD_MAIN_SRC load_main.cpp)
 
-set(STUDENT_QUERY_SRCS 
-	student_query_main.cpp
-	)
+set(SEGMENT_MAIN_SRC segment_main.cpp)
+
+set(STUDENT_QUERY_MAIN_SRC student_query_main.cpp)
 
 set(UNITTEST_SRCS
 	course_test.cpp
+	course_container_test.cpp
 	course_network_test.cpp
 	network_test.cpp
 	network_structure_test.cpp
 	student_test.cpp
 	student_network_test.cpp
-	tab_reader_test.cpp
+	student_container_test.cpp
 	utility_test.cpp
 	)
 
@@ -74,27 +75,35 @@ include_directories(
 add_library(${DEBUG_OBJECT_LIBRARY} OBJECT ${SRCS})
 add_library(${RELEASE_OBJECT_LIBRARY} OBJECT ${SRCS})
 add_executable(${BUILD_DEBUG_BINARY}
-	${BUILD_MAIN_SRCS}
+	${BUILD_MAIN_SRC}
+	${BUILD_SRCS}
 	$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
 add_executable(${BUILD_RELEASE_BINARY}
-	${BUILD_MAIN_SRCS}
+	${BUILD_MAIN_SRC}
+	${BUILD_SRCS}
 	$<TARGET_OBJECTS:${RELEASE_OBJECT_LIBRARY}>)
 add_executable(${LOAD_DEBUG_BINARY}
-	${LOAD_MAIN_SRCS}
+	${LOAD_MAIN_SRC}
+	${LOAD_SRCS}
 	$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
 add_executable(${LOAD_RELEASE_BINARY}
-	${LOAD_MAIN_SRCS}
+	${LOAD_MAIN_SRC}
+	${LOAD_SRCS}
 	$<TARGET_OBJECTS:${RELEASE_OBJECT_LIBRARY}>)
 add_executable(${SEGMENT_DEBUG_BINARY}
+	${SEGMENT_MAIN_SRC}
 	${SEGMENT_SRCS}
 	$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
 add_executable(${SEGMENT_RELEASE_BINARY}
+	${SEGMENT_MAIN_SRC}
 	${SEGMENT_SRCS}
 	$<TARGET_OBJECTS:${RELEASE_OBJECT_LIBRARY}>)
 add_executable(${STUDENT_QUERY_DEBUG_BINARY}
+	${STUDENT_QUERY_MAIN_SRC}
 	${STUDENT_QUERY_SRCS}
 	$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
 add_executable(${STUDENT_QUERY_RELEASE_BINARY}
+	${STUDENT_QUERY_MAIN_SRC}
 	${STUDENT_QUERY_SRCS}
 	$<TARGET_OBJECTS:${RELEASE_OBJECT_LIBRARY}>)
 
@@ -148,19 +157,28 @@ if (unit_tests)
 		${GMOCK_ROOT}/include)
 
 	add_library(${UNITTEST_OBJECT_LIBRARY} OBJECT ${UNITTEST_SRCS})
+	set_property(TARGET ${UNITTEST_OBJECT_LIBRARY} PROPERTY COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
 
 	add_executable(${BUILD_UNITTEST_BINARY}
-		${UNITTEST_SRCS}
-		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
+		${BUILD_SRCS}
+		${BUILD_UNITTEST_SRCS}
+		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>
+		$<TARGET_OBJECTS:${UNITTEST_OBJECT_LIBRARY}>)
 	add_executable(${LOAD_UNITTEST_BINARY}
-		${UNITTEST_SRCS}
-		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
+		${LOAD_SRCS}
+		${LOAD_UNITTEST_SRCS}
+		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>
+		$<TARGET_OBJECTS:${UNITTEST_OBJECT_LIBRARY}>)
 	add_executable(${SEGMENT_UNITTEST_BINARY}
-		${UNITTEST_SRCS}
-		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
+		${SEGMENT_SRCS}
+		${SEGMENT_UNITTEST_SRCS}
+		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>
+		$<TARGET_OBJECTS:${UNITTEST_OBJECT_LIBRARY}>)
 	add_executable(${STUDENT_QUERY_UNITTEST_BINARY}
-		${UNITTEST_SRCS}
-		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
+		${STUDENT_QUERY_SRCS}
+		${STUDENT_QUERY_UNITTEST_SRCS}
+		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>
+		$<TARGET_OBJECTS:${UNITTEST_OBJECT_LIBRARY}>)
 
 	set_target_properties(${BUILD_UNITTEST_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
 	set_target_properties(${LOAD_UNITTEST_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")

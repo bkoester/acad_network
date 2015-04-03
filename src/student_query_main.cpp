@@ -5,8 +5,9 @@
 #include <boost/program_options.hpp>
 
 #include "course.hpp"
+#include "course_container.hpp"
 #include "student.hpp"
-#include "tab_reader.hpp"
+#include "student_container.hpp"
 
 
 using std::cerr; using std::cin; using std::cout; using std::endl;
@@ -41,15 +42,15 @@ int main(int argc, char* argv[]) {
 	// read students and enrollment data
 	ifstream student_stream{student_path};
 	ifstream enrollment_stream{enrollment_path};
-	Student::container_t students{ReadStudents(student_stream)};
-	Course::container_t courses{ReadEnrollment(enrollment_stream, students)};
+	StudentContainer students{student_stream};
+	CourseContainer courses{enrollment_stream, students};
 
 	while (!cin.eof()) {
 		cout << "Enter student ID > ";
 		Student::Id input_id{0};
 		while (cin >> input_id) {
 			try {
-				cout << FindStudent(input_id, students) << endl;
+				cout << students.Find(input_id) << endl;
 			} catch (StudentNotFound& student_not_found) {
 				cerr << student_not_found.what() << endl;
 			}

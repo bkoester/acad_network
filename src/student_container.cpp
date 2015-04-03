@@ -1,5 +1,7 @@
 #include "student_container.hpp"
 
+#include <cassert>
+
 #include <algorithm>
 #include <functional>
 #include <initializer_list>
@@ -7,6 +9,7 @@
 #include <iterator>
 #include <vector>
 
+#include "course_container.hpp"
 #include "student.hpp"
 #include "utility.hpp"
 
@@ -28,7 +31,8 @@ StudentContainer::StudentContainer(istream& student_stream) {
 }
 
 
-vector<Student>::iterator StudentContainer::Insert(Student student) {
+StudentContainer::container_t::iterator StudentContainer::Insert(
+		Student student) {
 	auto student_it = lower_bound(
 			std::begin(students_), std::end(students_), student);
 	return students_.insert(student_it, student);
@@ -39,6 +43,22 @@ void StudentContainer::Insert(
 	for_each(std::begin(students),  std::end(students), 
 			[this](Student student) { Insert(student); });
 }
+
+
+void StudentContainer::UpdateCourses(const CourseContainer& courses) {
+	for (const auto& course : courses) {
+		for (const auto& student_ptr : course->students_enrolled()) {
+			try {
+				// find it again because student_ptr is const
+				Student& student(Find(student_ptr->id()));
+				student.AddCourseTaken(course.get());
+			// CourseContainer should check that all students exist before
+			// inserting them, so this should be impossible.
+			} catch (StudentNotFound&) { assert(false); }
+		}
+	}
+}
+
 
 const Student& StudentContainer::Find(Student::Id id) const {
 	auto student_it = lower_bound(

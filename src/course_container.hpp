@@ -14,20 +14,34 @@ class StudentContainer;
 
 class CourseContainer {
  public:
+	using container_t = std::set<std::unique_ptr<Course>, CourseComparator>;
+
 	CourseContainer() {}
-	// Read Student::Ids and courses they took from enrollment data. Populate a
-	// set of courses based off the courses students took and make a populate
-	// the list of courses a student took.
-	CourseContainer(std::istream& enrollment_stream, StudentContainer& students);
+	// Read Student::Ids and courses they took from enrollment data. 
+	// Populate a set of courses and which students took them
+	explicit CourseContainer(std::istream& enrollment_stream,
+							 const StudentContainer& students);
+
 
 	std::set<std::unique_ptr<Course>, CourseComparator>::size_type 
 		size() { return courses_.size(); }
 
-	const std::unique_ptr<Course>& Find(Course course);
+	const std::unique_ptr<Course>& Find(Course course) const;
+
+	virtual container_t::iterator begin() { return std::begin(courses_); }
+	virtual container_t::const_iterator begin() const
+	{ return std::begin(courses_); }
+	virtual container_t::const_iterator cbegin() const
+	{ return courses_.cbegin(); }
+
+	virtual container_t::iterator end() { return std::end(courses_); }
+	virtual container_t::const_iterator end() const
+	{ return std::end(courses_); }
+	virtual container_t::const_iterator cend() const { return courses_.cend(); }
 
 
  private:
-	std::set<std::unique_ptr<Course>, CourseComparator> courses_;
+	container_t courses_;
 };
 
 

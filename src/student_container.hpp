@@ -10,8 +10,14 @@
 #include "student.hpp"
 
 
+// incomplete declaration
+class CourseContainer;
+
+
 class StudentContainer {
  public:
+	using container_t = std::vector<Student>;
+
 	StudentContainer() {}
 
 	// Read students into a sorted vector. This vector "owns" the students,
@@ -19,36 +25,33 @@ class StudentContainer {
 	// pointers won't be invalidated) or find them in logn with Student::Id.
 	explicit StudentContainer(std::istream& student_stream);
 
-	// Inserts and takes ownership of student.
-	virtual std::vector<Student>::iterator Insert(Student student);
-	virtual void Insert(std::initializer_list<Student> students);
-
 	virtual ~StudentContainer() {}
+
+	// Inserts and takes ownership of student.
+	container_t::iterator Insert(Student student);
+	void Insert(std::initializer_list<Student> students);
+
+	// Populate the list of courses a student took.
+	void UpdateCourses(const CourseContainer& courses);
 
 	// These functions made virtual for mocking
 	// Finds a student with the given ID in the container of students
 	virtual Student& Find(Student::Id id);
 	virtual const Student& Find(Student::Id id) const;
 
-	virtual std::vector<Student>::size_type size() const 
+	virtual container_t::size_type size() const 
 	{ return students_.size(); }
 
-	virtual std::vector<Student>::iterator begin() 
-	{ return std::begin(students_); }
-	virtual std::vector<Student>::const_iterator begin() const
-	{ return std::begin(students_); }
-	virtual std::vector<Student>::const_iterator cbegin() const
-	{ return students_.cbegin(); }
+	container_t::iterator begin() { return std::begin(students_); }
+	container_t::const_iterator begin() const { return std::begin(students_); }
+	container_t::const_iterator cbegin() const { return students_.cbegin(); }
 
-	virtual std::vector<Student>::iterator end() 
-	{ return std::end(students_); }
-	virtual std::vector<Student>::const_iterator end() const
-	{ return std::end(students_); }
-	virtual std::vector<Student>::const_iterator cend() const
-	{ return students_.cend(); }
+	container_t::iterator end() { return std::end(students_); }
+	container_t::const_iterator end() const { return std::end(students_); }
+	container_t::const_iterator cend() const { return students_.cend(); }
 
  private:
-	std::vector<Student> students_;
+	container_t students_;
 };
 
 

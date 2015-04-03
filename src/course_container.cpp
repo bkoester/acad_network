@@ -25,7 +25,7 @@ static istream& operator>>(istream& input, Enrollment& enrollment);
 
 
 CourseContainer::CourseContainer(istream& enrollment_stream, 
-								 StudentContainer& students) {
+								 const StudentContainer& students) {
 
 	// Skip the headings line.
 	SkipLine(enrollment_stream);
@@ -38,20 +38,19 @@ CourseContainer::CourseContainer(istream& enrollment_stream,
 		auto inserted_course = (*courses_.insert(
 				make_unique<Course>(enrollment.course)).first).get();
 		try {
-			Student& student(students.Find(enrollment.student_id));
-
-			// Add the student to the course.
+			// Add the student to the course if the student actually exists (not
+			// guaranteed to based on presence in enrollment data).
+			const Student& student(students.Find(enrollment.student_id));
 			inserted_course->AddStudentEnrolled(&student);
-			student.AddCourseTaken(inserted_course);
 		} catch (StudentNotFound&) {}
 	}
 }
 
 
-const unique_ptr<Course>& CourseContainer::Find(Course course) {
+const unique_ptr<Course>& CourseContainer::Find(Course course) const {
 	auto course_ptr = make_unique<Course>(course);
 	auto find_it = courses_.find(course_ptr);
-	if (end(courses_) == find_it) { throw CourseNotFound{course}; }
+	if (std::end(courses_) == find_it) { throw CourseNotFound{course}; }
 	return *find_it;
 }
 

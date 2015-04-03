@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "course.hpp"
@@ -22,7 +23,7 @@ using ::testing::Eq;
 using ::testing::AtLeast;
 
 TEST(CourseContainerTest, Find) {
-	MockStudentContainer students{};
+	const MockStudentContainer students{};
 	Student student1{147195};
 	Student student2{312995};
 	Student student3{352468};
@@ -61,41 +62,6 @@ TEST(CourseContainerTest, Find) {
 	Course* environ311{courses.Find(
 			Course{"ENVIRON", short{311}, 201405}).get()};
 	Course* math425{courses.Find(Course{"MATH", short{425}, 201407}).get()};
-
-	EXPECT_TRUE(student1.HasTakenCourse(english125));
-	EXPECT_FALSE(student1.HasTakenCourse(chem210));
-	EXPECT_FALSE(student1.HasTakenCourse(chem211));
-	EXPECT_TRUE(student1.HasTakenCourse(aaptis277));
-	EXPECT_TRUE(student1.HasTakenCourse(environ311));
-	EXPECT_FALSE(student1.HasTakenCourse(math425));
-	
-	EXPECT_TRUE(student2.HasTakenCourse(english125));
-	EXPECT_TRUE(student2.HasTakenCourse(chem210));
-	EXPECT_TRUE(student2.HasTakenCourse(chem211));
-	EXPECT_TRUE(student2.HasTakenCourse(aaptis277));
-	EXPECT_FALSE(student2.HasTakenCourse(environ311));
-	EXPECT_FALSE(student2.HasTakenCourse(math425));
-
-	EXPECT_TRUE(student3.HasTakenCourse(english125));
-	EXPECT_FALSE(student3.HasTakenCourse(chem210));
-	EXPECT_FALSE(student3.HasTakenCourse(chem211));
-	EXPECT_FALSE(student3.HasTakenCourse(aaptis277));
-	EXPECT_TRUE(student3.HasTakenCourse(environ311));
-	EXPECT_TRUE(student3.HasTakenCourse(math425));
-
-	EXPECT_TRUE(student4.HasTakenCourse(english125));
-	EXPECT_TRUE(student4.HasTakenCourse(chem210));
-	EXPECT_FALSE(student4.HasTakenCourse(chem211));
-	EXPECT_FALSE(student4.HasTakenCourse(aaptis277));
-	EXPECT_FALSE(student4.HasTakenCourse(environ311));
-	EXPECT_FALSE(student4.HasTakenCourse(math425));
-
-	EXPECT_FALSE(student5.HasTakenCourse(english125));
-	EXPECT_FALSE(student5.HasTakenCourse(chem210));
-	EXPECT_FALSE(student5.HasTakenCourse(chem211));
-	EXPECT_FALSE(student5.HasTakenCourse(aaptis277));
-	EXPECT_FALSE(student5.HasTakenCourse(environ311));
-	EXPECT_TRUE(student5.HasTakenCourse(math425));
 
 	EXPECT_TRUE(english125->IsStudentEnrolled(&student1));
 	EXPECT_TRUE(english125->IsStudentEnrolled(&student2));

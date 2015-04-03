@@ -84,6 +84,7 @@ int main(int argc, char* argv[]) {
 	ifstream enrollment_stream{enrollment_path};
 	StudentContainer students{student_stream};
 	CourseContainer courses{enrollment_stream, students};
+	students.UpdateCourses(courses);
 
 	// read data to segment from the input stream
 	auto segmentation_func = segmenters.find(segment)->second;

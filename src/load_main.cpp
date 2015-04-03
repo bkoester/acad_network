@@ -99,6 +99,7 @@ int main(int argc, char* argv[]) {
 	ifstream enrollment_stream{enrollment_path};
 	StudentContainer students{student_stream};
 	CourseContainer courses{enrollment_stream, students};
+	students.UpdateCourses(courses);
 
 	// Do whatever work necessary
 	if (network_to_load == NetworkType_e::Course) {

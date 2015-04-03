@@ -44,6 +44,7 @@ int main(int argc, char* argv[]) {
 	ifstream enrollment_stream{enrollment_path};
 	StudentContainer students{student_stream};
 	CourseContainer courses{enrollment_stream, students};
+	students.UpdateCourses(courses);
 
 	while (!cin.eof()) {
 		cout << "Enter student ID > ";

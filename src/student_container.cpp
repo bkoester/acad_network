@@ -47,11 +47,11 @@ void StudentContainer::Insert(
 
 void StudentContainer::UpdateCourses(const CourseContainer& courses) {
 	for (const auto& course : courses) {
-		for (const auto& student_id : course->students_enrolled()) {
+		for (const auto& student_id : course.students_enrolled()) {
 			try {
 				// find it again because student_ptr is const
 				Student& student(Find(student_id));
-				student.AddCourseTaken(course.get());
+				student.AddCourseTaken(&course);
 			// CourseContainer should check that all students exist before
 			// inserting them, so this should be impossible.
 			} catch (StudentNotFound&) { assert(false); }

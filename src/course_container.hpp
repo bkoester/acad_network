@@ -1,9 +1,11 @@
 #ifndef COURSE_CONTAINER_H
 #define COURSE_CONTAINER_H
 
-#include <memory>
-#include <set>
+#include <initializer_list>
 #include <string>
+#include <vector>
+
+#include <boost/serialization/vector.hpp>
 
 #include "course.hpp"
 
@@ -14,7 +16,7 @@ class StudentContainer;
 
 class CourseContainer {
  public:
-	using container_t = std::set<std::unique_ptr<Course>, CourseComparator>;
+	using container_t = std::vector<Course>;
 
 	CourseContainer() {}
 	// Read Student::Ids and courses they took from enrollment data. 
@@ -22,11 +24,22 @@ class CourseContainer {
 	explicit CourseContainer(std::istream& enrollment_stream,
 							 const StudentContainer& students);
 
+	virtual ~CourseContainer() {}
 
-	std::set<std::unique_ptr<Course>, CourseComparator>::size_type 
-		size() { return courses_.size(); }
+	bool operator==(const CourseContainer& other) const
+	{ return courses_ == other.courses_; }
 
-	const std::unique_ptr<Course>& Find(Course course) const;
+	container_t::size_type size() { return courses_.size(); }
+
+	template <typename Archive>
+	void serialize(Archive& ar, const unsigned int) { ar & courses_; }
+
+	// Inserts and takes ownership of student.
+	container_t::iterator Insert(Course course);
+	void Insert(std::initializer_list<Course> courses);
+
+	const Course& Find(Course course) const;
+	Course& Find(Course course);
 
 	virtual container_t::iterator begin() { return std::begin(courses_); }
 	virtual container_t::const_iterator begin() const

@@ -5,6 +5,8 @@
 #include <string>
 #include <utility>
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -88,47 +90,35 @@ TEST_F(StudentContainerTest, UpdateCourses) {
 
 	// create courses that students should be enrolled in
 	MockCourseContainer::container_t courses_holder;
-	courses_holder.insert(move(
-				make_unique<Course>("ENGLISH", short{125}, 201403)));
-	courses_holder.insert(move(
-		make_unique<Course>("CHEM", short{210}, 201403)));
-	courses_holder.insert(move(
-		make_unique<Course>("CHEM", short{211}, 201407)));
-	courses_holder.insert(move(
-		make_unique<Course>("AAPTIS", short{277}, 201403)));
-	courses_holder.insert(move(
-		make_unique<Course>("ENVIRON", short{311}, 201405)));
-	courses_holder.insert(move(
-		make_unique<Course>("MATH", short{425}, 201407)));
+	courses_holder.push_back(Course{"AAPTIS", short{277}, 201403});
+	courses_holder.push_back(Course{"CHEM", short{210}, 201403});
+	courses_holder.push_back(Course{"CHEM", short{211}, 201407});
+	courses_holder.push_back(Course{"ENGLISH", short{125}, 201403});
+	courses_holder.push_back(Course{"ENVIRON", short{311}, 201405});
+	courses_holder.push_back(Course{"MATH", short{425}, 201407});
 
-	const auto& course1 = *courses_holder.find(
-			make_unique<Course>("ENGLISH", short{125}, 201403));
-	course1->AddStudentEnrolled(student1.id());
-	course1->AddStudentEnrolled(student2.id());
-	course1->AddStudentEnrolled(student3.id());
+	auto& course1 = courses_holder[3];
+	course1.AddStudentEnrolled(student1.id());
+	course1.AddStudentEnrolled(student2.id());
+	course1.AddStudentEnrolled(student3.id());
 
-	const auto& course2 = *courses_holder.find(
-		make_unique<Course>("CHEM", short{210}, 201403));
-	course2->AddStudentEnrolled(student1.id());
-	course2->AddStudentEnrolled(student4.id());
+	auto& course2 = courses_holder[1];
+	course2.AddStudentEnrolled(student1.id());
+	course2.AddStudentEnrolled(student4.id());
 
-	const auto& course3 = *courses_holder.find(
-		make_unique<Course>("CHEM", short{211}, 201407));
-	course3->AddStudentEnrolled(student3.id());
-	course3->AddStudentEnrolled(student4.id());
+	auto& course3 = courses_holder[2];
+	course3.AddStudentEnrolled(student3.id());
+	course3.AddStudentEnrolled(student4.id());
 
-	const auto& course4 = *courses_holder.find(
-		make_unique<Course>("AAPTIS", short{277}, 201403));
-	course4->AddStudentEnrolled(student2.id());
-	course4->AddStudentEnrolled(student3.id());
-	course4->AddStudentEnrolled(student5.id());
+	auto& course4 = courses_holder[0];
+	course4.AddStudentEnrolled(student2.id());
+	course4.AddStudentEnrolled(student3.id());
+	course4.AddStudentEnrolled(student5.id());
 
-	const auto& course5 = *courses_holder.find(
-		make_unique<Course>("ENVIRON", short{311}, 201405));
-	course5->AddStudentEnrolled(student1.id());
+	auto& course5 = courses_holder[4];
+	course5.AddStudentEnrolled(student1.id());
 
-	const auto& course6 = *courses_holder.find(
-		make_unique<Course>("MATH", short{425}, 201407));
+	auto& course6 = courses_holder[5];
 
 	// create CourseContainer mock and set call expectations
 	const MockCourseContainer courses;
@@ -142,39 +132,54 @@ TEST_F(StudentContainerTest, UpdateCourses) {
 	students.UpdateCourses(courses);
 
 	// check that students were updated
-	EXPECT_TRUE(student1.HasTakenCourse(course1.get()));
-	EXPECT_TRUE(student2.HasTakenCourse(course1.get()));
-	EXPECT_TRUE(student3.HasTakenCourse(course1.get()));
-	EXPECT_FALSE(student4.HasTakenCourse(course1.get()));
-	EXPECT_FALSE(student5.HasTakenCourse(course1.get()));
+	EXPECT_TRUE(student1.HasTakenCourse(&course1));
+	EXPECT_TRUE(student2.HasTakenCourse(&course1));
+	EXPECT_TRUE(student3.HasTakenCourse(&course1));
+	EXPECT_FALSE(student4.HasTakenCourse(&course1));
+	EXPECT_FALSE(student5.HasTakenCourse(&course1));
 
-	EXPECT_TRUE(student1.HasTakenCourse(course2.get()));
-	EXPECT_FALSE(student2.HasTakenCourse(course2.get()));
-	EXPECT_FALSE(student3.HasTakenCourse(course2.get()));
-	EXPECT_TRUE(student4.HasTakenCourse(course2.get()));
-	EXPECT_FALSE(student5.HasTakenCourse(course2.get()));
+	EXPECT_TRUE(student1.HasTakenCourse(&course2));
+	EXPECT_FALSE(student2.HasTakenCourse(&course2));
+	EXPECT_FALSE(student3.HasTakenCourse(&course2));
+	EXPECT_TRUE(student4.HasTakenCourse(&course2));
+	EXPECT_FALSE(student5.HasTakenCourse(&course2));
 
-	EXPECT_FALSE(student1.HasTakenCourse(course3.get()));
-	EXPECT_FALSE(student2.HasTakenCourse(course3.get()));
-	EXPECT_TRUE(student3.HasTakenCourse(course3.get()));
-	EXPECT_TRUE(student4.HasTakenCourse(course3.get()));
-	EXPECT_FALSE(student5.HasTakenCourse(course3.get()));
+	EXPECT_FALSE(student1.HasTakenCourse(&course3));
+	EXPECT_FALSE(student2.HasTakenCourse(&course3));
+	EXPECT_TRUE(student3.HasTakenCourse(&course3));
+	EXPECT_TRUE(student4.HasTakenCourse(&course3));
+	EXPECT_FALSE(student5.HasTakenCourse(&course3));
 
-	EXPECT_FALSE(student1.HasTakenCourse(course4.get()));
-	EXPECT_TRUE(student2.HasTakenCourse(course4.get()));
-	EXPECT_TRUE(student3.HasTakenCourse(course4.get()));
-	EXPECT_FALSE(student4.HasTakenCourse(course4.get()));
-	EXPECT_TRUE(student5.HasTakenCourse(course4.get()));
+	EXPECT_FALSE(student1.HasTakenCourse(&course4));
+	EXPECT_TRUE(student2.HasTakenCourse(&course4));
+	EXPECT_TRUE(student3.HasTakenCourse(&course4));
+	EXPECT_FALSE(student4.HasTakenCourse(&course4));
+	EXPECT_TRUE(student5.HasTakenCourse(&course4));
 
-	EXPECT_TRUE(student1.HasTakenCourse(course5.get()));
-	EXPECT_FALSE(student2.HasTakenCourse(course5.get()));
-	EXPECT_FALSE(student3.HasTakenCourse(course5.get()));
-	EXPECT_FALSE(student4.HasTakenCourse(course5.get()));
-	EXPECT_FALSE(student5.HasTakenCourse(course5.get()));
+	EXPECT_TRUE(student1.HasTakenCourse(&course5));
+	EXPECT_FALSE(student2.HasTakenCourse(&course5));
+	EXPECT_FALSE(student3.HasTakenCourse(&course5));
+	EXPECT_FALSE(student4.HasTakenCourse(&course5));
+	EXPECT_FALSE(student5.HasTakenCourse(&course5));
 
-	EXPECT_FALSE(student1.HasTakenCourse(course6.get()));
-	EXPECT_FALSE(student2.HasTakenCourse(course6.get()));
-	EXPECT_FALSE(student3.HasTakenCourse(course6.get()));
-	EXPECT_FALSE(student4.HasTakenCourse(course6.get()));
-	EXPECT_FALSE(student5.HasTakenCourse(course6.get()));
+	EXPECT_FALSE(student1.HasTakenCourse(&course6));
+	EXPECT_FALSE(student2.HasTakenCourse(&course6));
+	EXPECT_FALSE(student3.HasTakenCourse(&course6));
+	EXPECT_FALSE(student4.HasTakenCourse(&course6));
+	EXPECT_FALSE(student5.HasTakenCourse(&course6));
+}
+
+
+TEST_F(StudentContainerTest, Serialization) {
+	stringstream student_stream;
+	boost::archive::text_oarchive student_oarchive{student_stream};
+
+	students.serialize(student_oarchive, 0);
+
+	boost::archive::text_iarchive student_iarchive{student_stream};
+
+	StudentContainer serialized_students;
+	serialized_students.serialize(student_iarchive, 0);
+
+	EXPECT_EQ(students, serialized_students);
 }

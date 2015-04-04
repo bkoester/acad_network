@@ -1,5 +1,7 @@
 #include "course_container.hpp"
 
+#include <algorithm>
+#include <initializer_list>
 #include <iostream>
 #include <iterator>
 #include <memory>
@@ -10,6 +12,8 @@
 #include "utility.hpp"
 
 
+using std::for_each;
+using std::initializer_list;
 using std::istream;
 using std::istream_iterator;
 using std::unique_ptr;
@@ -35,8 +39,8 @@ CourseContainer::CourseContainer(istream& enrollment_stream,
 		const Enrollment& enrollment(*enrollment_it);
 
 		// Insert the course and find the student.
-		auto inserted_course = (*courses_.insert(
-				make_unique<Course>(enrollment.course)).first).get();
+		auto inserted_course = &(*Insert(enrollment.course));
+
 		try {
 			// Add the student to the course if the student actually exists (not
 			// guaranteed to based on presence in enrollment data).
@@ -47,10 +51,37 @@ CourseContainer::CourseContainer(istream& enrollment_stream,
 }
 
 
-const unique_ptr<Course>& CourseContainer::Find(Course course) const {
-	auto course_ptr = make_unique<Course>(course);
-	auto find_it = courses_.find(course_ptr);
-	if (std::end(courses_) == find_it) { throw CourseNotFound{course}; }
+CourseContainer::container_t::iterator CourseContainer::Insert(
+		Course course) {
+	auto course_it = lower_bound(
+			std::begin(courses_), std::end(courses_), course);
+	if (course_it != std::end(courses_) && *course_it == course)
+	{ return course_it; }
+	return courses_.insert(course_it, course);
+}
+
+
+void CourseContainer::Insert(
+		initializer_list<Course> courses) {
+	for_each(std::begin(courses), std::end(courses), 
+			[this](Course course) { Insert(course); });
+}
+
+
+const Course& CourseContainer::Find(Course course) const {
+	auto find_it = lower_bound(
+			std::begin(courses_), std::end(courses_), course);
+	if (std::end(courses_) == find_it || *find_it != course)
+	{ throw CourseNotFound{course}; }
+	return *find_it;
+}
+
+
+Course& CourseContainer::Find(Course course) {
+	auto find_it = lower_bound(
+			std::begin(courses_), std::end(courses_), course);
+	if (std::end(courses_) == find_it || *find_it != course)
+	{ throw CourseNotFound{course}; }
 	return *find_it;
 }
 

@@ -74,6 +74,7 @@ TEST_F(CourseTest, Ordering) {
 	EXPECT_LT(Course("ENGLISH", 125, 201401), course2);
 }
 
+
 TEST_F(CourseTest, EnrolledStudents) {
 	auto student1 = unique_ptr<Student>{new Student{1}};
 	auto student2 = unique_ptr<Student>{new Student{2}};

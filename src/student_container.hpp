@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include <boost/serialization/vector.hpp>
+
 #include "student.hpp"
 
 
@@ -27,9 +29,15 @@ class StudentContainer {
 
 	virtual ~StudentContainer() {}
 
+	bool operator==(const StudentContainer& other) const
+	{ return students_ == other.students_; }
+
 	// Inserts and takes ownership of student.
 	container_t::iterator Insert(Student student);
 	void Insert(std::initializer_list<Student> students);
+
+	template <typename Archive>
+	void serialize(Archive& ar, const unsigned int) { ar & students_; }
 
 	// Populate the list of courses a student took.
 	void UpdateCourses(const CourseContainer& courses);

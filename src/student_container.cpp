@@ -9,6 +9,9 @@
 #include <iterator>
 #include <vector>
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
 #include "course_container.hpp"
 #include "student.hpp"
 #include "utility.hpp"
@@ -19,7 +22,7 @@ using std::begin; using std::end;
 using std::bind; using std::placeholders::_1;
 using std::copy; using std::for_each; using std::lower_bound;
 using std::initializer_list;
-using std::istream;
+using std::istream; using std::ostream;
 using std::vector;
 
 
@@ -78,11 +81,12 @@ Student& StudentContainer::Find(Student::Id id) {
 }
 
 
-/*
 void StudentContainer::Save(std::ostream& output_archive) {
-	boost::archive::text_oarchive archive{output_graph_archive};
+	boost::archive::text_oarchive archive{output_archive};
+	serialize(archive, 0);
 }
 
 void StudentContainer::Load(std::istream& input_archive) {
-	boost::archive::text_iarchive archive{input_graph_archive};
-} */
+	boost::archive::text_iarchive archive{input_archive};
+	serialize(archive, 0);
+}

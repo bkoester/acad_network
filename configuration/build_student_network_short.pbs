@@ -11,17 +11,18 @@
 
 WORKING_DIR=/tmp/$PBS_JOBID
 DEPLOY_DIR=$HOME/thesis
-ENROLLMENT_FILENAME=enrollment.tab
-STUDENT_FILENAME=student.tab
+COURSE_ARCHIVE_FILENAME=course_archive.txt
+STUDENT_ARCHIVE_FILENAME=student_archive.txt
 BINARY_NAME=build
 mkdir $WORKING_DIR
 
-cp ${DEPLOY_DIR}/data/${ENROLLMENT_FILENAME} $WORKING_DIR
-cp ${DEPLOY_DIR}/data/${STUDENT_FILENAME} $WORKING_DIR
+cp ${DEPLOY_DIR}/data/${COURSE_ARCHIVE_FILENAME} $WORKING_DIR
+cp ${DEPLOY_DIR}/data/${STUDENT_ARCHIVE_FILENAME} $WORKING_DIR
 cp ${DEPLOY_DIR}/code/build/src/${BINARY_NAME} $WORKING_DIR
 
 cd $WORKING_DIR
-./${BINARY_NAME} --threads=4 --student_file=${STUDENT_FILENAME} \
-	--enrollment_file=${ENROLLMENT_FILENAME} --network_to_build=student
+./${BINARY_NAME} --threads=4 --course_archive_path=${COURSE_ARCHIVE_FILENAME} \
+	--student_archive_path=${STUDENT_ARCHIVE_FILENAME} \
+	--network_to_build=student
 
 rm -rf $WORKING_DIR

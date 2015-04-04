@@ -18,12 +18,14 @@ namespace po = boost::program_options;
 
 int main(int argc, char* argv[]) {
 	po::options_description desc{"Options for student segmenting binary:"};
-	string student_path, enrollment_path;
+	string student_archive_path, course_archive_path;
 	desc.add_options()
 		("help,h", "Show this help message")
-		("student_file", po::value<string>(&student_path)->required(),
+		("student_archive_path", 
+		 po::value<string>(&student_archive_path)->required(),
 		 "Set the path at which to find the student file")
-		("enrollment_file", po::value<string>(&enrollment_path)->required(),
+		("course_archive_path", 
+		 po::value<string>(&course_archive_path)->required(),
 		 "Set the path at which to find the enrollment file");
 
 	po::variables_map vm;
@@ -40,11 +42,16 @@ int main(int argc, char* argv[]) {
 	}
 
 	// read students and enrollment data
-	ifstream student_stream{student_path};
-	ifstream enrollment_stream{enrollment_path};
-	StudentContainer students{student_stream};
-	CourseContainer courses{enrollment_stream, students};
+	ifstream student_archive{student_archive_path};
+	ifstream course_archive{course_archive_path};
+	StudentContainer students;
+	students.Load(student_archive);
+	CourseContainer courses;
+	courses.Load(course_archive);
 	students.UpdateCourses(courses);
+
+	cout << "Students: " << students.size() << endl;
+	cout << "Courses: " << courses.size() << endl;
 
 	while (!cin.eof()) {
 		cout << "Enter student ID > ";

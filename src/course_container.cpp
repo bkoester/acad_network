@@ -6,6 +6,9 @@
 #include <iterator>
 #include <memory>
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
 #include "course.hpp"
 #include "student.hpp"
 #include "student_container.hpp"
@@ -14,7 +17,7 @@
 
 using std::for_each;
 using std::initializer_list;
-using std::istream;
+using std::istream; using std::ostream;
 using std::istream_iterator;
 using std::unique_ptr;
 
@@ -83,6 +86,16 @@ Course& CourseContainer::Find(Course course) {
 	if (std::end(courses_) == find_it || *find_it != course)
 	{ throw CourseNotFound{course}; }
 	return *find_it;
+}
+
+void CourseContainer::Save(ostream& output) {
+	boost::archive::text_oarchive archive{output};
+	serialize(archive, 0);
+}
+
+void CourseContainer::Load(istream& input) {
+	boost::archive::text_iarchive archive{input};
+	serialize(archive, 0);
 }
 
 

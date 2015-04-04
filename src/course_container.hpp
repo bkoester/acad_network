@@ -34,6 +34,11 @@ class CourseContainer {
 	template <typename Archive>
 	void serialize(Archive& ar, const unsigned int) { ar & courses_; }
 
+	// Save and Load the course container.
+	// When loading, the input must be a valid boost archive.
+	void Save(std::ostream& output);
+	void Load(std::istream& input);
+
 	// Inserts and takes ownership of student.
 	container_t::iterator Insert(Course course);
 	void Insert(std::initializer_list<Course> courses);

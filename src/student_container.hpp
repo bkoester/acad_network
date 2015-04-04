@@ -39,6 +39,11 @@ class StudentContainer {
 	template <typename Archive>
 	void serialize(Archive& ar, const unsigned int) { ar & students_; }
 
+	// Save and Load the student container.
+	// When loading, the input must be a valid boost archive.
+	void Save(std::ostream& output);
+	void Load(std::istream& input);
+
 	// Populate the list of courses a student took.
 	void UpdateCourses(const CourseContainer& courses);
 
@@ -57,11 +62,6 @@ class StudentContainer {
 	container_t::iterator end() { return std::end(students_); }
 	container_t::const_iterator end() const { return std::end(students_); }
 	container_t::const_iterator cend() const { return students_.cend(); }
-
-	// Save and Load the student container.
-	// When loading, the input must be a valid boost archive.
-	void Save(std::ostream& output_archive);
-	void Load(std::istream& input_archive);
 
  private:
 	container_t students_;

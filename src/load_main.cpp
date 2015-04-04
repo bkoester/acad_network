@@ -49,17 +49,21 @@ static void MakeReducedNetwork(const StudentNetwork& network, string segment,
 int main(int argc, char* argv[]) {
 	po::options_description desc{"Options for network loading binary:"};
 	NetworkType_e network_to_load;
-	string course_archive_path, student_archive_path, 
-		   student_path, enrollment_path;
+	string student_archive_path, course_archive_path, 
+		   course_network_archive_path, student_network_archive_path;
 	desc.add_options()
 		("help,h", "Show this help message")
-		("course_archive", po::value<string>(&course_archive_path),
+		("course_network_archive_path", 
+		 po::value<string>(&course_network_archive_path),
 		 "Set the path at which to find the archived course network")
-		("student_archive", po::value<string>(&student_archive_path),
+		("student_network_archive_path",
+		 po::value<string>(&student_network_archive_path),
 		 "Set the path at which to find the archive student network")
-		("student_file", po::value<string>(&student_path)->required(),
+		("student_archive_path", 
+		 po::value<string>(&student_archive_path)->required(),
 		 "Set the path at which to find the student file")
-		("enrollment_file", po::value<string>(&enrollment_path)->required(),
+		("course_archive_path", 
+		 po::value<string>(&course_archive_path)->required(),
 		 "Set the path at which to find the enrollment file")
 		("network_to_load", 
 		 po::value<NetworkType_e>(&network_to_load)->default_value(
@@ -94,13 +98,15 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	// Read students and enrollment data.
-	ifstream student_stream{student_path};
-	ifstream enrollment_stream{enrollment_path};
-	StudentContainer students{student_stream};
-	CourseContainer courses{enrollment_stream, students};
+	// read students and enrollment data
+	ifstream student_archive{student_archive_path};
+	ifstream course_archive{course_archive_path};
+	StudentContainer students;
+	students.Load(student_archive);
+	CourseContainer courses;
+	courses.Load(course_archive);
 	students.UpdateCourses(courses);
-
+	
 	// Do whatever work necessary
 	if (network_to_load == NetworkType_e::Course) {
 		ifstream course_archive{course_archive_path};

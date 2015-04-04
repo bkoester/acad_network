@@ -22,15 +22,17 @@ namespace po = boost::program_options;
 
 int main(int argc, char* argv[]) {
 	po::options_description desc{"Options for network building binary:"};
-	string student_path, enrollment_path;
+	string student_archive_path, course_archive_path;
 	NetworkType_e network_to_build;
 	desc.add_options()
 		("help,h", "Show this help message")
-		("student_file", po::value<string>(&student_path)->required(),
+		("student_archive_path", 
+		 po::value<string>(&student_archive_path)->required(),
 		 "Set the path at which to find the student file")
-		("enrollment_file", po::value<string>(&enrollment_path)->required(),
+		("course_archive_path",
+		 po::value<string>(&course_archive_path)->required(),
 		 "Set the path at which to find the enrollment file")
-		("network_to_build", 
+		("network_to_build",
 		 po::value<NetworkType_e>(&network_to_build)->default_value(
 			 NetworkType_e::Student), "Set the network to build "
 		 "('student' or 'course')")
@@ -53,10 +55,13 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	ifstream student_stream{student_path};
-	ifstream enrollment_stream{enrollment_path};
-	StudentContainer students{student_stream};
-	CourseContainer courses{enrollment_stream, students};
+	// read students and enrollment data
+	ifstream student_archive{student_archive_path};
+	ifstream course_archive{course_archive_path};
+	StudentContainer students;
+	students.Load(student_archive);
+	CourseContainer courses;
+	courses.Load(course_archive);
 	students.UpdateCourses(courses);
 
 	if (network_to_build == NetworkType_e::Course) {

@@ -172,14 +172,10 @@ TEST_F(StudentContainerTest, UpdateCourses) {
 
 TEST_F(StudentContainerTest, Serialization) {
 	stringstream student_stream;
-	boost::archive::text_oarchive student_oarchive{student_stream};
-
-	students.serialize(student_oarchive, 0);
-
-	boost::archive::text_iarchive student_iarchive{student_stream};
-
+	students.Save(student_stream);
+	
 	StudentContainer serialized_students;
-	serialized_students.serialize(student_iarchive, 0);
+	serialized_students.Load(student_stream);
 
 	EXPECT_EQ(students, serialized_students);
 }

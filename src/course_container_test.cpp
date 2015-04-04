@@ -115,14 +115,10 @@ TEST_F(CourseContainerTest, Find) {
 
 TEST_F(CourseContainerTest, Serialization) {
 	stringstream course_stream;
-	boost::archive::text_oarchive course_oarchive{course_stream};
-
-	courses.serialize(course_oarchive, 0);
-
-	boost::archive::text_iarchive course_iarchive{course_stream};
+	courses.Save(course_stream);
 
 	CourseContainer serialized_courses;
-	serialized_courses.serialize(course_iarchive, 0);
+	serialized_courses.Load(course_stream);
 
 	EXPECT_EQ(courses, serialized_courses);
 }

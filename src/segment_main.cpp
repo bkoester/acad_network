@@ -43,7 +43,7 @@ segmenters{
 
 int main(int argc, char* argv[]) {
 	po::options_description desc{"Options for student segmenting binary:"};
-	string segment, student_path, enrollment_path, input_path;
+	string student_archive_path, course_archive_path, segment, input_path;
 	unique_ptr<ifstream> given_input_file;  // owns input file if path given
 	auto input_stream = &cin;  // pointer to the input stream to use
 	desc.add_options()
@@ -52,9 +52,11 @@ int main(int argc, char* argv[]) {
 		 "Field by which to segment data")
 		("input_file", po::value<string>(&input_path),
 		 "File that contains data to be segmented")
-		("student_file", po::value<string>(&student_path)->required(),
+		("student_archive_path", 
+		 po::value<string>(&student_archive_path)->required(),
 		 "Set the path at which to find the student file")
-		("enrollment_file", po::value<string>(&enrollment_path)->required(),
+		("course_archive_path", 
+		 po::value<string>(&course_archive_path)->required(),
 		 "Set the path at which to find the enrollment file");
 
 	po::variables_map vm;
@@ -80,10 +82,12 @@ int main(int argc, char* argv[]) {
 	}
 
 	// read students and enrollment data
-	ifstream student_stream{student_path};
-	ifstream enrollment_stream{enrollment_path};
-	StudentContainer students{student_stream};
-	CourseContainer courses{enrollment_stream, students};
+	ifstream student_archive{student_archive_path};
+	ifstream course_archive{course_archive_path};
+	StudentContainer students;
+	students.Load(student_archive);
+	CourseContainer courses;
+	courses.Load(course_archive);
 	students.UpdateCourses(courses);
 
 	// read data to segment from the input stream

@@ -7,8 +7,8 @@
 #include <string>
 
 #include "student.hpp"
+#include "student_container.hpp"
 #include "student_network.hpp"
-#include "tab_reader.hpp"
 
 
 using std::accumulate;
@@ -29,7 +29,7 @@ void StudentSegmenter::AddSegment(Segment&& segment)
 
 
 void StudentSegmenter::RunSegmentation(
-		const StudentNetwork& network, const Student::container_t& students) {
+		const StudentNetwork& network, const StudentContainer& students) {
 	for (const auto& vertex_d : network.GetVertexDescriptors()) {
 		VertexData data{vertex_d, network, students};
 		for (auto& segment : segments_) {
@@ -42,8 +42,8 @@ void StudentSegmenter::RunSegmentation(
 
 StudentSegmenter::VertexData::VertexData(
 		StudentNetwork::vertex_t vertex_d, const StudentNetwork& network,
-		const Student::container_t& students) :
-	student{FindStudent(network[vertex_d], students)} {
+		const StudentContainer& students) :
+	student{students.Find(network[vertex_d])} {
 
 	auto out_edges = network.GetOutEdgeValues(vertex_d);
 	weighted_degree = accumulate(begin(out_edges), end(out_edges), 0.);

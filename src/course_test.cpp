@@ -4,6 +4,8 @@
 #include <string>
 #include <memory>
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 #include "gtest/gtest.h"
 
 #include "student.hpp"
@@ -72,16 +74,17 @@ TEST_F(CourseTest, Ordering) {
 	EXPECT_LT(Course("ENGLISH", 125, 201401), course2);
 }
 
+
 TEST_F(CourseTest, EnrolledStudents) {
 	auto student1 = unique_ptr<Student>{new Student{1}};
 	auto student2 = unique_ptr<Student>{new Student{2}};
 	auto student3 = unique_ptr<Student>{new Student{3}};
 
-	course1.AddStudentEnrolled(student1.get());
-	course1.AddStudentEnrolled(student2.get());
-	course2.AddStudentEnrolled(student2.get());
-	course2.AddStudentEnrolled(student3.get());
-	course3.AddStudentEnrolled(student3.get());
+	course1.AddStudentEnrolled(student1->id());
+	course1.AddStudentEnrolled(student2->id());
+	course2.AddStudentEnrolled(student2->id());
+	course2.AddStudentEnrolled(student3->id());
+	course3.AddStudentEnrolled(student3->id());
 
 	EXPECT_EQ(2u, course1.GetNumStudentsEnrolled());
 	EXPECT_EQ(2u, course2.GetNumStudentsEnrolled());
@@ -103,4 +106,62 @@ TEST_F(CourseTest, Input) {
 
 	EXPECT_EQ(4, input_course1.num_credits());
 	EXPECT_EQ(1.5, input_course2.num_credits());
+}
+
+
+TEST_F(CourseTest, Serialization) {
+	course1.AddStudentEnrolled(Student::Id{1});
+	course1.AddStudentEnrolled(Student::Id{2});
+	course1.AddStudentEnrolled(Student::Id{3});
+
+	course2.AddStudentEnrolled(Student::Id{2});
+	course2.AddStudentEnrolled(Student::Id{4});
+
+	stringstream course_stream;
+	boost::archive::text_oarchive course_oarchive{course_stream};
+
+	course1.serialize(course_oarchive, 0);
+	course2.serialize(course_oarchive, 0);
+	course3.serialize(course_oarchive, 0);
+
+	boost::archive::text_iarchive course_iarchive{course_stream};
+
+	Course serialized_course1, serialized_course2, serialized_course3;
+	serialized_course1.serialize(course_iarchive, 0);
+	serialized_course2.serialize(course_iarchive, 0);
+	serialized_course3.serialize(course_iarchive, 0);
+
+	EXPECT_EQ(undefined_subject, serialized_course1.subject());
+	EXPECT_EQ("ENGLISH", serialized_course2.subject());
+	EXPECT_EQ("EECS", serialized_course3.subject());
+
+	EXPECT_EQ(undefined_number, serialized_course1.number());
+	EXPECT_EQ(125, serialized_course2.number());
+	EXPECT_EQ(381, serialized_course3.number());
+
+	EXPECT_EQ(undefined_term, serialized_course1.term());
+	EXPECT_EQ(201403, serialized_course2.term());
+	EXPECT_EQ(201303, serialized_course3.term());
+
+	EXPECT_EQ(0, serialized_course1.num_credits());
+	EXPECT_EQ(4, serialized_course2.num_credits());
+	EXPECT_EQ(4, serialized_course3.num_credits());
+
+	EXPECT_EQ(0, serialized_course1.num_credits());
+	EXPECT_EQ(4, serialized_course2.num_credits());
+	EXPECT_EQ(4, serialized_course3.num_credits());
+
+	EXPECT_EQ(3u, serialized_course1.GetNumStudentsEnrolled());
+	EXPECT_TRUE(serialized_course1.IsStudentEnrolled(Student::Id{1}));
+	EXPECT_TRUE(serialized_course1.IsStudentEnrolled(Student::Id{2}));
+	EXPECT_TRUE(serialized_course1.IsStudentEnrolled(Student::Id{3}));
+	EXPECT_FALSE(serialized_course1.IsStudentEnrolled(Student::Id{4}));
+	
+	EXPECT_EQ(2u, serialized_course2.GetNumStudentsEnrolled());
+	EXPECT_TRUE(serialized_course2.IsStudentEnrolled(Student::Id{2}));
+	EXPECT_TRUE(serialized_course2.IsStudentEnrolled(Student::Id{4}));
+	EXPECT_FALSE(serialized_course2.IsStudentEnrolled(Student::Id{1}));
+
+	EXPECT_EQ(0u, serialized_course3.GetNumStudentsEnrolled());
+	EXPECT_FALSE(serialized_course2.IsStudentEnrolled(Student::Id{1}));
 }

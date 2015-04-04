@@ -10,7 +10,7 @@ import csv
 import numpy
 
 
-def segment_data(data_file, segment):
+def segment_data(data_file, segment=True):
     """Segments input data.
 
     Args:
@@ -29,6 +29,7 @@ def segment_data(data_file, segment):
         segments[segment] = numpy.append(segments[segment], float(datum))
 
     return segments
+
 
 def get_edges(data_file):
     """Reads vertex pairs and their associated values into a dict.

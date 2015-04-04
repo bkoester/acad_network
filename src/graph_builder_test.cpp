@@ -7,6 +7,7 @@
 #include "course.hpp"
 #include "network_structure_test.hpp"
 #include "student.hpp"
+#include "student_container.hpp"
 #include "student_network.hpp"
 #include "test_data_streams.hpp"
 
@@ -14,16 +15,7 @@
 using std::stringstream;
 
 
-class GraphBuilderTest : public ::testing::Test {
- public:
-	GraphBuilderTest() : enrollment_stream{enrollment_tab} {}
-
- protected:
-	stringstream enrollment_stream;
-};
-
-
-TEST_F(GraphBuilderTest, BuildStudentNetworkFromStudents) { 
+TEST(GraphBuilderTest, BuildStudentNetworkFromStudents) { 
 	// make the students
 	auto course1 = Course{"ENGLISH", 125, 0, 4};
 	auto course2 = Course{"AAPTIS", 277, 0, 4};
@@ -43,23 +35,22 @@ TEST_F(GraphBuilderTest, BuildStudentNetworkFromStudents) {
 	Student student5{567890};
 	student5.AddCourseTaken(&course6);
 	// put them in a container
-	Student::container_t students{
-		student1, student2, student3, student4, student5};
+	StudentContainer students;
+	students.Insert({student1, student2, student3, student4, student5});
 
-	course1.AddStudentEnrolled(&students[0]);
-	course1.AddStudentEnrolled(&students[1]);
-	course1.AddStudentEnrolled(&students[2]);
-	course1.AddStudentEnrolled(&students[3]);
-	course2.AddStudentEnrolled(&students[0]);
-	course2.AddStudentEnrolled(&students[1]);
-	course3.AddStudentEnrolled(&students[1]);
-	course3.AddStudentEnrolled(&students[3]);
-	course4.AddStudentEnrolled(&students[1]);
-	course5.AddStudentEnrolled(&students[0]);
-	course5.AddStudentEnrolled(&students[2]);
-	course6.AddStudentEnrolled(&students[2]);
-	course6.AddStudentEnrolled(&students[4]);
-
+	course1.AddStudentEnrolled(student1.id());
+	course1.AddStudentEnrolled(student2.id());
+	course1.AddStudentEnrolled(student3.id());
+	course1.AddStudentEnrolled(student4.id());
+	course2.AddStudentEnrolled(student1.id());
+	course2.AddStudentEnrolled(student2.id());
+	course3.AddStudentEnrolled(student2.id());
+	course3.AddStudentEnrolled(student4.id());
+	course4.AddStudentEnrolled(student2.id());
+	course5.AddStudentEnrolled(student1.id());
+	course5.AddStudentEnrolled(student3.id());
+	course6.AddStudentEnrolled(student3.id());
+	course6.AddStudentEnrolled(student5.id());
 
 	StudentNetwork network{BuildStudentNetworkFromStudents(students)};
 	TestStudentNetworkStructure(network);

@@ -21,29 +21,29 @@ CourseNetwork::CourseNetwork(const graph_t& graph) : Network{graph}
 { BuildCourseToVertexMap(); }
 
 
-CourseNetwork::vertex_t CourseNetwork::GetVertex(const Course& course) const
+CourseNetwork::vertex_t CourseNetwork::GetVertex(const Course::Id& course) const
 { return course_to_vertex_.at(course); }
 
 
-const Course& CourseNetwork::operator[](const Course& course) const
-{ return Network<Course, int>::operator[](GetVertex(course)); }
+const Course::Id& CourseNetwork::operator[](const Course::Id& course) const
+{ return Network<Course::Id, int>::operator[](GetVertex(course)); }
 
 
-Course& CourseNetwork::operator[](const Course& course)
-{ return Network<Course, int>::operator[](GetVertex(course)); }
+Course::Id& CourseNetwork::operator[](const Course::Id& course)
+{ return Network<Course::Id, int>::operator[](GetVertex(course)); }
 
 
 int CourseNetwork::CalculateValue(
 		const vertex_t& source, const vertex_t& target) const {
 	auto edge_option = GetEdgeDescriptor(source, target);
 	if (!edge_option) { return default_edge_value; }
-	return Network<Course, int>::operator[](edge_option.get());
+	return Network<Course::Id, int>::operator[](edge_option.get());
 }
 
 
 void CourseNetwork::Load(std::istream& input_graph_archive) {
 	// load the graph itself using the base function
-	Network<Course, int>::Load(input_graph_archive);
+	Network<Course::Id, int>::Load(input_graph_archive);
 	BuildCourseToVertexMap();
 }
 

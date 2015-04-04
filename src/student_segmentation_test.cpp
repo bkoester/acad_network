@@ -4,13 +4,15 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "gtest/gtest.h"
 
+#include "course_container.hpp"
 #include "graph_builder.hpp"
+#include "student_container.hpp"
 #include "student_network.hpp"
 #include "test_data_streams.hpp"
-#include "tab_reader.hpp"
 
 
 using std::begin;
@@ -18,22 +20,70 @@ using std::ostream;
 using std::ostringstream; using std::stringstream; 
 using std::move;
 using std::string;
+using std::vector;
 
 
 class StudentSegmentationTest : public ::testing::Test {
  public:
 	void SetUp() override {
-		// yes, this should be mocked, but mocking is a lot of work
-		stringstream student_stream{student_tab};
-		students = ReadStudents(student_stream);
-		stringstream enrollment_stream{enrollment_tab};
-		enrollment = ReadEnrollment(enrollment_stream, students);
-		network = BuildStudentNetworkFromStudents(students);
+		StudentNetwork::graph_t graph{5};
+
+		auto course1 = Course{"ENGLISH", 125, 0, 4};
+		auto course2 = Course{"AAPTIS", 277, 0, 4};
+		auto course3 = Course{"CHEM", 210, 0, 4};
+		auto course4 = Course{"CHEM", 211, 0, 1};
+		auto course5 = Course{"ENVIRON", 311, 0, 4};
+		auto course6 = Course{"MATH", 425, 0, 3};
+		courses = {course1, course2, course3, course4, course5, course6};
+
+		Student student1{147195, Student::Gender::Male, 
+			Student::Ethnicity::Unknown, 0, 0, false, ""};
+		student1.AddCoursesTaken({&courses[4], &courses[1], &courses[0]});
+		Student student2{312995, Student::Gender::Female, 
+			Student::Ethnicity::Unknown, 0, 0, false, ""};
+		student2.AddCoursesTaken(
+				{&courses[0], &courses[2], &courses[3], &courses[1]});
+		Student student3{352468, Student::Gender::Female, 
+			Student::Ethnicity::Unknown, 0, 0, false, ""};
+		student3.AddCoursesTaken({&courses[0], &courses[4], &courses[5]});
+		Student student4{500928, Student::Gender::Female, 
+			Student::Ethnicity::Unknown, 0, 0, false, ""};
+		student4.AddCoursesTaken({&courses[0], &courses[2]});
+		Student student5{567890, Student::Gender::Male, 
+			Student::Ethnicity::Unknown, 0, 0, false, ""};
+		student5.AddCourseTaken(&courses[5]);
+
+		// add vertices
+		auto student1_v = vertex(0, graph);
+		graph[student1_v] = student1.id();
+		auto student2_v = vertex(1, graph);
+		graph[student2_v] = student2.id();
+		auto student3_v = vertex(2, graph);
+		graph[student3_v] = student3.id();
+		auto student4_v = vertex(3, graph);
+		graph[student4_v] = student4.id();
+		auto student5_v = vertex(4, graph);
+		graph[student5_v] = student5.id();
+
+		// add edges
+		add_edge(student1_v, student2_v, 3.0, graph);
+		add_edge(student1_v, student3_v, 3.0, graph);
+		add_edge(student1_v, student4_v, 1.0, graph);
+
+		add_edge(student2_v, student3_v, 1.0, graph);
+		add_edge(student2_v, student4_v, 1.0, graph);
+
+		add_edge(student3_v, student4_v, 3.0, graph);
+		add_edge(student4_v, student5_v, 1.5, graph);
+
+		network = StudentNetwork{graph};
+
+		students.Insert({student1, student2, student3, student4, student5});
 	}
 
  protected:
-	Student::container_t students;
-	Course::container_t enrollment;
+	vector<Course> courses;
+	StudentContainer students;
 	StudentNetwork network;
 	StudentSegmenter segmentation;
 };

@@ -1,37 +1,42 @@
 set(SRCS
 	course.cpp
+	course_container.cpp
 	course_network.cpp
 	mem_usage.cpp
 	student.cpp
-	tab_reader.cpp
+	student_container.cpp
 	utility.cpp
 	)
 
-set(BUILD_MAIN_SRCS 
-	build_main.cpp
+set(BUILD_SRCS
 	graph_builder.cpp
 	)
 
-set(LOAD_MAIN_SRCS 
-	load_main.cpp
+set(BUILD_MAIN_SRC build_main.cpp)
+
+set(LOAD_SRCS
 	student_segmentation.cpp
 	)
 
-set(SEGMENT_SRCS 
-	segment_main.cpp
-	)
+set(LOAD_MAIN_SRC load_main.cpp)
+
+set(SEGMENT_MAIN_SRC segment_main.cpp)
+
+set(STUDENT_QUERY_MAIN_SRC student_query_main.cpp)
+
+set(SERIALIZE_MAIN_SRC serialize_main.cpp)
 
 set(UNITTEST_SRCS
 	course_test.cpp
+	course_container_test.cpp
 	course_network_test.cpp
 	network_test.cpp
 	network_structure_test.cpp
 	student_test.cpp
 	student_network_test.cpp
-	tab_reader_test.cpp
+	student_container_test.cpp
 	utility_test.cpp
 	)
-
 
 set(BUILD_UNITTEST_SRCS
 	graph_builder_test.cpp
@@ -45,6 +50,12 @@ set(LOAD_UNITTEST_SRCS
 set(SEGMENT_UNITTEST_SRCS
 	)
 
+set(STUDENT_QUERY_UNITTEST_SRCS
+	)
+
+set(SERIALIZE_UNITTEST_SRCS
+	)
+
 set(DEBUG_OBJECT_LIBRARY "debug_objects")
 set(UNITTEST_OBJECT_LIBRARY "unittest_objects")
 set(RELEASE_OBJECT_LIBRARY "release_objects")
@@ -54,9 +65,15 @@ set(LOAD_DEBUG_BINARY "loadd")
 set(LOAD_RELEASE_BINARY "load")
 set(SEGMENT_DEBUG_BINARY "segmentd")
 set(SEGMENT_RELEASE_BINARY "segment")
+set(STUDENT_QUERY_DEBUG_BINARY "queryd")
+set(STUDENT_QUERY_RELEASE_BINARY "query")
+set(SERIALIZE_DEBUG_BINARY "serialized")
+set(SERIALIZE_RELEASE_BINARY "serialize")
 set(BUILD_UNITTEST_BINARY "build_unittest")
 set(LOAD_UNITTEST_BINARY "load_unittest")
 set(SEGMENT_UNITTEST_BINARY "segment_unittest")
+set(STUDENT_QUERY_UNITTEST_BINARY "query_unittest")
+set(SERIALIZE_UNITTEST_BINARY "serialize_unittest")
 
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
@@ -65,22 +82,44 @@ include_directories(
 add_library(${DEBUG_OBJECT_LIBRARY} OBJECT ${SRCS})
 add_library(${RELEASE_OBJECT_LIBRARY} OBJECT ${SRCS})
 add_executable(${BUILD_DEBUG_BINARY}
-	${BUILD_MAIN_SRCS}
+	${BUILD_MAIN_SRC}
+	${BUILD_SRCS}
 	$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
 add_executable(${BUILD_RELEASE_BINARY}
-	${BUILD_MAIN_SRCS}
+	${BUILD_MAIN_SRC}
+	${BUILD_SRCS}
 	$<TARGET_OBJECTS:${RELEASE_OBJECT_LIBRARY}>)
 add_executable(${LOAD_DEBUG_BINARY}
-	${LOAD_MAIN_SRCS}
+	${LOAD_MAIN_SRC}
+	${LOAD_SRCS}
 	$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
 add_executable(${LOAD_RELEASE_BINARY}
-	${LOAD_MAIN_SRCS}
+	${LOAD_MAIN_SRC}
+	${LOAD_SRCS}
 	$<TARGET_OBJECTS:${RELEASE_OBJECT_LIBRARY}>)
 add_executable(${SEGMENT_DEBUG_BINARY}
+	${SEGMENT_MAIN_SRC}
 	${SEGMENT_SRCS}
 	$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
 add_executable(${SEGMENT_RELEASE_BINARY}
+	${SEGMENT_MAIN_SRC}
 	${SEGMENT_SRCS}
+	$<TARGET_OBJECTS:${RELEASE_OBJECT_LIBRARY}>)
+add_executable(${STUDENT_QUERY_DEBUG_BINARY}
+	${STUDENT_QUERY_MAIN_SRC}
+	${STUDENT_QUERY_SRCS}
+	$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
+add_executable(${STUDENT_QUERY_RELEASE_BINARY}
+	${STUDENT_QUERY_MAIN_SRC}
+	${STUDENT_QUERY_SRCS}
+	$<TARGET_OBJECTS:${RELEASE_OBJECT_LIBRARY}>)
+add_executable(${SERIALIZE_DEBUG_BINARY}
+	${SERIALIZE_MAIN_SRC}
+	${SERIALIZE_SRCS}
+	$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
+add_executable(${SERIALIZE_RELEASE_BINARY}
+	${SERIALIZE_MAIN_SRC}
+	${SERIALIZE_SRCS}
 	$<TARGET_OBJECTS:${RELEASE_OBJECT_LIBRARY}>)
 
 
@@ -92,6 +131,10 @@ set_target_properties(${BUILD_DEBUG_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS
 set_target_properties(${BUILD_RELEASE_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_RELEASE}")
 set_target_properties(${SEGMENT_DEBUG_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
 set_target_properties(${SEGMENT_RELEASE_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_RELEASE}")
+set_target_properties(${STUDENT_QUERY_DEBUG_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
+set_target_properties(${STUDENT_QUERY_RELEASE_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_RELEASE}")
+set_target_properties(${SERIALIZE_DEBUG_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
+set_target_properties(${SERIALIZE_RELEASE_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_RELEASE}")
 
 
 target_link_libraries(${BUILD_DEBUG_BINARY}
@@ -106,6 +149,15 @@ target_link_libraries(${SEGMENT_DEBUG_BINARY}
 	${Boost_LIBRARIES})
 target_link_libraries(${SEGMENT_RELEASE_BINARY}
 	${Boost_LIBRARIES})
+target_link_libraries(${STUDENT_QUERY_DEBUG_BINARY}
+	${Boost_LIBRARIES})
+target_link_libraries(${STUDENT_QUERY_RELEASE_BINARY}
+	${Boost_LIBRARIES})
+target_link_libraries(${SERIALIZE_DEBUG_BINARY}
+	${Boost_LIBRARIES})
+target_link_libraries(${SERIALIZE_RELEASE_BINARY}
+	${Boost_LIBRARIES})
+
 
 
 # if we choose to build unit tests, add rules for building unittest executable
@@ -126,20 +178,40 @@ if (unit_tests)
 		${GMOCK_ROOT}/include)
 
 	add_library(${UNITTEST_OBJECT_LIBRARY} OBJECT ${UNITTEST_SRCS})
+	set_property(TARGET ${UNITTEST_OBJECT_LIBRARY} PROPERTY COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
 
 	add_executable(${BUILD_UNITTEST_BINARY}
-		${UNITTEST_SRCS}
-		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
+		${BUILD_SRCS}
+		${BUILD_UNITTEST_SRCS}
+		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>
+		$<TARGET_OBJECTS:${UNITTEST_OBJECT_LIBRARY}>)
 	add_executable(${LOAD_UNITTEST_BINARY}
-		${UNITTEST_SRCS}
-		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
+		${LOAD_SRCS}
+		${LOAD_UNITTEST_SRCS}
+		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>
+		$<TARGET_OBJECTS:${UNITTEST_OBJECT_LIBRARY}>)
 	add_executable(${SEGMENT_UNITTEST_BINARY}
-		${UNITTEST_SRCS}
-		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
+		${SEGMENT_SRCS}
+		${SEGMENT_UNITTEST_SRCS}
+		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>
+		$<TARGET_OBJECTS:${UNITTEST_OBJECT_LIBRARY}>)
+	add_executable(${STUDENT_QUERY_UNITTEST_BINARY}
+		${STUDENT_QUERY_SRCS}
+		${STUDENT_QUERY_UNITTEST_SRCS}
+		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>
+		$<TARGET_OBJECTS:${UNITTEST_OBJECT_LIBRARY}>)
+	add_executable(${SERIALIZE_UNITTEST_BINARY}
+		${SERIALIZE_SRCS}
+		${SERIALIZE_UNITTEST_SRCS}
+		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>
+		$<TARGET_OBJECTS:${UNITTEST_OBJECT_LIBRARY}>)
+
 
 	set_target_properties(${BUILD_UNITTEST_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
 	set_target_properties(${LOAD_UNITTEST_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
 	set_target_properties(${SEGMENT_UNITTEST_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
+	set_target_properties(${STUDENT_QUERY_UNITTEST_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
+	set_target_properties(${SERIALIZE_UNITTEST_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
 
 	target_link_libraries(${BUILD_UNITTEST_BINARY}
 		${Boost_LIBRARIES}
@@ -150,6 +222,14 @@ if (unit_tests)
 		gmock_main
 		pthread)
 	target_link_libraries(${SEGMENT_UNITTEST_BINARY}
+		${Boost_LIBRARIES}
+		gmock_main
+		pthread)
+	target_link_libraries(${STUDENT_QUERY_UNITTEST_BINARY}
+		${Boost_LIBRARIES}
+		gmock_main
+		pthread)
+	target_link_libraries(${SERIALIZE_UNITTEST_BINARY}
 		${Boost_LIBRARIES}
 		gmock_main
 		pthread)

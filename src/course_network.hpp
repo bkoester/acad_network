@@ -8,7 +8,7 @@
 #include "network.hpp"
 #include "course.hpp"
 
-class CourseNetwork : public Network<Course, int> {
+class CourseNetwork : public Network<Course::Id, int> {
  public:
 	CourseNetwork() {}
 	// Creates a graph for the vertices stored in the range first to last.
@@ -20,11 +20,11 @@ class CourseNetwork : public Network<Course, int> {
 
 	// gets the vertex type in the graph for a specific course
 	// Will throw out_of_range exception if the course doesn't exist.
-	vertex_t GetVertex(const Course& course) const;
+	vertex_t GetVertex(const Course::Id& course) const;
 
-	using Network<Course, int>::operator[];
-	const Course& operator[](const Course& course) const;
-	Course& operator[](const Course& course);
+	using Network<Course::Id, int>::operator[];
+	const Course::Id& operator[](const Course::Id& course) const;
+	Course::Id& operator[](const Course::Id& course);
 
 	void Load(std::istream& input_graph_archive);
 
@@ -35,7 +35,8 @@ class CourseNetwork : public Network<Course, int> {
 	// Fill out the hash table of courses => vertices.
 	void BuildCourseToVertexMap();
 
-	std::unordered_map<Course, vertex_t, Course::Hasher> course_to_vertex_;
+	std::unordered_map<Course::Id, vertex_t, Course::Id::Hasher> 
+		course_to_vertex_;
 };
 
 std::ostream& operator<<(

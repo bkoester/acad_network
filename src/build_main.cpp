@@ -4,11 +4,12 @@
 
 #include <boost/program_options.hpp>
 
+#include "course_container.hpp"
 #include "course_network.hpp"
 #include "graph_builder.hpp"
 #include "mem_usage.hpp"
+#include "student_container.hpp"
 #include "student_network.hpp"
-#include "tab_reader.hpp"
 #include "utility.hpp"
 
 
@@ -21,15 +22,17 @@ namespace po = boost::program_options;
 
 int main(int argc, char* argv[]) {
 	po::options_description desc{"Options for network building binary:"};
-	string student_path, enrollment_path;
+	string student_archive_path, course_archive_path;
 	NetworkType_e network_to_build;
 	desc.add_options()
 		("help,h", "Show this help message")
-		("student_file", po::value<string>(&student_path)->required(),
+		("student_archive_path", 
+		 po::value<string>(&student_archive_path)->required(),
 		 "Set the path at which to find the student file")
-		("enrollment_file", po::value<string>(&enrollment_path)->required(),
+		("course_archive_path",
+		 po::value<string>(&course_archive_path)->required(),
 		 "Set the path at which to find the enrollment file")
-		("network_to_build", 
+		("network_to_build",
 		 po::value<NetworkType_e>(&network_to_build)->default_value(
 			 NetworkType_e::Student), "Set the network to build "
 		 "('student' or 'course')")
@@ -52,20 +55,24 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	ifstream student_stream{student_path};
-	ifstream enrollment_stream{enrollment_path};
+	// read students and enrollment data
+	ifstream student_archive{student_archive_path};
+	ifstream course_archive{course_archive_path};
+	StudentContainer students;
+	students.Load(student_archive);
+	CourseContainer courses;
+	courses.Load(course_archive);
+	students.UpdateCourses(courses);
 
 	if (network_to_build == NetworkType_e::Course) {
 		// build the course network
 		CourseNetwork course_network{
-			BuildCourseNetworkFromEnrollment(enrollment_stream)};
+			BuildCourseNetworkFromEnrollment(students)};
 		course_network.Save(cout);
 	} else {
 		assert(network_to_build == NetworkType_e::Student);
 
 		// build the student network
-		Student::container_t students{ReadStudents(student_stream)};
-		Course::container_t courses{ReadEnrollment(enrollment_stream, students)};
 		cout << "Size of student network is " << students.size() << endl;
 		/*
 		StudentNetwork student_network{

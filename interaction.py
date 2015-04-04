@@ -13,25 +13,7 @@ import numpy
 import sys
 
 import data_processing
-import tab_reader
-
-
-ethnicity_codes = {
-    '0': "Unknown",
-    '1': "Hispanic only",
-    '2': "American Indian or Alaska Native",
-    '3': "Asian only",
-    '4': "Black or African American",
-    '5': "Hawaiian or other Pacific Islander",
-    '6': "White only",
-    '7': "Multiracial",
-    '8': "Unknown",
-    '9': "Nonresident alien"
-}
-
-field_value_map = {
-    'ethnicity': ethnicity_codes,
-}
+import student_analysis
 
 
 def get_vertex_total_weight(edges, vertex):
@@ -81,36 +63,16 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.weightedness not in ['weighted', 'unweighted']:
-        print('Weightedness %s not known!' % args.weightedness)
-        exit()
+        raise ValueError('Weightedness %s not known!' % args.weightedness)
 
     # get actual interaction values
     actual_edges = data_processing.get_edges(sys.stdin)
 
     # get expected interaction values
     with open(args.student_path, 'r') as student_file:
-        reader = csv.reader(student_file, delimiter='\t')
-        headings_line = next(reader)
-
-        heading_found = False
-        for index, heading in enumerate(headings_line):
-            if args.field.lower() in heading.lower():
-                field_index = index
-                heading_found = True
-
-        if not heading_found:
-            print('Could not find field "%s"!' % args.field)
-            exit()
-
-        # find frequencies of the various segments in all students
-        segment_counts = collections.defaultdict(int)
-        for value in tab_reader.read_column(student_file, field_index):
-            if args.field in field_value_map:
-                value_map = field_value_map[args.field]
-                segment_counts[value_map[value]] += 1
-            else:
-                segment_counts[value] += 1
-
+        segment_counts = student_analysis.get_segment_counts(
+                student_file, args.field)
+         
     # compare actual edges with expected edges, put into matrix
     segments = sorted(list(segment_counts.keys()))
     population = sum(segment_counts.values())
@@ -168,5 +130,16 @@ if __name__ == '__main__':
     matplotlib.pyplot.ylabel('To ...')
 
     matplotlib.pyplot.colorbar(heatmap)
+
+    # put the numbers in the boxes
+    for y in range(heatmatrix.shape[0]):
+        for x in range(heatmatrix.shape[1]):
+            color = 'black' if abs(heatmatrix[y, x]) < 1 else 'white'
+            matplotlib.pyplot.text(
+                    x + 0.5, y + 0.5, '%.2f' % heatmatrix[y, x],
+                    horizontalalignment='center',
+                    verticalalignment='center',
+                    color=color)
+
     fig.tight_layout()
     matplotlib.pyplot.show()

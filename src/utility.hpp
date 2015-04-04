@@ -21,6 +21,13 @@ std::ostream& operator<<(
 std::istream& operator>>(std::istream& input, NetworkType_e& network_type);
 
 
+template <typename Enum>
+constexpr auto ToIntegralType(Enum e) 
+	-> typename std::underlying_type<Enum>::type {
+		return static_cast<typename std::underlying_type<Enum>::type>(e);
+	}
+
+
 // Ignore any line in the given istream
 void SkipLine(std::istream& input);
 

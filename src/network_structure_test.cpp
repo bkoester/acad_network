@@ -19,17 +19,17 @@ static StudentNetwork::vertex_t FindStudentId(
 
 void TestCourseNetworkStructure(const CourseNetwork& network) {
 	CourseNetwork::vertex_t english125_vertex{network.GetVertex(
-			Course{"ENGLISH", 125, 0})};
+			Course::Id{"ENGLISH", 125, 0})};
 	CourseNetwork::vertex_t chem210_vertex{network.GetVertex(
-			Course{"CHEM", 210, 0})};
+			Course::Id{"CHEM", 210, 0})};
 	CourseNetwork::vertex_t chem211_vertex{network.GetVertex(
-			Course{"CHEM", 211, 0})};
+			Course::Id{"CHEM", 211, 0})};
 	CourseNetwork::vertex_t aaptis277_vertex{network.GetVertex(
-			Course{"AAPTIS", 277, 0})};
+			Course::Id{"AAPTIS", 277, 0})};
 	CourseNetwork::vertex_t environ311_vertex{network.GetVertex(
-			Course{"ENVIRON", 311, 0})};
+			Course::Id{"ENVIRON", 311, 0})};
 	CourseNetwork::vertex_t math425_vertex{network.GetVertex(
-			Course{"MATH", 425, 0})};
+			Course::Id{"MATH", 425, 0})};
 
 	// test edge to itself
 	EXPECT_EQ(0, network.CalculateValue(english125_vertex, english125_vertex));

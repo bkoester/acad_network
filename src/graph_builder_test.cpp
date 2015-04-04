@@ -38,19 +38,19 @@ TEST(GraphBuilderTest, BuildStudentNetworkFromStudents) {
 	StudentContainer students;
 	students.Insert({student1, student2, student3, student4, student5});
 
-	course1.AddStudentEnrolled(&students.Find(student1.id()));
-	course1.AddStudentEnrolled(&students.Find(student2.id()));
-	course1.AddStudentEnrolled(&students.Find(student3.id()));
-	course1.AddStudentEnrolled(&students.Find(student4.id()));
-	course2.AddStudentEnrolled(&students.Find(student1.id()));
-	course2.AddStudentEnrolled(&students.Find(student2.id()));
-	course3.AddStudentEnrolled(&students.Find(student2.id()));
-	course3.AddStudentEnrolled(&students.Find(student4.id()));
-	course4.AddStudentEnrolled(&students.Find(student2.id()));
-	course5.AddStudentEnrolled(&students.Find(student1.id()));
-	course5.AddStudentEnrolled(&students.Find(student3.id()));
-	course6.AddStudentEnrolled(&students.Find(student3.id()));
-	course6.AddStudentEnrolled(&students.Find(student5.id()));
+	course1.AddStudentEnrolled(student1.id());
+	course1.AddStudentEnrolled(student2.id());
+	course1.AddStudentEnrolled(student3.id());
+	course1.AddStudentEnrolled(student4.id());
+	course2.AddStudentEnrolled(student1.id());
+	course2.AddStudentEnrolled(student2.id());
+	course3.AddStudentEnrolled(student2.id());
+	course3.AddStudentEnrolled(student4.id());
+	course4.AddStudentEnrolled(student2.id());
+	course5.AddStudentEnrolled(student1.id());
+	course5.AddStudentEnrolled(student3.id());
+	course6.AddStudentEnrolled(student3.id());
+	course6.AddStudentEnrolled(student5.id());
 
 	StudentNetwork network{BuildStudentNetworkFromStudents(students)};
 	TestStudentNetworkStructure(network);

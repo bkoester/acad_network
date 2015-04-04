@@ -47,10 +47,10 @@ void StudentContainer::Insert(
 
 void StudentContainer::UpdateCourses(const CourseContainer& courses) {
 	for (const auto& course : courses) {
-		for (const auto& student_ptr : course->students_enrolled()) {
+		for (const auto& student_id : course->students_enrolled()) {
 			try {
 				// find it again because student_ptr is const
-				Student& student(Find(student_ptr->id()));
+				Student& student(Find(student_id));
 				student.AddCourseTaken(course.get());
 			// CourseContainer should check that all students exist before
 			// inserting them, so this should be impossible.
@@ -76,3 +76,13 @@ Student& StudentContainer::Find(Student::Id id) {
 	{ throw StudentNotFound{id}; }
 	return *student_it;
 }
+
+
+/*
+void StudentContainer::Save(std::ostream& output_archive) {
+	boost::archive::text_oarchive archive{output_graph_archive};
+}
+
+void StudentContainer::Load(std::istream& input_archive) {
+	boost::archive::text_iarchive archive{input_graph_archive};
+} */

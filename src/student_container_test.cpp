@@ -103,29 +103,29 @@ TEST_F(StudentContainerTest, UpdateCourses) {
 
 	const auto& course1 = *courses_holder.find(
 			make_unique<Course>("ENGLISH", short{125}, 201403));
-	course1->AddStudentEnrolled(&student1);
-	course1->AddStudentEnrolled(&student2);
-	course1->AddStudentEnrolled(&student3);
+	course1->AddStudentEnrolled(student1.id());
+	course1->AddStudentEnrolled(student2.id());
+	course1->AddStudentEnrolled(student3.id());
 
 	const auto& course2 = *courses_holder.find(
 		make_unique<Course>("CHEM", short{210}, 201403));
-	course2->AddStudentEnrolled(&student1);
-	course2->AddStudentEnrolled(&student4);
+	course2->AddStudentEnrolled(student1.id());
+	course2->AddStudentEnrolled(student4.id());
 
 	const auto& course3 = *courses_holder.find(
 		make_unique<Course>("CHEM", short{211}, 201407));
-	course3->AddStudentEnrolled(&student3);
-	course3->AddStudentEnrolled(&student4);
+	course3->AddStudentEnrolled(student3.id());
+	course3->AddStudentEnrolled(student4.id());
 
 	const auto& course4 = *courses_holder.find(
 		make_unique<Course>("AAPTIS", short{277}, 201403));
-	course4->AddStudentEnrolled(&student2);
-	course4->AddStudentEnrolled(&student3);
-	course4->AddStudentEnrolled(&student5);
+	course4->AddStudentEnrolled(student2.id());
+	course4->AddStudentEnrolled(student3.id());
+	course4->AddStudentEnrolled(student5.id());
 
 	const auto& course5 = *courses_holder.find(
 		make_unique<Course>("ENVIRON", short{311}, 201405));
-	course5->AddStudentEnrolled(&student1);
+	course5->AddStudentEnrolled(student1.id());
 
 	const auto& course6 = *courses_holder.find(
 		make_unique<Course>("MATH", short{425}, 201407));

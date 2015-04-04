@@ -63,39 +63,39 @@ TEST(CourseContainerTest, Find) {
 			Course{"ENVIRON", short{311}, 201405}).get()};
 	Course* math425{courses.Find(Course{"MATH", short{425}, 201407}).get()};
 
-	EXPECT_TRUE(english125->IsStudentEnrolled(&student1));
-	EXPECT_TRUE(english125->IsStudentEnrolled(&student2));
-	EXPECT_TRUE(english125->IsStudentEnrolled(&student3));
-	EXPECT_TRUE(english125->IsStudentEnrolled(&student4));
-	EXPECT_FALSE(english125->IsStudentEnrolled(&student5));
+	EXPECT_TRUE(english125->IsStudentEnrolled(student1.id()));
+	EXPECT_TRUE(english125->IsStudentEnrolled(student2.id()));
+	EXPECT_TRUE(english125->IsStudentEnrolled(student3.id()));
+	EXPECT_TRUE(english125->IsStudentEnrolled(student4.id()));
+	EXPECT_FALSE(english125->IsStudentEnrolled(student5.id()));
 
-	EXPECT_FALSE(chem210->IsStudentEnrolled(&student1));
-	EXPECT_TRUE(chem210->IsStudentEnrolled(&student2));
-	EXPECT_FALSE(chem210->IsStudentEnrolled(&student3));
-	EXPECT_TRUE(chem210->IsStudentEnrolled(&student4));
-	EXPECT_FALSE(chem210->IsStudentEnrolled(&student5));
+	EXPECT_FALSE(chem210->IsStudentEnrolled(student1.id()));
+	EXPECT_TRUE(chem210->IsStudentEnrolled(student2.id()));
+	EXPECT_FALSE(chem210->IsStudentEnrolled(student3.id()));
+	EXPECT_TRUE(chem210->IsStudentEnrolled(student4.id()));
+	EXPECT_FALSE(chem210->IsStudentEnrolled(student5.id()));
 
-	EXPECT_FALSE(chem211->IsStudentEnrolled(&student1));
-	EXPECT_TRUE(chem211->IsStudentEnrolled(&student2));
-	EXPECT_FALSE(chem211->IsStudentEnrolled(&student3));
-	EXPECT_FALSE(chem211->IsStudentEnrolled(&student4));
-	EXPECT_FALSE(chem211->IsStudentEnrolled(&student5));
+	EXPECT_FALSE(chem211->IsStudentEnrolled(student1.id()));
+	EXPECT_TRUE(chem211->IsStudentEnrolled(student2.id()));
+	EXPECT_FALSE(chem211->IsStudentEnrolled(student3.id()));
+	EXPECT_FALSE(chem211->IsStudentEnrolled(student4.id()));
+	EXPECT_FALSE(chem211->IsStudentEnrolled(student5.id()));
 
-	EXPECT_TRUE(aaptis277->IsStudentEnrolled(&student1));
-	EXPECT_TRUE(aaptis277->IsStudentEnrolled(&student2));
-	EXPECT_FALSE(aaptis277->IsStudentEnrolled(&student3));
-	EXPECT_FALSE(aaptis277->IsStudentEnrolled(&student4));
-	EXPECT_FALSE(aaptis277->IsStudentEnrolled(&student5));
+	EXPECT_TRUE(aaptis277->IsStudentEnrolled(student1.id()));
+	EXPECT_TRUE(aaptis277->IsStudentEnrolled(student2.id()));
+	EXPECT_FALSE(aaptis277->IsStudentEnrolled(student3.id()));
+	EXPECT_FALSE(aaptis277->IsStudentEnrolled(student4.id()));
+	EXPECT_FALSE(aaptis277->IsStudentEnrolled(student5.id()));
 
-	EXPECT_TRUE(environ311->IsStudentEnrolled(&student1));
-	EXPECT_FALSE(environ311->IsStudentEnrolled(&student2));
-	EXPECT_TRUE(environ311->IsStudentEnrolled(&student3));
-	EXPECT_FALSE(environ311->IsStudentEnrolled(&student4));
-	EXPECT_FALSE(environ311->IsStudentEnrolled(&student5));
+	EXPECT_TRUE(environ311->IsStudentEnrolled(student1.id()));
+	EXPECT_FALSE(environ311->IsStudentEnrolled(student2.id()));
+	EXPECT_TRUE(environ311->IsStudentEnrolled(student3.id()));
+	EXPECT_FALSE(environ311->IsStudentEnrolled(student4.id()));
+	EXPECT_FALSE(environ311->IsStudentEnrolled(student5.id()));
 
-	EXPECT_FALSE(math425->IsStudentEnrolled(&student1));
-	EXPECT_FALSE(math425->IsStudentEnrolled(&student2));
-	EXPECT_TRUE(math425->IsStudentEnrolled(&student3));
-	EXPECT_FALSE(math425->IsStudentEnrolled(&student4));
-	EXPECT_TRUE(math425->IsStudentEnrolled(&student5));
+	EXPECT_FALSE(math425->IsStudentEnrolled(student1.id()));
+	EXPECT_FALSE(math425->IsStudentEnrolled(student2.id()));
+	EXPECT_TRUE(math425->IsStudentEnrolled(student3.id()));
+	EXPECT_FALSE(math425->IsStudentEnrolled(student4.id()));
+	EXPECT_TRUE(math425->IsStudentEnrolled(student5.id()));
 }

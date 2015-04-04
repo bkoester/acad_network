@@ -43,7 +43,7 @@ namespace chr = std::chrono;
 const int timing_modulus{10000000};
 
 
-static unordered_map<Student::Id, unordered_set<Course, Course::Hasher>> 
+static unordered_map<Student::Id, unordered_set<Course::Id, Course::Id::Hasher>> 
 GetStudentIdsToCourses(const StudentContainer& students);
 
 class StudentNetworkBuilder;
@@ -81,16 +81,16 @@ CourseNetwork BuildCourseNetworkFromEnrollment(
 	auto student_to_courses = GetStudentIdsToCourses(students);
 
 	// aggregate pairs of courses
-	unordered_map<DistinctUnorderedPair<Course>, int, PairHasher<Course::Hasher>> 
-		edge_weights;
-	unordered_set<Course, Course::Hasher> courses;
+	unordered_map<DistinctUnorderedPair<Course::Id>, 
+				  int, PairHasher<Course::Id::Hasher>> edge_weights;
+	unordered_set<Course::Id, Course::Id::Hasher> courses;
 	for (const auto& elt : student_to_courses) {
 		if (elt.second.size() == 1) { courses.insert(*elt.second.begin()); }
 
 		// get all pairs of courses
 		for (auto it = elt.second.cbegin(); it != elt.second.cend(); ++it) {
 			for (auto it2 = it; ++it2 != elt.second.cend();) {
-				DistinctUnorderedPair<Course> e{*it, *it2};
+				DistinctUnorderedPair<Course::Id> e{*it, *it2};
 				++edge_weights[e];
 
 				// create the two courses
@@ -101,15 +101,17 @@ CourseNetwork BuildCourseNetworkFromEnrollment(
 	}
 
 	// create new graph so all vertices can be added at once
-	CourseNetwork course_network{courses.begin(), courses.end()};
+	CourseNetwork course_network{begin(courses), end(courses)};
 
 	// add edges and weights
 	for (auto& edge_pair : edge_weights) {
 		auto e = edge_pair.first;
 		int weight{edge_pair.second};
 
-		CourseNetwork::vertex_t vertex1{course_network.GetVertex(e.first)};
-		CourseNetwork::vertex_t vertex2{course_network.GetVertex(e.second)};
+		CourseNetwork::vertex_t vertex1{
+			course_network.GetVertex(e.first)};
+		CourseNetwork::vertex_t vertex2{
+			course_network.GetVertex(e.second)};
 
 		// INVARIANT: the edge should not exist in the graph already.
 		assert(!course_network.GetEdgeDescriptor(vertex1, vertex2));
@@ -235,15 +237,15 @@ void CalculateStudentNetworkEdges(const StudentNetwork& network,
 
 
 // Gets a hash table of students => set of courses they have taken
-unordered_map<Student::Id, unordered_set<Course, Course::Hasher>> 
+unordered_map<Student::Id, unordered_set<Course::Id, Course::Id::Hasher>> 
 GetStudentIdsToCourses(const StudentContainer& students) {
-	unordered_map<Student::Id, unordered_set<Course, Course::Hasher>> 
+	unordered_map<Student::Id, unordered_set<Course::Id, Course::Id::Hasher>> 
 		student_to_courses;
 
 	// make a map of student id => courses taken
 	for (const auto& student : students) {
 		for (const auto& course : student.courses_taken()) {
-			student_to_courses[student.id()].insert(Course{*course});
+			student_to_courses[student.id()].insert(course->GetId());
 		}
 	}
 	

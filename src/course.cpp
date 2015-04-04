@@ -50,11 +50,10 @@ ostream& operator<<(ostream& output, const Course& course) {
 	assert(course.GetNumStudentsEnrolled() >= 0);	
 	if (course.GetNumStudentsEnrolled() == 0) { return output; }
 	output << " ";
-	transform(begin(course.students_enrolled()), 
+	copy(begin(course.students_enrolled()), 
 			--end(course.students_enrolled()),
-			ostream_iterator<Student::Id>{output, ", "},
-			[](const Student* student) { return student->id(); });
-	output << (*course.students_enrolled().rbegin())->id();
+			ostream_iterator<Student::Id>{output, ", "});
+	output << *course.students_enrolled().rbegin();
 	return output;
 }
 

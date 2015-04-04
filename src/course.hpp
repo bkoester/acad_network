@@ -7,10 +7,12 @@
 #include <set>
 #include <string>
 
+#include <boost/serialization/set.hpp>
 #include <boost/serialization/utility.hpp>
 
+#include "student.hpp"
 
-class Student;
+
 struct CourseComparator;
 
 
@@ -24,13 +26,34 @@ class Course {
 		std::string subject;
 		short number;
 		int term;
+
+		template <typename Archive>
+		void serialize(Archive& ar, const unsigned int) {
+			ar & subject;
+			ar & number;
+			ar & term;
+		}
+
+		bool operator==(const Id& other) const
+		{ return subject == other.subject && 
+			number == other.number && term == other.term; }
+
+		bool operator!=(const Id& other) const { return !(*this == other); }
+
+		struct Hasher {
+			int operator()(const Course::Id& course) const {
+				return std::hash<std::string>()(course.subject) ^
+					std::hash<short>()(course.number) ^ 
+					std::hash<int>()(course.term);
+			}
+		};
 	};
 
 	struct Hasher {
 		int operator()(const Course& course) const {
 			return std::hash<std::string>()(course.subject()) ^
 				std::hash<short>()(course.number()) ^ 
-				std::hash<short>()(course.term());
+				std::hash<int>()(course.term());
 		}
 	};
 
@@ -61,20 +84,21 @@ class Course {
 	bool operator<(const Course& other) const;
 
 	template <typename Archive>
-	void serialize(Archive& ar, const unsigned int version) {
+	void serialize(Archive& ar, const unsigned int) {
 		ar & subject_;
 		ar & number_;
 		ar & term_;
 		ar & num_credits_;
+		ar & students_enrolled_;
 	}
 
-	void AddStudentEnrolled(const Student* student)
-	{ students_enrolled_.insert(student); }
+	void AddStudentEnrolled(const Student::Id student_id)
+	{ students_enrolled_.insert(student_id); }
 
-	bool IsStudentEnrolled(const Student* student)
-	{ return students_enrolled_.count(student); }
+	bool IsStudentEnrolled(Student::Id student_id)
+	{ return students_enrolled_.count(student_id); }
 
-	const std::set<const Student*>& students_enrolled() const
+	const std::set<Student::Id>& students_enrolled() const
 	{ return students_enrolled_; }
 
 	std::set<const Student*>::size_type GetNumStudentsEnrolled() const
@@ -95,7 +119,7 @@ class Course {
 	short number_;
 	int term_;
 	double num_credits_;
-	std::set<const Student*> students_enrolled_;
+	std::set<Student::Id> students_enrolled_;
 
 	static const std::string undefined_subject;
 	static const short undefined_number;

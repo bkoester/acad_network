@@ -68,7 +68,7 @@ ostream& operator<<(ostream& os, const Student& student) {
 
 	// print first term
 	os << "; First term: ";
-	if (student.first_term() == Student::uninitialized_first_term)
+	if (student.first_term() == Student::uninitialized_term)
 	{ os << "Undefined"; }
 	else { os << student.first_term(); }
 	os << "; Major(s): ";
@@ -271,7 +271,7 @@ std::string Student::to_string(const Ethnicity& ethnicity) {
 
 
 const int Student::uninitialized_id{-1};
-const int Student::uninitialized_first_term{-1};
+const int Student::uninitialized_term{-1};
 const Student::Ethnicity Student::uninitialized_ethnicity{
 	Student::Ethnicity::Unknown};
 const unordered_map<double, string> Student::major_code_map{

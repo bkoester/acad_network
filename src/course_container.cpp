@@ -41,7 +41,7 @@ CourseContainer::CourseContainer(istream& enrollment_stream,
 			// Add the student to the course if the student actually exists (not
 			// guaranteed to based on presence in enrollment data).
 			const Student& student(students.Find(enrollment.student_id));
-			inserted_course->AddStudentEnrolled(&student);
+			inserted_course->AddStudentEnrolled(student.id());
 		} catch (StudentNotFound&) {}
 	}
 }

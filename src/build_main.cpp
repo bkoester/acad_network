@@ -73,11 +73,9 @@ int main(int argc, char* argv[]) {
 		assert(network_to_build == NetworkType_e::Student);
 
 		// build the student network
-		cout << "Size of student network is " << students.size() << endl;
-		/*
 		StudentNetwork student_network{
 			BuildStudentNetworkFromStudents(students)};
-		student_network.Save(cout); */
+		student_network.Save(cout);
 	}
 
 	return 0;

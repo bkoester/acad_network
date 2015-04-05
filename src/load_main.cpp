@@ -35,6 +35,7 @@ static void PrintIndividualStudentNetwork(const StudentNetwork& network,
 /*
 static void ComputeWeightedDistances(const StudentNetwork& network);
 static void ComputeUnweightedDistances(const StudentNetwork& network);
+							   */
 
 static void ReduceStudentNetwork(const StudentNetwork& network,
 								 const StudentContainer& students,
@@ -45,7 +46,6 @@ static void MakeReducedNetwork(const StudentNetwork& network, string segment,
 							   string weightedness, SegmentFunc segment_func, 
 							   AccumulateFunc accumulate_func, 
 							   Init init);
-							   */
 
 
 int main(int argc, char* argv[]) {
@@ -115,12 +115,12 @@ int main(int argc, char* argv[]) {
 		CourseNetwork course_network{course_archive};
 	}
 	if (network_to_load == NetworkType_e::Student) {
-		ifstream student_archive{student_archive_path};
-		StudentNetwork student_network{student_archive};
+		ifstream student_network_archive{student_network_archive_path};
+		StudentNetwork student_network{student_network_archive};
 	
 		//ComputeWeightedDistances(student_network);
 		//ComputeUnweightedDistances(student_network);
-		//ReduceStudentNetwork(student_network, students, courses);
+		ReduceStudentNetwork(student_network, students, courses);
 		auto num_students = 0;
 		for (const auto& student_d : student_network.GetVertexDescriptors()) {
 			const auto& student = students.Find(student_network[student_d]);
@@ -207,7 +207,7 @@ void ComputeUnweightedDistances(const StudentNetwork& network) {
 		if (num_students > 500) { break; }
 	}
 }
-
+*/
 
 // reduces network to see the interaction between various segments
 void ReduceStudentNetwork(const StudentNetwork& network,
@@ -258,4 +258,4 @@ void MakeReducedNetwork(const StudentNetwork& network, string segment,
 	output << segment << "1" << '\t' << segment << "2" << '\t' << "count" 
 		   << endl;
 	reduced_network.SaveEdgewise(output);
-} */
+}

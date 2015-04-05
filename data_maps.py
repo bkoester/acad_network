@@ -130,4 +130,5 @@ major_codes = {
     '52.0799': 'Entrepreneurial and Small Business',
     '52.1003': 'Organizational Behavior Studies',
     '54.0101': 'History, General',
+    'NA': 'NA',
 }

@@ -39,6 +39,7 @@ def get_segment_counts(student_file, field):
         if field.lower() in heading.lower():
             field_index = index
             heading_found = True
+            break
 
     if not heading_found:
         raise KeyError('Could not find field "%s"!' % field)

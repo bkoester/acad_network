@@ -8,6 +8,7 @@ __copyright__ = "Kar Epker, 2015"
 import argparse
 import collections
 import csv
+import math
 import matplotlib.pyplot
 import numpy
 import sys
@@ -92,54 +93,73 @@ if __name__ == '__main__':
         # store the difference of actual and expected in a matrix
         vertex1_index = segments.index(vertex1)
         vertex2_index = segments.index(vertex2)
-        heatmatrix[vertex1_index, vertex2_index] = relative_percent_difference(
+        heatmatrix[vertex2_index, vertex1_index] = relative_percent_difference(
                 actual_weight, v1v2_expected_weight)
+
         if vertex1 != vertex2:
-            heatmatrix[vertex2_index, vertex1_index] = (
+            heatmatrix[vertex1_index, vertex2_index] = (
                     relative_percent_difference(
                         actual_weight, v2v1_expected_weight))
             
 
-    fig, ax = matplotlib.pyplot.subplots()
-    heatmap = matplotlib.pyplot.pcolor(
-            heatmatrix, cmap=matplotlib.pyplot.cm.RdBu)
-    heatmap.set_clim(vmin=-1.0, vmax=1.0)
+    if len(segments) > 50:
+        # print out just segment RPDS with themselves
+        segment_self_rpds = dict()
+        for i in range(0, heatmatrix.shape[0]):
+            segment_self_rpds[segments[i]] = heatmatrix[i, i]
 
-    # where the ticks are located
-    ax.invert_yaxis()
-    ax.xaxis.tick_top()
+        # sort them
+        sorted_segment_self_rpds = sorted([(segment, self_rpd) for 
+                (segment, self_rpd) in segment_self_rpds.items()],
+            key=lambda x: x[1], reverse=True)
 
-    # tick locations relative to the cell
-    ax.set_xticks(numpy.arange(heatmatrix.shape[0]) + 0.5, minor=False)
-    ax.set_yticks(numpy.arange(heatmatrix.shape[1]) + 0.5, minor=False)
-    # stop a white bar from appearing due to rounding
-    ax.set_xlim(right=len(segments))
-    ax.set_ylim(bottom=len(segments))
+        for segment, self_rpd in sorted_segment_self_rpds:
+            print("%s || %.2f" % (segment, self_rpd))
 
-    # tick labels
-    ax.set_xticklabels(segments, minor=False)
-    ax.set_yticklabels(segments, minor=False)
+    else:
+        figsize = (3 + math.ceil(len(segments) * 0.6), 
+                       2 + math.ceil(len(segments) * 0.4))
+        fig = matplotlib.pyplot.figure(figsize=figsize)
+        ax = fig.add_subplot(1, 1, 1)
+        heatmap = matplotlib.pyplot.pcolor(
+                heatmatrix, cmap=matplotlib.pyplot.cm.RdBu)
+        heatmap.set_clim(vmin=-1.0, vmax=1.0)
 
-    # rotation of x-axis
-    matplotlib.pyplot.xticks(rotation=90)
+        # where the ticks are located
+        ax.invert_yaxis()
+        ax.xaxis.tick_top()
 
-    # labels
-    matplotlib.pyplot.xlabel('%s interactions from ...' %
-            (args.weightedness.title()))
-    ax.xaxis.set_label_position('top')
-    matplotlib.pyplot.ylabel('To ...')
+        # tick locations relative to the cell
+        ax.set_xticks(numpy.arange(heatmatrix.shape[0]) + 0.5, minor=False)
+        ax.set_yticks(numpy.arange(heatmatrix.shape[1]) + 0.5, minor=False)
+        # stop a white bar from appearing due to rounding
+        ax.set_xlim(right=len(segments))
+        ax.set_ylim(bottom=len(segments))
 
-    matplotlib.pyplot.colorbar(heatmap)
+        # tick labels
+        ax.set_xticklabels(segments, minor=False)
+        ax.set_yticklabels(segments, minor=False)
 
-    # put the numbers in the boxes
-    for y in range(heatmatrix.shape[0]):
-        for x in range(heatmatrix.shape[1]):
-            color = 'black' if abs(heatmatrix[y, x]) < 1 else 'white'
-            matplotlib.pyplot.text(
-                    x + 0.5, y + 0.5, '%.2f' % heatmatrix[y, x],
-                    horizontalalignment='center',
-                    verticalalignment='center',
-                    color=color)
+        # rotation of x-axis
+        matplotlib.pyplot.xticks(rotation=90)
 
-    fig.tight_layout()
-    matplotlib.pyplot.show()
+        # labels
+        matplotlib.pyplot.xlabel('%s interactions from ...' %
+                (args.weightedness.title()))
+        ax.xaxis.set_label_position('top')
+        matplotlib.pyplot.ylabel('To ...')
+
+        matplotlib.pyplot.colorbar(heatmap)
+
+        # put the numbers in the boxes
+        for y in range(heatmatrix.shape[0]):
+            for x in range(heatmatrix.shape[1]):
+                color = 'black' if abs(heatmatrix[y, x]) < 0.5 else 'white'
+                matplotlib.pyplot.text(
+                        x + 0.5, y + 0.5, '%.2f' % heatmatrix[y, x],
+                        horizontalalignment='center',
+                        verticalalignment='center',
+                        color=color)
+
+        fig.tight_layout()
+        matplotlib.pyplot.show()

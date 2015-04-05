@@ -8,7 +8,6 @@
 #include <set>
 #include <string>
 #include <type_traits>
-#include <unordered_map>
 #include <vector>
 
 #include <boost/mpl/bool.hpp>
@@ -95,7 +94,6 @@ class Student {
 	static const int uninitialized_id;
 	static const int uninitialized_term;
 	static const Ethnicity uninitialized_ethnicity;
-	static const std::unordered_map<double, std::string> major_code_map;
 };
 
 

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <chrono>
 #include <fstream>
 #include <iostream>
@@ -5,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <boost/program_options.hpp>
 
@@ -18,16 +20,21 @@
 #include "utility.hpp"
 
 
-using std::begin; using std::end; using std::ostream_iterator;
+using std::copy_if; using std::for_each;
+using std::begin; using std::end; using std::back_inserter;
 using std::cerr; using std::cin; using std::cout; using std::endl;
 using std::ifstream; using std::ofstream; 
+using std::ostream_iterator;
 using std::pair;
 using std::string; using std::to_string;
 using std::unique_ptr;
+using std::vector;
 namespace po = boost::program_options;
 namespace chr = std::chrono;
 
 
+
+//static void GetWeightedAndUnweightedSummations(const StudentNetwork& network);
 
 static void PrintIndividualStudentNetwork(const StudentNetwork& network, 
 		StudentNetwork::vertex_t student_d, const string& file_name);
@@ -121,31 +128,69 @@ int main(int argc, char* argv[]) {
 		//ComputeWeightedDistances(student_network);
 		//ComputeUnweightedDistances(student_network);
 		ReduceStudentNetwork(student_network, students, courses);
-		auto num_students = 0;
-		for (const auto& student_d : student_network.GetVertexDescriptors()) {
-			const auto& student = students.Find(student_network[student_d]);
-			auto file_name = 
-				"output/individual_" + to_string(student.id()) + ".tsv";
-			PrintIndividualStudentNetwork(student_network, student_d, file_name);
-			if (++num_students == 100) { break; }
-		}
+		
+		vector<Student> musical_theater;
+		copy_if(begin(students), end(students), back_inserter(musical_theater),
+				[](const Student& student) {
+					return student.GetMajor1Description() == 
+						"Musical Theatre."; });
 
-		ofstream weighted_students{"output/student_weighted_summation.tsv"};
-		ofstream unweighted_students{"output/student_unweighted_summation.tsv"};
-		for (const auto& student_d : student_network.GetVertexDescriptors()) {
-			auto out_edges = student_network.GetOutEdgeValues(student_d);
-			auto weighted_sum = accumulate(
-					begin(out_edges), end(out_edges), 0.);
-			auto unweighted_sum = out_edges.size();
-			weighted_students << student_network[student_d] << '\t' 
-							  << weighted_sum << endl;
-			unweighted_students << student_network[student_d] << '\t' 
-								<< unweighted_sum << endl;
-		}
+		vector<Student> general_studies;
+		copy_if(begin(students), end(students), back_inserter(musical_theater),
+				[](const Student& student) {
+					return student.GetMajor1Description() == 
+						"General Studies"; });
+
+		vector<Student> philosophy;
+		copy_if(begin(students), end(students), back_inserter(musical_theater),
+				[](const Student& student) {
+					return student.GetMajor1Description() == 
+						"Philosophy"; });
+
+
+		for_each(begin(philosophy), end(philosophy),
+				[&student_network](const Student& student) {
+					PrintIndividualStudentNetwork(
+							student_network, 
+							student_network.GetVertexDescriptor(student.id()), 
+							"output/individual_" + to_string(student.id()) + 
+								".tsv"); });
+
+		for_each(begin(general_studies), end(general_studies),
+				[&student_network](const Student& student) {
+					PrintIndividualStudentNetwork(
+							student_network, 
+							student_network.GetVertexDescriptor(student.id()), 
+							"output/individual_" + to_string(student.id()) + 
+								".tsv"); });
+
+		for_each(begin(musical_theater), end(musical_theater),
+				[&student_network](const Student& student) {
+					PrintIndividualStudentNetwork(
+							student_network,
+							student_network.GetVertexDescriptor(student.id()),
+							"output/individual_" + to_string(student.id()) + 
+								".tsv"); });
 	}
 
 	return 0;
 }
+
+
+/*
+void GetWeightedAndUnweightedSummations(const StudentNetwork& network) {
+	ofstream weighted_students{"output/student_weighted_summation.tsv"};
+	ofstream unweighted_students{"output/student_unweighted_summation.tsv"};
+	for (const auto& student_d : network.GetVertexDescriptors()) {
+		auto out_edges = network.GetOutEdgeValues(student_d);
+		auto weighted_sum = accumulate(
+				begin(out_edges), end(out_edges), 0.);
+		auto unweighted_sum = out_edges.size();
+		weighted_students << network[student_d] << '\t' << weighted_sum << endl;
+		unweighted_students << network[student_d] << '\t' 
+							<< unweighted_sum << endl;
+	}
+} */
 
 
 void PrintIndividualStudentNetwork(const StudentNetwork& network, 

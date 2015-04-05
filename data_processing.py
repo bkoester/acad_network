@@ -24,9 +24,10 @@ def segment_data(data_file, segment=True):
     segments = collections.defaultdict(lambda: numpy.ndarray(0))
     for line in csv.reader(data_file, delimiter='\t'):
         # add the datum to the correct segment
-        segment = line[0] if segment else 'all'
+        line_segment = line[0] if segment else 'all'
         datum = line[1]
-        segments[segment] = numpy.append(segments[segment], float(datum))
+        segments[line_segment] = numpy.append(
+                segments[line_segment], float(datum))
 
     return segments
 

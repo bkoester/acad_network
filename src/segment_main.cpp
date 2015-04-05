@@ -38,6 +38,10 @@ segmenters{
 		{ os << student.GetMajor1Description(); }},
 	{"school", [](ostream& os, const Student& student)
 		{ os << student.school(); }},
+	{"transfer", [](ostream& os, const Student& student)
+		{ os << (student.transfer() ? "Transfer" : "Non-transfer"); }},
+	{"first_year", [](ostream& os, const Student& student)
+		{ os << student.first_term() / 100; }},
 };
 
 

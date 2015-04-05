@@ -65,15 +65,15 @@ TEST_F(CourseContainerTest, Find) {
 	EXPECT_NO_THROW(courses.Find(Course{"ENVIRON", short{311}, 201405}));
 	EXPECT_NO_THROW(courses.Find(Course{"MATH", short{425}, 201407}));
 
-	Course& english125{courses.Find(
-			Course{"ENGLISH", short{125}, 201403})};
-	Course& chem210{courses.Find(Course{"CHEM", short{210}, 201403})};
-	Course& chem211{courses.Find(Course{"CHEM", short{211}, 201407})};
-	Course& aaptis277{courses.Find(
-			Course{"AAPTIS", short{277}, 201403})};
-	Course& environ311{courses.Find(
-			Course{"ENVIRON", short{311}, 201405})};
-	Course& math425{courses.Find(Course{"MATH", short{425}, 201407})};
+	Course& english125(courses.Find(
+			Course{"ENGLISH", short{125}, 201403}));
+	Course& chem210(courses.Find(Course{"CHEM", short{210}, 201403}));
+	Course& chem211(courses.Find(Course{"CHEM", short{211}, 201407}));
+	Course& aaptis277(courses.Find(
+			Course{"AAPTIS", short{277}, 201403}));
+	Course& environ311(courses.Find(
+			Course{"ENVIRON", short{311}, 201405}));
+	Course& math425(courses.Find(Course{"MATH", short{425}, 201407}));
 
 	EXPECT_TRUE(english125.IsStudentEnrolled(student1.id()));
 	EXPECT_TRUE(english125.IsStudentEnrolled(student2.id()));

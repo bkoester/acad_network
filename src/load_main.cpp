@@ -32,8 +32,10 @@ namespace chr = std::chrono;
 static void PrintIndividualStudentNetwork(const StudentNetwork& network, 
 		StudentNetwork::vertex_t student_d, const string& file_name);
 
+/*
 static void ComputeWeightedDistances(const StudentNetwork& network);
 static void ComputeUnweightedDistances(const StudentNetwork& network);
+							   */
 
 static void ReduceStudentNetwork(const StudentNetwork& network,
 								 const StudentContainer& students,
@@ -113,11 +115,11 @@ int main(int argc, char* argv[]) {
 		CourseNetwork course_network{course_archive};
 	}
 	if (network_to_load == NetworkType_e::Student) {
-		ifstream student_archive{student_archive_path};
-		StudentNetwork student_network{student_archive};
+		ifstream student_network_archive{student_network_archive_path};
+		StudentNetwork student_network{student_network_archive};
 	
-		ComputeWeightedDistances(student_network);
-		ComputeUnweightedDistances(student_network);
+		//ComputeWeightedDistances(student_network);
+		//ComputeUnweightedDistances(student_network);
 		ReduceStudentNetwork(student_network, students, courses);
 		auto num_students = 0;
 		for (const auto& student_d : student_network.GetVertexDescriptors()) {
@@ -126,6 +128,19 @@ int main(int argc, char* argv[]) {
 				"output/individual_" + to_string(student.id()) + ".tsv";
 			PrintIndividualStudentNetwork(student_network, student_d, file_name);
 			if (++num_students == 100) { break; }
+		}
+
+		ofstream weighted_students{"output/student_weighted_summation.tsv"};
+		ofstream unweighted_students{"output/student_unweighted_summation.tsv"};
+		for (const auto& student_d : student_network.GetVertexDescriptors()) {
+			auto out_edges = student_network.GetOutEdgeValues(student_d);
+			auto weighted_sum = accumulate(
+					begin(out_edges), end(out_edges), 0.);
+			auto unweighted_sum = out_edges.size();
+			weighted_students << student_network[student_d] << '\t' 
+							  << weighted_sum << endl;
+			unweighted_students << student_network[student_d] << '\t' 
+								<< unweighted_sum << endl;
 		}
 	}
 
@@ -143,6 +158,7 @@ void PrintIndividualStudentNetwork(const StudentNetwork& network,
 }
 
 
+/*
 void ComputeWeightedDistances(const StudentNetwork& network) {
 	ofstream dijkstra_file{"output/stats_dijkstra.tsv"};
 	auto beginning_time = chr::system_clock::now();
@@ -191,7 +207,7 @@ void ComputeUnweightedDistances(const StudentNetwork& network) {
 		if (num_students > 500) { break; }
 	}
 }
-
+*/
 
 // reduces network to see the interaction between various segments
 void ReduceStudentNetwork(const StudentNetwork& network,

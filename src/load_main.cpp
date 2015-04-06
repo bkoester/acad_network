@@ -153,7 +153,7 @@ int main(int argc, char* argv[]) {
 					PrintIndividualStudentNetwork(
 							student_network, 
 							student_network.GetVertexDescriptor(student.id()), 
-							"output/individual_" + to_string(student.id()) + 
+							"output/philosophy_" + to_string(student.id()) + 
 								".tsv"); });
 
 		for_each(begin(general_studies), end(general_studies),
@@ -161,16 +161,16 @@ int main(int argc, char* argv[]) {
 					PrintIndividualStudentNetwork(
 							student_network, 
 							student_network.GetVertexDescriptor(student.id()), 
-							"output/individual_" + to_string(student.id()) + 
-								".tsv"); });
+							"output/general_studies_" + 
+								to_string(student.id()) + ".tsv"); });
 
 		for_each(begin(musical_theater), end(musical_theater),
 				[&student_network](const Student& student) {
 					PrintIndividualStudentNetwork(
 							student_network,
 							student_network.GetVertexDescriptor(student.id()),
-							"output/individual_" + to_string(student.id()) + 
-								".tsv"); });
+							"output/musical_theatre_" + 
+								to_string(student.id()) + ".tsv"); });
 	}
 
 	return 0;

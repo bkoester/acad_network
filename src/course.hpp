@@ -7,6 +7,7 @@
 #include <set>
 #include <string>
 
+#include <boost/serialization/serialization.hpp>
 #include <boost/serialization/set.hpp>
 #include <boost/serialization/utility.hpp>
 

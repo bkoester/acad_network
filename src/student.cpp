@@ -179,6 +179,8 @@ ostream& operator<<(ostream& os, const Student& student) {
 	os << "; Gender: " << student.gender();
 	os << "; Ethnicity: " << student.ethnicity();
 	os << "; School: " << student.school();
+	os << "; Transfer status: " << (student.transfer() ? "Transfer" :
+		"Non-transfer");
 
 	// print first term
 	os << "; First term: ";

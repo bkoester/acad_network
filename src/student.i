@@ -1,4 +1,5 @@
 %module student
+
 %{
 #include "student.hpp"
 %}

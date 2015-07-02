@@ -1,6 +1,8 @@
 %module student_container
+
 %include "std_string.i"
 %include "student.i"
+
 %{
 #include "student_container.hpp"
 %}

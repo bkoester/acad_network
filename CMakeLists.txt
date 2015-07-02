@@ -18,24 +18,36 @@ endif()
 find_package(Boost 1.57.0 REQUIRED serialization program_options)
 message(STATUS "Boost including from ${Boost_INCLUDE_DIRS}")
 
+find_package(SWIG REQUIRED)
+include(${SWIG_USE_FILE})
+
+find_package(PythonLibs)
+
 # set compilation variables
 if (CMAKE_COMPILER_IS_GNUCC)
 	if (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 4.8)
-		message(FATAL_ERROR "Cannot use gcc version ${CMAKE_CXX_COMPILER_VERSION} < 4.8!")
+		message(FATAL_ERROR 
+            "Cannot use gcc version ${CMAKE_CXX_COMPILER_VERSION} < 4.8!")
 	elseif (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 4.9)
 		set(CXXSTD "-std=c++11")
 	else ()
 		set(CXXSTD "-std=c++14")
 	endif()
 	
-	set(CXXFLAGS "-Wall -Werror -pedantic-errors ${CXXSTD}")
-	set(CXXFLAGS_RELEASE "${CXXFLAGS} -O3 -DNDEBUG")
-	set(CXXFLAGS_DEBUG "${CXXFLAGS} -g -O0")
+    set(COMMON_FLAGS "-Wall -Werror -pedantic-errors ${CXXSTD}")
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${COMMON_FLAGS})
+    set(CMAKE_CXX_FLAGS_RELEASE 
+        "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG 
+        "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS} -g -O0")
+    set(SWIG_COMPILE_FLAGS "-fPIC")
 endif()
 
 
 # add directory for project source files
 add_subdirectory(${SOURCE_DIR})
+
+message(STATUS "CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE}")
 
 # Unit testing with Google Test
 option(unit_tests "Build unit tests" OFF)

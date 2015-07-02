@@ -1,4 +1,4 @@
-set(SRCS
+set(STUDENTS_COURSES_SRCS
 	course.cpp
 	course_container.cpp
 	course_network.cpp
@@ -26,7 +26,7 @@ set(STUDENT_QUERY_MAIN_SRC student_query_main.cpp)
 
 set(SERIALIZE_MAIN_SRC serialize_main.cpp)
 
-set(UNITTEST_SRCS
+set(STUDENTS_COURSES_UNITTEST_SRCS
 	course_test.cpp
 	course_container_test.cpp
 	course_network_test.cpp
@@ -56,19 +56,20 @@ set(STUDENT_QUERY_UNITTEST_SRCS
 set(SERIALIZE_UNITTEST_SRCS
 	)
 
-set(DEBUG_OBJECT_LIBRARY "debug_objects")
-set(UNITTEST_OBJECT_LIBRARY "unittest_objects")
-set(RELEASE_OBJECT_LIBRARY "release_objects")
-set(BUILD_DEBUG_BINARY "buildd")
-set(BUILD_RELEASE_BINARY "build")
-set(LOAD_DEBUG_BINARY "loadd")
-set(LOAD_RELEASE_BINARY "load")
-set(SEGMENT_DEBUG_BINARY "segmentd")
-set(SEGMENT_RELEASE_BINARY "segment")
-set(STUDENT_QUERY_DEBUG_BINARY "queryd")
-set(STUDENT_QUERY_RELEASE_BINARY "query")
-set(SERIALIZE_DEBUG_BINARY "serialized")
-set(SERIALIZE_RELEASE_BINARY "serialize")
+set(SWIG_SRCS
+    course_container.i
+    student.i
+    student_container.i
+    )
+
+set(STUDENTS_COURSES_LIBRARY "students_courses")
+set(BUILD_BINARY "build")
+set(LOAD_BINARY "load")
+set(SEGMENT_BINARY "segment")
+set(STUDENT_QUERY_BINARY "query")
+set(SERIALIZE_BINARY "serialize")
+set(STUDENTS_COURSES_UNITTEST_BINARY "students_courses_unittest")
+set(STUDENTS_COURSES_UNITTEST_LIBRARY "students_courses_unittest_objects")
 set(BUILD_UNITTEST_BINARY "build_unittest")
 set(LOAD_UNITTEST_BINARY "load_unittest")
 set(SEGMENT_UNITTEST_BINARY "segment_unittest")
@@ -77,98 +78,78 @@ set(SERIALIZE_UNITTEST_BINARY "serialize_unittest")
 
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
-	${Boost_INCLUDE_DIRS})
+	${Boost_INCLUDE_DIRS}
+    ${PYTHON_INCLUDE_PATH})
 
-add_library(${DEBUG_OBJECT_LIBRARY} OBJECT ${SRCS})
-add_library(${RELEASE_OBJECT_LIBRARY} OBJECT ${SRCS})
-add_executable(${BUILD_DEBUG_BINARY}
+set(CMAKE_SWIG_FLAGS "")
+
+set_source_files_properties(${SWIG_SRCS} PROPERTIES 
+    CPLUSPLUS ON)
+
+swig_add_module(student python student.i)
+swig_add_module(student_container python student_container.i)
+swig_add_module(course_container python course_container.i)
+
+set(STUDENT_COURSES_SWIG_LINK_LIBRARIES 
+    ${PYTHON_LIBRARIES} 
+    ${STUDENTS_COURSES_LIBRARY}
+    )
+
+swig_link_libraries(student ${STUDENT_COURSES_SWIG_LINK_LIBRARIES})
+swig_link_libraries(student_container ${STUDENT_COURSES_SWIG_LINK_LIBRARIES})
+swig_link_libraries(course_container ${STUDENT_COURSES_SWIG_LINK_LIBRARIES})
+
+
+add_library(${STUDENTS_COURSES_LIBRARY} ${STUDENTS_COURSES_SRCS})
+set_target_properties(${STUDENTS_COURSES_LIBRARY} PROPERTIES
+    COMPILE_FLAGS ${SWIG_COMPILE_FLAGS}
+    )
+
+add_executable(${BUILD_BINARY}
 	${BUILD_MAIN_SRC}
-	${BUILD_SRCS}
-	$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
-add_executable(${BUILD_RELEASE_BINARY}
-	${BUILD_MAIN_SRC}
-	${BUILD_SRCS}
-	$<TARGET_OBJECTS:${RELEASE_OBJECT_LIBRARY}>)
-add_executable(${LOAD_DEBUG_BINARY}
+	${BUILD_SRCS})
+
+add_executable(${LOAD_BINARY}
 	${LOAD_MAIN_SRC}
-	${LOAD_SRCS}
-	$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
-add_executable(${LOAD_RELEASE_BINARY}
-	${LOAD_MAIN_SRC}
-	${LOAD_SRCS}
-	$<TARGET_OBJECTS:${RELEASE_OBJECT_LIBRARY}>)
-add_executable(${SEGMENT_DEBUG_BINARY}
+	${LOAD_SRCS})
+
+add_executable(${SEGMENT_BINARY}
 	${SEGMENT_MAIN_SRC}
-	${SEGMENT_SRCS}
-	$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
-add_executable(${SEGMENT_RELEASE_BINARY}
-	${SEGMENT_MAIN_SRC}
-	${SEGMENT_SRCS}
-	$<TARGET_OBJECTS:${RELEASE_OBJECT_LIBRARY}>)
-add_executable(${STUDENT_QUERY_DEBUG_BINARY}
+	${SEGMENT_SRCS})
+
+add_executable(${STUDENT_QUERY_BINARY}
 	${STUDENT_QUERY_MAIN_SRC}
-	${STUDENT_QUERY_SRCS}
-	$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
-add_executable(${STUDENT_QUERY_RELEASE_BINARY}
-	${STUDENT_QUERY_MAIN_SRC}
-	${STUDENT_QUERY_SRCS}
-	$<TARGET_OBJECTS:${RELEASE_OBJECT_LIBRARY}>)
-add_executable(${SERIALIZE_DEBUG_BINARY}
+	${STUDENT_QUERY_SRCS})
+
+add_executable(${SERIALIZE_BINARY}
 	${SERIALIZE_MAIN_SRC}
-	${SERIALIZE_SRCS}
-	$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>)
-add_executable(${SERIALIZE_RELEASE_BINARY}
-	${SERIALIZE_MAIN_SRC}
-	${SERIALIZE_SRCS}
-	$<TARGET_OBJECTS:${RELEASE_OBJECT_LIBRARY}>)
+	${SERIALIZE_SRCS})
 
 
-set_property(TARGET ${DEBUG_OBJECT_LIBRARY} PROPERTY COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
-set_property(TARGET ${RELEASE_OBJECT_LIBRARY} PROPERTY COMPILE_FLAGS "${CXXFLAGS_RELEASE}")
-set_target_properties(${LOAD_DEBUG_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
-set_target_properties(${LOAD_RELEASE_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_RELEASE}")
-set_target_properties(${BUILD_DEBUG_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
-set_target_properties(${BUILD_RELEASE_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_RELEASE}")
-set_target_properties(${SEGMENT_DEBUG_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
-set_target_properties(${SEGMENT_RELEASE_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_RELEASE}")
-set_target_properties(${STUDENT_QUERY_DEBUG_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
-set_target_properties(${STUDENT_QUERY_RELEASE_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_RELEASE}")
-set_target_properties(${SERIALIZE_DEBUG_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
-set_target_properties(${SERIALIZE_RELEASE_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_RELEASE}")
+set(BINARY_LINK_LIBRARIES
+    ${Boost_LIBRARIES}
+    ${STUDENTS_COURSES_LIBRARY}
+    )
 
-
-target_link_libraries(${BUILD_DEBUG_BINARY}
-	${Boost_LIBRARIES})
-target_link_libraries(${BUILD_RELEASE_BINARY}
-	${Boost_LIBRARIES})
-target_link_libraries(${LOAD_DEBUG_BINARY}
-	${Boost_LIBRARIES})
-target_link_libraries(${LOAD_RELEASE_BINARY}
-	${Boost_LIBRARIES})
-target_link_libraries(${SEGMENT_DEBUG_BINARY}
-	${Boost_LIBRARIES})
-target_link_libraries(${SEGMENT_RELEASE_BINARY}
-	${Boost_LIBRARIES})
-target_link_libraries(${STUDENT_QUERY_DEBUG_BINARY}
-	${Boost_LIBRARIES})
-target_link_libraries(${STUDENT_QUERY_RELEASE_BINARY}
-	${Boost_LIBRARIES})
-target_link_libraries(${SERIALIZE_DEBUG_BINARY}
-	${Boost_LIBRARIES})
-target_link_libraries(${SERIALIZE_RELEASE_BINARY}
-	${Boost_LIBRARIES})
-
+target_link_libraries(${STUDENTS_COURSES_LIBRARY} 
+    ${Boost_LIBRARIES})
+target_link_libraries(${BUILD_BINARY} ${BINARY_LINK_LIBRARIES})
+target_link_libraries(${LOAD_BINARY} ${BINARY_LINK_LIBRARIES})
+target_link_libraries(${SEGMENT_BINARY} ${BINARY_LINK_LIBRARIES})
+target_link_libraries(${STUDENT_QUERY_BINARY} ${BINARY_LINK_LIBRARIES})
+target_link_libraries(${SERIALIZE_BINARY} ${BINARY_LINK_LIBRARIES})
 
 
 # if we choose to build unit tests, add rules for building unittest executable
 if (unit_tests)
+    message(STATUS "Unit test targets available.")
 	if (NOT EXISTS "${GMOCK_ROOT}")
 		message("'${GMOCK_ROOT}' does not exist, please set the GMOCK_ROOT
 		variable to the appropriate directory")
 		return()
 	endif()
 
-	# add binaries of google test and google mock to their their roots
+	# add binaries of google test and google mock to their roots
 	add_subdirectory("${GMOCK_ROOT}" "${GMOCK_ROOT}")
 
 	include_directories(
@@ -177,61 +158,70 @@ if (unit_tests)
 		${GMOCK_ROOT}
 		${GMOCK_ROOT}/include)
 
-	add_library(${UNITTEST_OBJECT_LIBRARY} OBJECT ${UNITTEST_SRCS})
-	set_property(TARGET ${UNITTEST_OBJECT_LIBRARY} PROPERTY COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
+    add_library(${STUDENTS_COURSES_UNITTEST_LIBRARY} OBJECT
+        ${STUDENTS_COURSES_UNITTEST_SRCS})
+
+    add_executable(${STUDENTS_COURSES_UNITTEST_BINARY}
+        ${STUDENTS_COURSES_SRCS}
+        ${STUDENTS_COURSES_UNITTEST_SRCS}
+        )
 
 	add_executable(${BUILD_UNITTEST_BINARY}
 		${BUILD_SRCS}
 		${BUILD_UNITTEST_SRCS}
-		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>
-		$<TARGET_OBJECTS:${UNITTEST_OBJECT_LIBRARY}>)
+		$<TARGET_OBJECTS:${STUDENTS_COURSES_UNITTEST_LIBRARY}>
+        )
+
 	add_executable(${LOAD_UNITTEST_BINARY}
 		${LOAD_SRCS}
 		${LOAD_UNITTEST_SRCS}
-		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>
-		$<TARGET_OBJECTS:${UNITTEST_OBJECT_LIBRARY}>)
+		$<TARGET_OBJECTS:${STUDENTS_COURSES_UNITTEST_LIBRARY}>
+        )
+
 	add_executable(${SEGMENT_UNITTEST_BINARY}
 		${SEGMENT_SRCS}
 		${SEGMENT_UNITTEST_SRCS}
-		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>
-		$<TARGET_OBJECTS:${UNITTEST_OBJECT_LIBRARY}>)
+		$<TARGET_OBJECTS:${STUDENTS_COURSES_UNITTEST_LIBRARY}>
+        )
+
 	add_executable(${STUDENT_QUERY_UNITTEST_BINARY}
 		${STUDENT_QUERY_SRCS}
 		${STUDENT_QUERY_UNITTEST_SRCS}
-		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>
-		$<TARGET_OBJECTS:${UNITTEST_OBJECT_LIBRARY}>)
+		$<TARGET_OBJECTS:${STUDENTS_COURSES_UNITTEST_LIBRARY}>
+        )
+
 	add_executable(${SERIALIZE_UNITTEST_BINARY}
 		${SERIALIZE_SRCS}
 		${SERIALIZE_UNITTEST_SRCS}
-		$<TARGET_OBJECTS:${DEBUG_OBJECT_LIBRARY}>
-		$<TARGET_OBJECTS:${UNITTEST_OBJECT_LIBRARY}>)
+		$<TARGET_OBJECTS:${STUDENTS_COURSES_UNITTEST_LIBRARY}>
+        )
 
+    # special case: we don't need to link STUDENTS_COURSES_LIBRARY because we
+    # are testing it
+    target_link_libraries(${STUDENTS_COURSES_UNITTEST_BINARY}
+        ${Boost_LIBRARIES}
+        gmock_main
+        )
 
-	set_target_properties(${BUILD_UNITTEST_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
-	set_target_properties(${LOAD_UNITTEST_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
-	set_target_properties(${SEGMENT_UNITTEST_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
-	set_target_properties(${STUDENT_QUERY_UNITTEST_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
-	set_target_properties(${SERIALIZE_UNITTEST_BINARY} PROPERTIES COMPILE_FLAGS "${CXXFLAGS_DEBUG}")
+    set(UNITTEST_BINARY_LINK_LIBRARIES
+        ${Boost_LIBRARIES}
+        gmock_main
+        pthread
+        ${STUDENTS_COURSES_LIBRARY})
 
-	target_link_libraries(${BUILD_UNITTEST_BINARY}
-		${Boost_LIBRARIES}
-		gmock_main
-		pthread)
+    target_link_libraries(${BUILD_UNITTEST_BINARY}
+        ${UNITTEST_BINARY_LINK_LIBRARIES})
+
 	target_link_libraries(${LOAD_UNITTEST_BINARY}
-		${Boost_LIBRARIES}
-		gmock_main
-		pthread)
+        ${UNITTEST_BINARY_LINK_LIBRARIES})
+
 	target_link_libraries(${SEGMENT_UNITTEST_BINARY}
-		${Boost_LIBRARIES}
-		gmock_main
-		pthread)
+        ${UNITTEST_BINARY_LINK_LIBRARIES})
+
 	target_link_libraries(${STUDENT_QUERY_UNITTEST_BINARY}
-		${Boost_LIBRARIES}
-		gmock_main
-		pthread)
+        ${UNITTEST_BINARY_LINK_LIBRARIES})
+
 	target_link_libraries(${SERIALIZE_UNITTEST_BINARY}
-		${Boost_LIBRARIES}
-		gmock_main
-		pthread)
+        ${UNITTEST_BINARY_LINK_LIBRARIES})
 
 endif()

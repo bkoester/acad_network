@@ -32,24 +32,11 @@ class CourseContainerTest : public ::testing::Test {
 		student5{567890} {}
 
 	void SetUp() override {
-		EXPECT_CALL(students, Find(147195)).Times(AtLeast(1)).
-			WillRepeatedly(ReturnRef(student1));
-		EXPECT_CALL(students, Find(312995)).Times(AtLeast(1)).
-			WillRepeatedly(ReturnRef(student2));
-		EXPECT_CALL(students, Find(352468)).Times(AtLeast(1)).
-			WillRepeatedly(ReturnRef(student3));
-		EXPECT_CALL(students, Find(500928)).Times(AtLeast(1)).
-			WillRepeatedly(ReturnRef(student4));
-		EXPECT_CALL(students, Find(567890)).Times(AtLeast(1)).
-			WillRepeatedly(ReturnRef(student5));
-
 		stringstream enrollment_stream{enrollment_tab};
-		courses = CourseContainer{enrollment_stream, students};
+		courses = CourseContainer::LoadFromTsv(enrollment_stream);
 	}
 
-
  protected:
-	const MockStudentContainer students;
 	Student student1, student2, student3, student4, student5;
 	CourseContainer courses;
 };
@@ -115,10 +102,10 @@ TEST_F(CourseContainerTest, Find) {
 
 TEST_F(CourseContainerTest, Serialization) {
 	stringstream course_stream;
-	courses.Save(course_stream);
+	courses.SaveToArchive(course_stream);
 
-	CourseContainer serialized_courses;
-	serialized_courses.Load(course_stream);
+	CourseContainer serialized_courses{
+        CourseContainer::LoadFromArchive(course_stream)};
 
 	EXPECT_EQ(courses, serialized_courses);
 }

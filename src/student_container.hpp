@@ -20,12 +20,15 @@ class StudentContainer {
  public:
 	using container_t = std::vector<Student>;
 
-	StudentContainer() {}
-
 	// Read students into a sorted vector. This vector "owns" the students,
 	// other containers must point to them (the vector never grows, so the
 	// pointers won't be invalidated) or find them in logn with Student::Id.
-	explicit StudentContainer(std::istream& student_stream);
+	static StudentContainer LoadFromTsv(std::istream& student_stream);
+	// Load the student container from a Boost archive.
+	static StudentContainer LoadFromArchive(std::istream& input_archive);
+	static StudentContainer LoadFromArchive(std::string input_path);
+    // Save the student container to a Boost archive.
+	void SaveToArchive(std::ostream& output);
 
 	virtual ~StudentContainer() {}
 
@@ -38,12 +41,7 @@ class StudentContainer {
 
 	template <typename Archive>
 	void serialize(Archive& ar, const unsigned int) { ar & students_; }
-
-	// Save and Load the student container.
-	// When loading, the input must be a valid boost archive.
-	void Save(std::ostream& output);
-	void Load(std::istream& input);
-
+	
 	// Populate the list of courses a student took.
 	void UpdateCourses(const CourseContainer& courses);
 
@@ -63,7 +61,13 @@ class StudentContainer {
 	container_t::const_iterator end() const { return std::end(students_); }
 	container_t::const_iterator cend() const { return students_.cend(); }
 
+ protected:
+	StudentContainer() {}  // use "Load..." static member functions instead
+
  private:
+    friend class StudentContainerTest;  // to access default constructor
+
+
 	container_t students_;
 };
 

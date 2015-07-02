@@ -31,9 +31,8 @@ class StudentContainerTest : public ::testing::Test {
 		unused_id3 = 999999;
 
 		stringstream student_stream{student_tab};
-		students = StudentContainer{student_stream};
+		students = StudentContainer::LoadFromTsv(student_stream);
 	}
-	
 	
  protected:
 	StudentContainer students;
@@ -172,10 +171,10 @@ TEST_F(StudentContainerTest, UpdateCourses) {
 
 TEST_F(StudentContainerTest, Serialization) {
 	stringstream student_stream;
-	students.Save(student_stream);
+	students.SaveToArchive(student_stream);
 	
-	StudentContainer serialized_students;
-	serialized_students.Load(student_stream);
+	StudentContainer serialized_students{
+        StudentContainer::LoadFromArchive(student_stream)};
 
 	EXPECT_EQ(students, serialized_students);
 }

@@ -47,8 +47,8 @@ int main(int argc, char* argv[]) {
 	// read students and enrollment data
 	ifstream student_stream{student_path};
 	ifstream enrollment_stream{enrollment_path};
-	StudentContainer students{student_stream};
-	CourseContainer courses{enrollment_stream, students};
+	StudentContainer students{StudentContainer::LoadFromTsv(student_stream)};
+	CourseContainer courses{CourseContainer::LoadFromTsv(enrollment_stream)};
 
 	// save archives of students and courses
 	ofstream student_archive{student_archive_path};

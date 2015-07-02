@@ -44,10 +44,10 @@ int main(int argc, char* argv[]) {
 	// read students and enrollment data
 	ifstream student_archive{student_archive_path};
 	ifstream course_archive{course_archive_path};
-	StudentContainer students;
-	students.Load(student_archive);
-	CourseContainer courses;
-	courses.Load(course_archive);
+	StudentContainer students{
+        StudentContainer::LoadFromArchive(student_archive)};
+	CourseContainer courses{
+        CourseContainer::LoadFromArchive(course_archive)};
 	students.UpdateCourses(courses);
 
 	cout << "Students: " << students.size() << endl;

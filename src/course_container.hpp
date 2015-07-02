@@ -18,11 +18,14 @@ class CourseContainer {
  public:
 	using container_t = std::vector<Course>;
 
-	CourseContainer() {}
 	// Read Student::Ids and courses they took from enrollment data. 
-	// Populate a set of courses and which students took them
-	explicit CourseContainer(std::istream& enrollment_stream,
-							 const StudentContainer& students);
+	// Populate a set of courses and which students took them.
+    static CourseContainer LoadFromTsv(std::istream& enrollment_stream);
+	// Load the course container from a Boost archive.
+	static CourseContainer LoadFromArchive(std::istream& input_archive);
+	static CourseContainer LoadFromArchive(std::string input_path);
+    // Save the course container to a Boost archive.
+	void SaveToArchive(std::ostream& output);
 
 	virtual ~CourseContainer() {}
 
@@ -34,12 +37,7 @@ class CourseContainer {
 	template <typename Archive>
 	void serialize(Archive& ar, const unsigned int) { ar & courses_; }
 
-	// Save and Load the course container.
-	// When loading, the input must be a valid boost archive.
-	void Save(std::ostream& output);
-	void Load(std::istream& input);
-
-	// Inserts and takes ownership of student.
+	// Inserts and takes ownership of course.
 	container_t::iterator Insert(Course course);
 	void Insert(std::initializer_list<Course> courses);
 
@@ -57,8 +55,12 @@ class CourseContainer {
 	{ return std::end(courses_); }
 	virtual container_t::const_iterator cend() const { return courses_.cend(); }
 
+ protected:
+	CourseContainer() {}  // use "Load..." static member functions instead
 
  private:
+    friend class CourseContainerTest;  // to access default constructor
+
 	container_t courses_;
 };
 

@@ -8,8 +8,8 @@
 
 // workaround for lack of swig support of nested classes
 struct CourseId {
-    Id();
-    Id(std::string s, short n, int t);
+    CourseId();
+    CourseId(std::string s, short n, int t);
 
     std::string subject;
     short number;

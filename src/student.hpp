@@ -34,7 +34,7 @@ class Student {
 	static std::string to_string(const Gender& gender);
 	static std::string to_string(const Ethnicity& ethnicity);
 
-	Student() : id_{uninitialized_id}, gender_{Gender::Unspecified}, 
+    Student() : id_{uninitialized_id}, gender_{Gender::Unspecified}, 
 		ethnicity_{uninitialized_ethnicity},
 		first_term_{uninitialized_term} {}
 	explicit Student(Student::Id id) : id_{id}, gender_{Gender::Unspecified}, 
@@ -57,6 +57,8 @@ class Student {
 
 	std::string GetMajor1Description() const;
 	std::string GetMajor2Description() const;
+    std::string GetGenderDescription() const;
+    std::string GetEthnicityDescription() const;
 
 	bool operator==(const Student& other) const { return id() == other.id(); }
 	bool operator!=(const Student& other) const { return !(operator==(other)); }

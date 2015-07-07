@@ -1,6 +1,8 @@
 %module course_container
 
 %include "course.i"
+%include "std_string.i"
+
 %{
 #include "course_container.hpp"
 %}

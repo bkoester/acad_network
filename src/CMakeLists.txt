@@ -20,8 +20,6 @@ set(LOAD_SRCS
 
 set(LOAD_MAIN_SRC load_main.cpp)
 
-set(SEGMENT_MAIN_SRC segment_main.cpp)
-
 set(STUDENT_QUERY_MAIN_SRC student_query_main.cpp)
 
 set(SERIALIZE_MAIN_SRC serialize_main.cpp)
@@ -47,9 +45,6 @@ set(LOAD_UNITTEST_SRCS
 	student_segmentation_test.cpp
 	)
 
-set(SEGMENT_UNITTEST_SRCS
-	)
-
 set(STUDENT_QUERY_UNITTEST_SRCS
 	)
 
@@ -57,6 +52,7 @@ set(SERIALIZE_UNITTEST_SRCS
 	)
 
 set(SWIG_SRCS
+    course.i
     course_container.i
     student.i
     student_container.i
@@ -86,9 +82,21 @@ set(CMAKE_SWIG_FLAGS "")
 set_source_files_properties(${SWIG_SRCS} PROPERTIES 
     CPLUSPLUS ON)
 
+set(SWIG_MODULE_student_container_EXTRA_DEPS 
+    student.i
+    student_container.hpp
+    )
+
+set(SWIG_MODULE_course_container_EXTRA_DEPS 
+    course.i
+    course_container.hpp
+    )
+
 swig_add_module(student python student.i)
 swig_add_module(student_container python student_container.i)
+swig_add_module(course python course.i)
 swig_add_module(course_container python course_container.i)
+
 
 set(STUDENT_COURSES_SWIG_LINK_LIBRARIES 
     ${PYTHON_LIBRARIES} 
@@ -97,7 +105,9 @@ set(STUDENT_COURSES_SWIG_LINK_LIBRARIES
 
 swig_link_libraries(student ${STUDENT_COURSES_SWIG_LINK_LIBRARIES})
 swig_link_libraries(student_container ${STUDENT_COURSES_SWIG_LINK_LIBRARIES})
+swig_link_libraries(course ${STUDENT_COURSES_SWIG_LINK_LIBRARIES})
 swig_link_libraries(course_container ${STUDENT_COURSES_SWIG_LINK_LIBRARIES})
+
 
 
 add_library(${STUDENTS_COURSES_LIBRARY} ${STUDENTS_COURSES_SRCS})
@@ -112,10 +122,6 @@ add_executable(${BUILD_BINARY}
 add_executable(${LOAD_BINARY}
 	${LOAD_MAIN_SRC}
 	${LOAD_SRCS})
-
-add_executable(${SEGMENT_BINARY}
-	${SEGMENT_MAIN_SRC}
-	${SEGMENT_SRCS})
 
 add_executable(${STUDENT_QUERY_BINARY}
 	${STUDENT_QUERY_MAIN_SRC}
@@ -135,7 +141,6 @@ target_link_libraries(${STUDENTS_COURSES_LIBRARY}
     ${Boost_LIBRARIES})
 target_link_libraries(${BUILD_BINARY} ${BINARY_LINK_LIBRARIES})
 target_link_libraries(${LOAD_BINARY} ${BINARY_LINK_LIBRARIES})
-target_link_libraries(${SEGMENT_BINARY} ${BINARY_LINK_LIBRARIES})
 target_link_libraries(${STUDENT_QUERY_BINARY} ${BINARY_LINK_LIBRARIES})
 target_link_libraries(${SERIALIZE_BINARY} ${BINARY_LINK_LIBRARIES})
 
@@ -178,12 +183,6 @@ if (unit_tests)
 		$<TARGET_OBJECTS:${STUDENTS_COURSES_UNITTEST_LIBRARY}>
         )
 
-	add_executable(${SEGMENT_UNITTEST_BINARY}
-		${SEGMENT_SRCS}
-		${SEGMENT_UNITTEST_SRCS}
-		$<TARGET_OBJECTS:${STUDENTS_COURSES_UNITTEST_LIBRARY}>
-        )
-
 	add_executable(${STUDENT_QUERY_UNITTEST_BINARY}
 		${STUDENT_QUERY_SRCS}
 		${STUDENT_QUERY_UNITTEST_SRCS}
@@ -213,9 +212,6 @@ if (unit_tests)
         ${UNITTEST_BINARY_LINK_LIBRARIES})
 
 	target_link_libraries(${LOAD_UNITTEST_BINARY}
-        ${UNITTEST_BINARY_LINK_LIBRARIES})
-
-	target_link_libraries(${SEGMENT_UNITTEST_BINARY}
         ${UNITTEST_BINARY_LINK_LIBRARIES})
 
 	target_link_libraries(${STUDENT_QUERY_UNITTEST_BINARY}

@@ -67,7 +67,6 @@ class StudentContainer {
  private:
     friend class StudentContainerTest;  // to access default constructor
 
-
 	container_t students_;
 };
 

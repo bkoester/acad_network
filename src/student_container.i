@@ -12,6 +12,7 @@ class StudentContainer {
 	static StudentContainer LoadFromArchive(std::string input_path);
     // Only expose const member function to external clients.
 	virtual const Student& Find(Student::Id id) const;
+	void UpdateCourses(const CourseContainer& courses);
 
  protected:
     StudentContainer();

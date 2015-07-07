@@ -169,6 +169,11 @@ string Student::GetMajor2Description() const {
 	return major_code_map.at(major_code);
 }
 
+string Student::GetGenderDescription() const { return to_string(gender()); }
+
+string Student::GetEthnicityDescription() const
+{ return to_string(ethnicity()); }
+
 
 ostream& operator<<(ostream& os, const Student& student) {
 	// print ID

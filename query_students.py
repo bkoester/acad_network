@@ -45,4 +45,6 @@ if __name__ == '__main__':
             print(s.GetDescription())
         except ValueError:
             print('Please enter a valid integer!')
+        except RuntimeError as e:
+            print(e, end='\n\n')
 

@@ -1,6 +1,7 @@
 #ifndef STUDENT_CONTAINER_H
 #define STUDENT_CONTAINER_H
 
+#include <exception>
 #include <initializer_list>
 #include <iosfwd>
 #include <iterator>

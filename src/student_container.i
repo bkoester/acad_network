@@ -9,26 +9,20 @@
 %}
 
 
-/*
 class StudentNotFound : public std::exception {
     StudentNotFound(Student::Id id);
 	const char* what() const;
-}; */
+};
 
 
 //%catches(StudentNotFound) StudentContainer::Find(Student::Id);
-/*
-%exception{
+%exception StudentContainer::Find {
     try {
         $action
     } catch (StudentNotFound& e) {
-        SWIG_Python_Raise(SWIG_NewPointerObj(
-            (new StudentNotFound(e),
-            SWIGTYPE_p_StudentNotFound, SWIG_POINTER_OWN),
-            "StudentNotFound", SWIGTYPE_p_StudentNotFound);
-        SWIG_fail;
+        SWIG_exception(SWIG_RuntimeError, e.what());
     }
-} */
+}
 
 
 class StudentContainer {

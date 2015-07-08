@@ -29,5 +29,6 @@ class Student {
 	std::string GetMajor2Description() const;
     std::string GetGenderDescription() const;
     std::string GetEthnicityDescription() const;
+    std::string GetDescription() const;
 
 };

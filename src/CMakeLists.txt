@@ -20,8 +20,6 @@ set(LOAD_SRCS
 
 set(LOAD_MAIN_SRC load_main.cpp)
 
-set(STUDENT_QUERY_MAIN_SRC student_query_main.cpp)
-
 set(SERIALIZE_MAIN_SRC serialize_main.cpp)
 
 set(STUDENTS_COURSES_UNITTEST_SRCS
@@ -45,9 +43,6 @@ set(LOAD_UNITTEST_SRCS
 	student_segmentation_test.cpp
 	)
 
-set(STUDENT_QUERY_UNITTEST_SRCS
-	)
-
 set(SERIALIZE_UNITTEST_SRCS
 	)
 
@@ -62,14 +57,12 @@ set(STUDENTS_COURSES_LIBRARY "students_courses")
 set(BUILD_BINARY "build")
 set(LOAD_BINARY "load")
 set(SEGMENT_BINARY "segment")
-set(STUDENT_QUERY_BINARY "query")
 set(SERIALIZE_BINARY "serialize")
 set(STUDENTS_COURSES_UNITTEST_BINARY "students_courses_unittest")
 set(STUDENTS_COURSES_UNITTEST_LIBRARY "students_courses_unittest_objects")
 set(BUILD_UNITTEST_BINARY "build_unittest")
 set(LOAD_UNITTEST_BINARY "load_unittest")
 set(SEGMENT_UNITTEST_BINARY "segment_unittest")
-set(STUDENT_QUERY_UNITTEST_BINARY "query_unittest")
 set(SERIALIZE_UNITTEST_BINARY "serialize_unittest")
 
 include_directories(
@@ -123,10 +116,6 @@ add_executable(${LOAD_BINARY}
 	${LOAD_MAIN_SRC}
 	${LOAD_SRCS})
 
-add_executable(${STUDENT_QUERY_BINARY}
-	${STUDENT_QUERY_MAIN_SRC}
-	${STUDENT_QUERY_SRCS})
-
 add_executable(${SERIALIZE_BINARY}
 	${SERIALIZE_MAIN_SRC}
 	${SERIALIZE_SRCS})
@@ -141,7 +130,6 @@ target_link_libraries(${STUDENTS_COURSES_LIBRARY}
     ${Boost_LIBRARIES})
 target_link_libraries(${BUILD_BINARY} ${BINARY_LINK_LIBRARIES})
 target_link_libraries(${LOAD_BINARY} ${BINARY_LINK_LIBRARIES})
-target_link_libraries(${STUDENT_QUERY_BINARY} ${BINARY_LINK_LIBRARIES})
 target_link_libraries(${SERIALIZE_BINARY} ${BINARY_LINK_LIBRARIES})
 
 
@@ -183,12 +171,6 @@ if (unit_tests)
 		$<TARGET_OBJECTS:${STUDENTS_COURSES_UNITTEST_LIBRARY}>
         )
 
-	add_executable(${STUDENT_QUERY_UNITTEST_BINARY}
-		${STUDENT_QUERY_SRCS}
-		${STUDENT_QUERY_UNITTEST_SRCS}
-		$<TARGET_OBJECTS:${STUDENTS_COURSES_UNITTEST_LIBRARY}>
-        )
-
 	add_executable(${SERIALIZE_UNITTEST_BINARY}
 		${SERIALIZE_SRCS}
 		${SERIALIZE_UNITTEST_SRCS}
@@ -212,9 +194,6 @@ if (unit_tests)
         ${UNITTEST_BINARY_LINK_LIBRARIES})
 
 	target_link_libraries(${LOAD_UNITTEST_BINARY}
-        ${UNITTEST_BINARY_LINK_LIBRARIES})
-
-	target_link_libraries(${STUDENT_QUERY_UNITTEST_BINARY}
         ${UNITTEST_BINARY_LINK_LIBRARIES})
 
 	target_link_libraries(${SERIALIZE_UNITTEST_BINARY}

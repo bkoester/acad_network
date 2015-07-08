@@ -7,28 +7,9 @@ __copyright__ = "Kar Epker, 2015"
 
 import argparse
 import csv
-import os
 import sys
 
-
-class ReadableDirectory(argparse.Action):
-    """Action for acception a readable directory from argparse."""
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        if not os.path.isdir(values):
-            raise argparse.ArgumentTypeError('%s is not a valid path!' % values)
-        if not os.access(values, os.R_OK):
-            raise argparse.ArgumentTypeError('%s is not readable!' % values)
-        setattr(namespace, self.dest, values)
-
-
-def add_path_to_python_path(path):
-    """Adds directory to python path so modules can be imported from it.
-
-    Args:
-        directory (string): Path to a directory to add to the path.
-    """
-    sys.path.append(path)
+import readable_directory
 
 
 SEGMENTERS = {
@@ -54,14 +35,14 @@ if __name__ == '__main__':
     parser.add_argument('--course-archive-path', dest='course_archive_path',
         help='Path of the course archive file.', required=True)
     parser.add_argument('--swig-module-path', dest='swig_module_path', 
-        help='Directory containing the swig modules.', action=ReadableDirectory,
-        required=True)
+        help='Directory containing the swig modules.',
+        action=readable_directory.ReadableDirectory, required=True)
 
 
     args = parser.parse_args()
 
     # import the course_container and student_container modules
-    add_path_to_python_path(args.swig_module_path)
+    sys.path.append(args.swig_module_path)
     import course_container
     import student_container
 

@@ -19,7 +19,7 @@ using std::begin; using std::end;
 using std::cout; using std::endl;
 using std::copy; using std::transform; using std::remove;
 using std::ostream; using std::istream; using std::endl;
-using std::ostringstream;
+using std::ostringstream; 
 using std::ostream_iterator; using std::inserter;
 using std::string; using std::stoi;
 using std::unordered_map;
@@ -169,10 +169,19 @@ string Student::GetMajor2Description() const {
 	return major_code_map.at(major_code);
 }
 
+
 string Student::GetGenderDescription() const { return to_string(gender()); }
+
 
 string Student::GetEthnicityDescription() const
 { return to_string(ethnicity()); }
+
+
+string Student::GetDescription() const {
+    ostringstream description;
+    description << *this;
+    return description.str();
+}
 
 
 ostream& operator<<(ostream& os, const Student& student) {

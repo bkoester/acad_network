@@ -59,6 +59,8 @@ class Student {
 	std::string GetMajor2Description() const;
     std::string GetGenderDescription() const;
     std::string GetEthnicityDescription() const;
+    // equivalent to what is printed for operator<<, but useful for swig
+    std::string GetDescription() const;
 
 	bool operator==(const Student& other) const { return id() == other.id(); }
 	bool operator!=(const Student& other) const { return !(operator==(other)); }

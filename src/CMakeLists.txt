@@ -68,40 +68,44 @@ set(SERIALIZE_UNITTEST_BINARY "serialize_unittest")
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${Boost_INCLUDE_DIRS}
-    ${PYTHON_INCLUDE_PATH})
+	)
 
-set(CMAKE_SWIG_FLAGS "")
+if (swig_hooks)
+	include_directories(
+		${PYTHON_INCLUDE_PATH}
+	)
 
-set_source_files_properties(${SWIG_SRCS} PROPERTIES 
-    CPLUSPLUS ON)
+	set(CMAKE_SWIG_FLAGS "")
 
-set(SWIG_MODULE_student_container_EXTRA_DEPS 
-    student.i
-    student_container.hpp
-    )
+	set_source_files_properties(${SWIG_SRCS} PROPERTIES 
+		CPLUSPLUS ON)
 
-set(SWIG_MODULE_course_container_EXTRA_DEPS 
-    course.i
-    course_container.hpp
-    )
+	set(SWIG_MODULE_student_container_EXTRA_DEPS 
+		student.i
+		student_container.hpp
+		)
 
-swig_add_module(student python student.i)
-swig_add_module(student_container python student_container.i)
-swig_add_module(course python course.i)
-swig_add_module(course_container python course_container.i)
+	set(SWIG_MODULE_course_container_EXTRA_DEPS 
+		course.i
+		course_container.hpp
+		)
 
-
-set(STUDENT_COURSES_SWIG_LINK_LIBRARIES 
-    ${PYTHON_LIBRARIES} 
-    ${STUDENTS_COURSES_LIBRARY}
-    )
-
-swig_link_libraries(student ${STUDENT_COURSES_SWIG_LINK_LIBRARIES})
-swig_link_libraries(student_container ${STUDENT_COURSES_SWIG_LINK_LIBRARIES})
-swig_link_libraries(course ${STUDENT_COURSES_SWIG_LINK_LIBRARIES})
-swig_link_libraries(course_container ${STUDENT_COURSES_SWIG_LINK_LIBRARIES})
+	swig_add_module(student python student.i)
+	swig_add_module(student_container python student_container.i)
+	swig_add_module(course python course.i)
+	swig_add_module(course_container python course_container.i)
 
 
+	set(STUDENT_COURSES_SWIG_LINK_LIBRARIES 
+		${PYTHON_LIBRARIES} 
+		${STUDENTS_COURSES_LIBRARY}
+		)
+
+	swig_link_libraries(student ${STUDENT_COURSES_SWIG_LINK_LIBRARIES})
+	swig_link_libraries(student_container ${STUDENT_COURSES_SWIG_LINK_LIBRARIES})
+	swig_link_libraries(course ${STUDENT_COURSES_SWIG_LINK_LIBRARIES})
+	swig_link_libraries(course_container ${STUDENT_COURSES_SWIG_LINK_LIBRARIES})
+endif()
 
 add_library(${STUDENTS_COURSES_LIBRARY} ${STUDENTS_COURSES_SRCS})
 set_target_properties(${STUDENTS_COURSES_LIBRARY} PROPERTIES

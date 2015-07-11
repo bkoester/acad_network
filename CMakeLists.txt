@@ -5,6 +5,20 @@ project (thesis)
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 set(GMOCK_ROOT "$ENV{HOME}/links/third_party/gmock-1.7.0")
 
+# Unit testing with Google Test
+option(unit_tests "Build unit tests" OFF)
+
+# Option for building swig hooks
+option(swig_hooks "Build swig hooks into C++ for Python.")
+
+if (swig_hooks)
+	message(STATUS "Swig hook targets available.")
+	find_package(SWIG REQUIRED)
+	include(${SWIG_USE_FILE})
+
+	find_package(PythonLibs)
+endif()
+
 site_name(SITE_NAME)
 if (${SITE_NAME} MATCHES ".*flux.*")
 	set(BOOST_ROOT "/home/software/rhel6/boost/1.57.0-gcc-4.8.0")
@@ -17,11 +31,6 @@ endif()
 
 find_package(Boost 1.57.0 REQUIRED serialization program_options)
 message(STATUS "Boost including from ${Boost_INCLUDE_DIRS}")
-
-find_package(SWIG REQUIRED)
-include(${SWIG_USE_FILE})
-
-find_package(PythonLibs)
 
 # set compilation variables
 if (CMAKE_COMPILER_IS_GNUCC)
@@ -48,6 +57,3 @@ endif()
 add_subdirectory(${SOURCE_DIR})
 
 message(STATUS "CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE}")
-
-# Unit testing with Google Test
-option(unit_tests "Build unit tests" OFF)

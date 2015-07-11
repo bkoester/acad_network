@@ -107,7 +107,8 @@ if (swig_hooks)
 	swig_link_libraries(course_container ${STUDENT_COURSES_SWIG_LINK_LIBRARIES})
 endif()
 
-add_library(${STUDENTS_COURSES_LIBRARY} ${STUDENTS_COURSES_SRCS})
+# make this library shared as recommended for linking with swig modules
+add_library(${STUDENTS_COURSES_LIBRARY} SHARED ${STUDENTS_COURSES_SRCS})
 set_target_properties(${STUDENTS_COURSES_LIBRARY} PROPERTIES
     COMPILE_FLAGS ${SWIG_COMPILE_FLAGS}
     )
@@ -128,6 +129,7 @@ add_executable(${SERIALIZE_BINARY}
 set(BINARY_LINK_LIBRARIES
     ${Boost_LIBRARIES}
     ${STUDENTS_COURSES_LIBRARY}
+	${CMAKE_THREAD_LIBS_INIT}
     )
 
 target_link_libraries(${STUDENTS_COURSES_LIBRARY} 

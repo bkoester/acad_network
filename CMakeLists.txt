@@ -32,6 +32,8 @@ endif()
 find_package(Boost 1.57.0 REQUIRED serialization program_options)
 message(STATUS "Boost including from ${Boost_INCLUDE_DIRS}")
 
+find_package(Threads)
+
 # set compilation variables
 if (CMAKE_COMPILER_IS_GNUCC)
 	if (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 4.8)

@@ -53,6 +53,6 @@ int main(int argc, char* argv[]) {
 	// save archives of students and courses
 	ofstream student_archive{student_archive_path};
 	ofstream course_archive{course_archive_path};
-	students.Save(student_archive);
-	courses.Save(course_archive);
+	students.SaveToArchive(student_archive);
+	courses.SaveToArchive(course_archive);
 }

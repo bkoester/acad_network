@@ -10,8 +10,10 @@
 #PBS -V
 
 WORKING_DIR=/tmp/$PBS_JOBID
-THESIS_ROOT_DIR=$HOME/thesis/
-OUTPUT_DIR=$THESIS_ROOT_DIR/data
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+DATA_DIR="${SCRIPT_DIR}/../../data"
+BINARY_DIR="${SCRIPT_DIR}/../release/src"
+
 COURSE_ARCHIVE_FILENAME=course_archive.txt
 STUDENT_ARCHIVE_FILENAME=student_archive.txt
 STUDENT_NETWORK_ARCHIVE_FILENAME=student_network.txt
@@ -21,10 +23,11 @@ BINARY_NAME=load
 mkdir $WORKING_DIR
 mkdir $WORKING_DIR/output
 
-cp ${THESIS_ROOT_DIR}/data/${COURSE_ARCHIVE_FILENAME} $WORKING_DIR
-cp ${THESIS_ROOT_DIR}/data/${STUDENT_ARCHIVE_FILENAME} $WORKING_DIR
-cp ${THESIS_ROOT_DIR}/data/${STUDENT_NETWORK_ARCHIVE_FILENAME} $WORKING_DIR
-cp ${THESIS_ROOT_DIR}/code/build/src/${BINARY_NAME} $WORKING_DIR
+
+cp ${DATA_DIR}/${COURSE_ARCHIVE_FILENAME} $WORKING_DIR
+cp ${DATA_DIR}/${STUDENT_ARCHIVE_FILENAME} $WORKING_DIR
+cp ${DATA_DIR}/${STUDENT_NETWORK_ARCHIVE_FILENAME} $WORKING_DIR
+cp ${BINARY_DIR}/${BINARY_NAME} $WORKING_DIR
 
 cd $WORKING_DIR
 ./${BINARY_NAME} --threads=1 \
@@ -34,7 +37,7 @@ cd $WORKING_DIR
 	--network_to_load=student
 
 # copy any output data out
-cp -R output/ ${OUTPUT_DIR}/generated${PBS_JOBID}
+cp -R output/ ${DATA_DIR}/generated${PBS_JOBID}
 
 # remove the directory
 rm -rf $WORKING_DIR

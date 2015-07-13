@@ -9,7 +9,9 @@ import argparse
 import csv
 import sys
 
+from course_container_wrapper import CourseContainerWrapper
 import readable_directory
+from student_container_wrapper import StudentContainerWrapper
 
 
 if __name__ == '__main__':
@@ -22,26 +24,21 @@ if __name__ == '__main__':
     parser.add_argument('--swig-module-path', dest='swig_module_path', 
         help='Directory containing the swig modules.',
         action=readable_directory.ReadableDirectory, required=True)
-
     
     args = parser.parse_args()
 
     # import the course_container and student_container modules
-    sys.path.append(args.swig_module_path)
-    import course_container
-    import student_container
-
-    students = student_container.StudentContainer_LoadFromArchive(
-            args.student_archive_path)
-    courses = course_container.CourseContainer_LoadFromArchive(
-            args.course_archive_path)
-    students.UpdateCourses(courses)
+    students_wrapper = StudentContainerWrapper(
+            args.swig_module_path, args.student_archive_path)
+    courses_wrapper = CourseContainerWrapper(
+            args.swig_module_path, args.course_archive_path)
+    students_wrapper.load_courses(courses_wrapper.courses)
 
     # read integer IDs of the students for which to print information
     while True:
         try:
             student_id = int(input('Enter student ID:'))
-            s = students.Find(student_id)
+            s = students_wrapper.students.Find(student_id)
             print(s.GetDescription())
         except ValueError:
             print('Please enter a valid integer!')

@@ -17,6 +17,7 @@ class StudentContainerWrapper:
     """
 
     SEGMENTERS = {
+        'all': lambda s: 'all',
         'gender': lambda s: s.GetGenderDescription(),
         'ethnicity': lambda s: s.GetEthnicityDescription(),
         'major1': lambda s: s.GetMajor1Description(),

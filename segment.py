@@ -12,6 +12,7 @@ import sys
 from course_container_wrapper import CourseContainerWrapper
 import readable_directory
 from student_container_wrapper import StudentContainerWrapper
+import vertex_analysis
 
 
 def get_segment_counts(students, field):
@@ -38,30 +39,6 @@ def get_segment_counts(students, field):
     return segment_counts
 
 
-def reduce_segment_to_in_out(segments, in_segment):
-    """Reduces segment categories to an "in" category and an "out" category.
-
-        Args:
-            segments (string => num): Current dict of segments.
-            in_segment (string): The in segment to maintain.
-
-        Returns:
-            string => num with keys in_segment and "out" and corresponding
-                weights
-    """
-    reduced_segments = {
-        in_segment: segments[in_segment],
-        'out': 0
-    }
-
-    for segment, weight in segments.items():
-        if segment == in_segment:
-            continue
-        reduced_segments['out'] += weight
-
-    return reduced_segments
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Segment input student IDs.')
     parser.add_argument('-d', '--delimiter', help='Delimiter by which to '
@@ -86,12 +63,13 @@ if __name__ == '__main__':
             args.swig_module_path, args.course_archive_path)
     students_wrapper.load_courses(courses_wrapper.courses)
 
-    # segment IDs (use the first field in the line as the ID)
+    # segment students
     segmenter = StudentContainerWrapper.SEGMENTERS[args.field]
-    writer = csv.writer(sys.stdout, delimiter=args.delimiter)
-    for line in csv.reader(args.file, delimiter=args.delimiter):
-        # replace the student ID with the segment value
-        student_id = int(line[0])
-        line[0] = students_wrapper.segment_student(student_id, segmenter)
-        writer.writerow(line) 
+    vertex_lines = vertex_analysis.parse_vertex_file(args.file) 
+    segment_mapped_lines = vertex_analysis.map_to_segments(
+            vertex_lines, segmenter, students_wrapper)
 
+    # write out the segmented students
+    writer = csv.writer(sys.stdout, delimiter=args.delimiter)
+    for segment, value in segment_mapped_lines:
+        writer.writerow([segment, value]) 

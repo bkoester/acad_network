@@ -33,11 +33,23 @@ def parse_vertex_file(vertex_file):
         yield tuple(row)
 
 
+def sum_values(vertex_file_lines):
+    """Sums all the values given the lines of the file.
+
+    Args:
+        vertex_file_lines (iterable): (<anything>, value) pairs
+      
+    Returns:
+        Sum of all the values of the lines.
+    """
+    return sum([float(vertex_line[1]) for vertex_line in vertex_file_lines])
+
+
 def map_to_segments(vertex_file_lines, segmenter, students_wrapper):
     """Maps student IDs to segments.
 
         Args:
-            vertex_file_lines (list): ID, value pairs
+            vertex_file_lines (iterable): (ID, value) pairs
             segmenter (function): Takes a student ID and maps it to a segment.
             students_wrapper (StudentContainerWrapper): Students container.
 

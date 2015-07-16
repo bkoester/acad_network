@@ -32,6 +32,22 @@ class VertexAnalysisTest(unittest.TestCase):
         actual2 = list(vertex_analysis.parse_vertex_file(test1))
         self.assertEqual(actual2, expected2)
 
+    def sum_values(self):
+        test1 = [('1', '0.2'), ('2', '0.2'), ('3', '0.3')]
+        expected1 = 0.7
+        actual1 = vertex_analysis.sum_values(test1)
+        self.assertAlmostEqual(actual1, expected1)
+
+        test2 = []
+        expected2 = 0.0
+        actual2 = vertex_analysis.sum_values(test1)
+        self.assertAlmostEqual(actual2, expected2)
+
+        test3 = [('1', '0.2')]
+        expected3 = 0.2
+        actual3 = vertex_analysis.sum_values(test1)
+        self.assertAlmostEqual(actual3, expected3)
+
     def test_map_to_segments(self):
         segmenter = None
 

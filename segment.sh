@@ -13,6 +13,6 @@ if [[ $# -lt 1 ]]; then
 fi
 
 
-python3 $SEGMENT_BINARY --student-archive-path="${STUDENT_ARCHIVE_PATH}" \
+python3 "${SEGMENT_BINARY}" --student-archive-path="${STUDENT_ARCHIVE_PATH}" \
 	--course-archive-path="${COURSE_ARCHIVE_PATH}" \
 	--swig-module-path="${SWIG_MODULE_PATH}" "$@"

@@ -1,4 +1,13 @@
-"""Utility to segment students."""
+"""Utility to segment students.
+
+Expects input as a file in the form:
+
+vertex1\tvalue
+vertex2\tvalue
+...
+
+where vertexn a student ID
+"""
 
 
 __author__ = "karepker@umich.edu Kar Epker"

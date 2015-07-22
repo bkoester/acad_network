@@ -37,7 +37,7 @@ if __name__ == '__main__':
     # read integer IDs of the students for which to print information
     while True:
         try:
-            student_id = int(input('Enter student ID:'))
+            student_id = int(input('Enter student ID: '))
             s = students_wrapper.students.Find(student_id)
             print(s.GetDescription())
         except ValueError:

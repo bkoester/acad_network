@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <iterator>
+#include <set>
 #include <sstream>
 
 #include "gtest/gtest.h"
@@ -14,6 +15,7 @@
 using std::begin;
 using std::plus;
 using std::stringstream;
+using std::set;
 
 
 class ReduceNetworkTest : public ::testing::Test {
@@ -46,7 +48,7 @@ class ReduceNetworkTest : public ::testing::Test {
 
 		network = StudentNetwork{graph};
 
-		students.Insert({
+		students.insert({
 			Student{147195, Student::Gender::Male, Student::Ethnicity::Unknown,
 				0, 0, false, ""},
 			Student{312995, Student::Gender::Female, Student::Ethnicity::Unknown,
@@ -61,18 +63,19 @@ class ReduceNetworkTest : public ::testing::Test {
 	}
 
  protected:
-	StudentContainer students;
+	set<Student> students;
 	StudentNetwork network;
 };
+
 
 TEST_F(ReduceNetworkTest, ReduceNework) {
 	auto weighted_gender_network = ReduceNetwork(network,
 			[this](const Student::Id& id)
-			{ return students.Find(id).gender(); },
+			{ return students.find(Student{id})->gender(); },
 			plus<double>{}, 0.);
 	auto unweighted_gender_network = ReduceNetwork(network,
 			[this](const Student::Id& id)
-			{ return students.Find(id).gender(); },
+			{ return students.find(Student{id})->gender(); },
 			[](double, int old_value) { return 1 + old_value; }, 0);
 
 	// find the vertices for weighted network

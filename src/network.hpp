@@ -1,7 +1,6 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#include <unordered_map>
 #include <iostream>
 #include <iterator>
 #include <map>
@@ -89,10 +88,14 @@ class Network {
 
 	// more complex algorithms
 	// Returns the number of steps to get from start to any other vertex.
+	// If a vertex is disconnected, its distance is returned as 0.
 	std::map<Vertex, int> FindUnweightedDistances(vertex_t start) const;
 	// Returns the weighted distance to get from start to any other vertex.
 	// Uses bundled edge property as weight.
+	// If a vertex is disconnected, its distance is returned as 0.
 	std::map<Vertex, Edge> FindWeightedDistances(vertex_t start) const;
+	// Calculates brandes betweeness centrality of vertices.
+	std::map<Vertex, int> CalculateBrandesBetweennessCentrality() const;
 
 	void Save(std::ostream& output_graph_archive) const;
 	void Load(std::istream& input_graph_archive);
@@ -417,10 +420,12 @@ std::map<Vertex, Edge> Network<Vertex, Edge>::FindWeightedDistances(
 
 	std::map<Vertex, Edge> value_distances;
 	// distances indices are vertex descriptors, so no std algorithm here
-	for (auto vertex_descriptor = 0u; vertex_descriptor < distances.size(); 
+	for (auto vertex_descriptor = 0u; vertex_descriptor < distances.size();
 			++vertex_descriptor) {
-		value_distances[operator[](vertex_descriptor)] = 
-			distances[vertex_descriptor];
+		auto distance = distances[vertex_descriptor];
+		// test if distance is maximum (change to zero)
+		if (std::numeric_limits<Edge>::max() - distance == 0) { distance = 0; }
+		value_distances[operator[](vertex_descriptor)] = distance;
 	}
 
 	return value_distances;

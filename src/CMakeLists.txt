@@ -15,7 +15,6 @@ set(BUILD_SRCS
 set(BUILD_MAIN_SRC build_main.cpp)
 
 set(LOAD_SRCS
-	student_segmentation.cpp
 	)
 
 set(LOAD_MAIN_SRC load_main.cpp)
@@ -40,7 +39,6 @@ set(BUILD_UNITTEST_SRCS
 
 set(LOAD_UNITTEST_SRCS
 	reduce_network_test.cpp
-	student_segmentation_test.cpp
 	)
 
 set(SERIALIZE_UNITTEST_SRCS
@@ -56,13 +54,11 @@ set(SWIG_SRCS
 set(STUDENTS_COURSES_LIBRARY "students_courses")
 set(BUILD_BINARY "build")
 set(LOAD_BINARY "load")
-set(SEGMENT_BINARY "segment")
 set(SERIALIZE_BINARY "serialize")
 set(STUDENTS_COURSES_UNITTEST_BINARY "students_courses_unittest")
 set(STUDENTS_COURSES_UNITTEST_LIBRARY "students_courses_unittest_objects")
 set(BUILD_UNITTEST_BINARY "build_unittest")
 set(LOAD_UNITTEST_BINARY "load_unittest")
-set(SEGMENT_UNITTEST_BINARY "segment_unittest")
 set(SERIALIZE_UNITTEST_BINARY "serialize_unittest")
 
 include_directories(

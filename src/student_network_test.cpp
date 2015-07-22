@@ -50,10 +50,21 @@ class StudentNetworkTest : public ::testing::Test {
 		 add_edge(student3, student5, 1.5, graph);
 
 		 network = StudentNetwork{graph};
+
+		// try with a disconnected graph
+		StudentNetwork::graph_t disconnected_graph{2};
+
+		// add vertices
+		auto disconnected_student1 = vertex(0, disconnected_graph);
+		disconnected_graph[disconnected_student1] = Student::Id{1};
+		auto disconnected_student2 = vertex(1, disconnected_graph);
+		disconnected_graph[disconnected_student2] = Student::Id{2};
+
+		disconnected_network = StudentNetwork{disconnected_graph};
 	 }
 
  protected:
-	StudentNetwork network;
+	StudentNetwork network, disconnected_network;
 };
 
 
@@ -85,8 +96,8 @@ TEST_F(StudentNetworkTest, GetVertexDescriptor) {
 
 
 TEST_F(StudentNetworkTest, FindUnweightedDistance) {
-	auto distances = network.FindUnweightedDistances(network.GetVertexDescriptor(
-				Student::Id(312995)));
+	auto distances = network.FindUnweightedDistances(
+			network.GetVertexDescriptor(Student::Id(312995)));
 
 	EXPECT_EQ(5u, distances.size());
 	EXPECT_EQ(0, distances[Student::Id(312995)]);
@@ -94,6 +105,13 @@ TEST_F(StudentNetworkTest, FindUnweightedDistance) {
 	EXPECT_EQ(1, distances[Student::Id(147195)]);
 	EXPECT_EQ(1, distances[Student::Id(352468)]);
 	EXPECT_EQ(2, distances[Student::Id(567890)]);
+
+	auto disconnected_distances = disconnected_network.FindUnweightedDistances(
+			disconnected_network.GetVertexDescriptor(Student::Id(1)));
+
+	EXPECT_EQ(2u, disconnected_distances.size());
+	EXPECT_EQ(0, disconnected_distances[Student::Id(1)]);
+	EXPECT_EQ(0, disconnected_distances[Student::Id(2)]);
 }
 
 
@@ -107,4 +125,12 @@ TEST_F(StudentNetworkTest, FindWeightedDistance) {
 	EXPECT_DOUBLE_EQ(3., distances[Student::Id(147195)]);
 	EXPECT_DOUBLE_EQ(1., distances[Student::Id(352468)]);
 	EXPECT_DOUBLE_EQ(2.5, distances[Student::Id(567890)]);
+
+	auto disconnected_distances = disconnected_network.FindWeightedDistances(
+			disconnected_network.GetVertexDescriptor(Student::Id(1)));
+
+	EXPECT_EQ(2u, disconnected_distances.size());
+	EXPECT_DOUBLE_EQ(0., disconnected_distances[Student::Id(1)]);
+	EXPECT_DOUBLE_EQ(0., disconnected_distances[Student::Id(2)]);
+
 }

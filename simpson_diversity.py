@@ -48,12 +48,12 @@ if __name__ == '__main__':
     segmenter = StudentContainerWrapper.SEGMENTERS[args.segmenter]
 
     for vertex_file in args.files:
-        vertex_lines = vertex_analysis.parse_vertex_file(vertex_file)
+        vertex_lines = vertex_analysis.get_id_values(vertex_file)
 
         segmented_lines = list(vertex_analysis.map_to_segments(
                 vertex_lines, segmenter, students_wrapper))
         total_connections = len(segmented_lines)
-        values_sum = vertex_analysis.sum_values(segmented_lines)
+        values_sum = vertex_analysis.accumulate(segmented_lines, sum)
         segments = vertex_analysis.reduce_to_segments(segmented_lines)
 
         # calculate the diversity of the segments

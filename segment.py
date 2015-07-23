@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
     # segment students
     segmenter = StudentContainerWrapper.SEGMENTERS[args.field]
-    vertex_lines = vertex_analysis.parse_vertex_file(args.file) 
+    vertex_lines = vertex_analysis.get_id_values(args.file) 
     segment_mapped_lines = vertex_analysis.map_to_segments(
             vertex_lines, segmenter, students_wrapper)
 

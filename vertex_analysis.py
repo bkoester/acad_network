@@ -3,9 +3,21 @@
 
 I.e. data output in a file format such as:
 
-vertex1\tvalue
-vertex2\tvalue
+student_id_1\tvalue_11[\tvalue_12\t...\tvalue_1n]
+student_id_2\tvalue_21[\tvalue_22\t...\tvalue_2n]
 ...
+
+The terminology "values" is used often throughout this file. Values always
+refers to the fields marked values as given above. Values can be processed in a
+few different ways. They can either be combined into a list `get_id_value_list`,
+or presented as a tuple `get_id_values` flat with the student ID.
+
+It might be useful to combine values into a list if there are many values, while
+if there are just a few, then presenting them flat with the tuple may make more
+sense.
+
+Essentially, this module allows processes to operate on id => values like a
+key-value store.
 """
 
 
@@ -15,11 +27,71 @@ __copyright__ = "Kar Epker, 2015"
 
 import collections
 import csv
+
 import numpy
 
 
-def parse_vertex_file(vertex_file):
-    """Reads the data file into an iterable.
+def _are_values_flat(values):
+    """Tests whether values are stored flat with the student_id.
+
+    Args:
+        values (list): List of values to test.
+
+    Returns:
+        Boolean if values are stored as flat.
+    """
+    return len(values) > 0 and not isinstance(values[0], list)
+
+
+def _are_values_listed(values):
+    """Tests whether values are stored as a list.
+
+    Args:
+        values (list): List of values to test.
+
+    Returns:
+        Boolean if values are stored as flat.
+    """
+    return len(values) == 1 and isinstance(values[0], list)
+
+def _iterate_over_all_values(vertex_file_lines):
+    """Iterates over all values in the set of lines.
+
+    Args:
+        vertex_file_lines (iterable): (id, *values) tuples.
+
+    Yields:
+        One value at a time.
+    """
+    for _, *values in vertex_file_lines:
+        if _are_values_listed(values):
+            for value in values[0]:
+                yield value
+        elif _are_values_flat(values):
+            for value in values:
+                yield value
+        else:
+            raise ValueError('Values are of unknown type (should be either flat' 
+                             ' with the student ID or in a list.')
+
+
+def get_id_values(vertex_file):
+    """Reads the data file into an iterable of (id, *values)
+
+    Args:
+        vertex_file (file-like object): The file to parse in the format given
+            above.
+
+    Yields:
+        Tuple of (id, *values).
+    """
+    csv_reader = csv.reader(vertex_file, delimiter='\t')
+    for student_id, *values in csv_reader:
+        yield tuple([int(student_id)] + [float(value) for value in values])
+
+
+def get_id_value_list(vertex_file):
+    """Reads the data file into an iterable of (id, [values])
 
     Args:
         vertex_file (file-like object): The file to parse in the format given
@@ -29,20 +101,44 @@ def parse_vertex_file(vertex_file):
         One line of the file at a time.
     """
     csv_reader = csv.reader(vertex_file, delimiter='\t')
-    for row in csv_reader:
-        yield tuple(row)
+    for student_id, *values in csv_reader:
+        yield int(student_id), [float(value) for value in values]
 
 
-def sum_values(vertex_file_lines):
-    """Sums all the values given the lines of the file.
+def accumulate(vertex_file_lines, func):
+    """Performs a function 
 
     Args:
-        vertex_file_lines (iterable): (<anything>, value) pairs
+        vertex_file_lines (iterable): (id, *values) tuples.
+        func (function): A function that takes a list.
       
     Returns:
-        Sum of all the values of the lines.
+        func applied to all values.
     """
-    return sum([float(vertex_line[1]) for vertex_line in vertex_file_lines])
+    return func(_iterate_over_all_values(vertex_file_lines))
+    
+
+def accumulate_lines(vertex_file_lines, func):
+    """Applies a given function to all the values in the line.
+
+    Essentially, this is a glorified version of python's built-in map function 
+    operating on each set of values.
+
+    Args:
+        vertex_file_lines (iterable): (id, *values) tuples .
+        func (function): A function that takes a list.
+
+    Yields:
+        func(values) for each line.
+    """
+    for student_id, *values in vertex_file_lines:
+        if _are_values_listed(values):
+            yield student_id, func(values[0]) 
+        elif _are_values_flat(values):
+            yield student_id, func(values) 
+        else:
+            raise ValueError('Values are of unknown type (should be either flat' 
+                             ' with the student ID or in a list.')
 
 
 def map_to_segments(vertex_file_lines, segmenter, students_wrapper):
@@ -56,10 +152,9 @@ def map_to_segments(vertex_file_lines, segmenter, students_wrapper):
         Yields:
             A line at a time containing segment, value
     """
-
-    for student_id_str, value in vertex_file_lines:
-        student_id = int(student_id_str)
-        yield students_wrapper.segment_student(student_id, segmenter), value
+    for student_id, *values in vertex_file_lines:
+        yield tuple([students_wrapper.segment_student(student_id, segmenter)] + 
+                    values)
 
 
 def reduce_to_segments(segmented_data):

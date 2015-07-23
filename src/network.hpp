@@ -10,6 +10,7 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/graph/adjacency_matrix.hpp>
+#include <boost/graph/betweenness_centrality.hpp>
 #include <boost/graph/breadth_first_search.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/graph/visitors.hpp>
@@ -86,16 +87,18 @@ class Network {
 	Edge& operator()(const Vertex& source, const Vertex& target, Edge init);
 	Edge& operator()(const Vertex& source, const Vertex& target);
 
-	// more complex algorithms
+	// More complex algorithms:
 	// Returns the number of steps to get from start to any other vertex.
 	// If a vertex is disconnected, its distance is returned as 0.
 	std::map<Vertex, int> FindUnweightedDistances(vertex_t start) const;
+
 	// Returns the weighted distance to get from start to any other vertex.
 	// Uses bundled edge property as weight.
 	// If a vertex is disconnected, its distance is returned as 0.
 	std::map<Vertex, Edge> FindWeightedDistances(vertex_t start) const;
-	// Calculates brandes betweeness centrality of vertices.
-	std::map<Vertex, int> CalculateBrandesBetweennessCentrality() const;
+
+	// Calculates betweeness centrality of vertices.
+	std::map<Vertex, double> CalculateUnweightedBetweennessCentrality() const;
 
 	void Save(std::ostream& output_graph_archive) const;
 	void Load(std::istream& input_graph_archive);
@@ -395,16 +398,15 @@ std::map<Vertex, int> Network<Vertex, Edge>::FindUnweightedDistances(
 							get(boost::vertex_index, graph_)),
 						boost::on_tree_edge()))));
 
-	// return with the actual bundled vertex property, the descriptor is useless
-	std::map<Vertex, int> value_distances;
-	// distances indices are vertex descriptors, so no std algorithm here
+	// Descriptors are useless. Remap descriptors to bundled Vertex property.
+	std::map<Vertex, int> output;
 	for (auto vertex_descriptor = 0u; vertex_descriptor < distances.size(); 
 			++vertex_descriptor) {
-		value_distances[operator[](vertex_descriptor)] = 
+		output[operator[](vertex_descriptor)] = 
 			distances[vertex_descriptor];
 	}
 
-	return value_distances;
+	return output;
 }
 
 template <typename Vertex, typename Edge>
@@ -413,23 +415,47 @@ std::map<Vertex, Edge> Network<Vertex, Edge>::FindWeightedDistances(
 	std::vector<Edge> distances(GetVertexValues().size(), 0);
 	// perform a BFS on the vertex
 	boost::dijkstra_shortest_paths(graph_, start, 
-			boost::weight_map(boost::get(boost::edge_bundle, graph_)).
+			weight_map(boost::get(boost::edge_bundle, graph_)).
 			distance_map(boost::make_iterator_property_map(
 					std::begin(distances),
 					get(boost::vertex_index, graph_))));
 
-	std::map<Vertex, Edge> value_distances;
-	// distances indices are vertex descriptors, so no std algorithm here
+	// Descriptors are useless. Remap descriptors to bundled Vertex property.
+	std::map<Vertex, Edge> output;
 	for (auto vertex_descriptor = 0u; vertex_descriptor < distances.size();
 			++vertex_descriptor) {
 		auto distance = distances[vertex_descriptor];
 		// test if distance is maximum (change to zero)
 		if (std::numeric_limits<Edge>::max() - distance == 0) { distance = 0; }
-		value_distances[operator[](vertex_descriptor)] = distance;
+		output[operator[](vertex_descriptor)] = distance;
 	}
 
-	return value_distances;
+	return output;
+}
 
+
+template <typename Vertex, typename Edge>
+std::map<Vertex, double>
+Network<Vertex, Edge>::CalculateUnweightedBetweennessCentrality() const {
+	// centrality will always be a double regardless of Edge type
+	std::vector<double> centralities(GetVertexValues().size());
+
+	// run the algorithm
+	boost::brandes_betweenness_centrality(
+			graph_,
+			centrality_map(boost::make_iterator_property_map(
+					std::begin(centralities), 
+					get(boost::vertex_index, graph_))));
+
+	// Descriptors are useless. Remap descriptors to bundled Vertex property.
+	std::map<Vertex, double> output;
+	for (auto vertex_descriptor = 0u; vertex_descriptor < centralities.size();
+			++vertex_descriptor) {
+		auto centrality = centralities[vertex_descriptor];
+		output[operator[](vertex_descriptor)] = centrality;
+	}
+
+	return output;
 }
 
 

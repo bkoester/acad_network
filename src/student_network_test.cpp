@@ -23,33 +23,33 @@ using boost::vertex;
 
 class StudentNetworkTest : public ::testing::Test {
  public:
-	 void SetUp() override {
-		 StudentNetwork::graph_t graph{5};
+	void SetUp() override {
+		StudentNetwork::graph_t graph{5};
 
-		 // add vertices
-		 auto student1 = vertex(0, graph);
-		 graph[student1] = Student::Id{147195};
- 		 auto student2 = vertex(1, graph);
-		 graph[student2] = Student::Id{312995};
- 		 auto student3 = vertex(2, graph);
-		 graph[student3] = Student::Id{352468};
- 		 auto student4 = vertex(3, graph);
-		 graph[student4] = Student::Id{500928};
- 		 auto student5 = vertex(4, graph);
-		 graph[student5] = Student::Id{567890};
+		// add vertices
+		auto student1 = vertex(0, graph);
+		graph[student1] = Student::Id{147195};
+		auto student2 = vertex(1, graph);
+		graph[student2] = Student::Id{312995};
+		auto student3 = vertex(2, graph);
+		graph[student3] = Student::Id{352468};
+		auto student4 = vertex(3, graph);
+		graph[student4] = Student::Id{500928};
+		auto student5 = vertex(4, graph);
+		graph[student5] = Student::Id{567890};
 
-		 // add edges
-		 add_edge(student1, student2, 3.0, graph);
-		 add_edge(student1, student3, 3.0, graph);
-		 add_edge(student1, student4, 1.0, graph);
+		// add edges
+		add_edge(student1, student2, 3.0, graph);
+		add_edge(student1, student3, 3.0, graph);
+		add_edge(student1, student4, 1.0, graph);
 
-		 add_edge(student2, student3, 1.0, graph);
-		 add_edge(student2, student4, 3.0, graph);
+		add_edge(student2, student3, 1.0, graph);
+		add_edge(student2, student4, 3.0, graph);
 
-		 add_edge(student3, student4, 1.0, graph);
-		 add_edge(student3, student5, 1.5, graph);
+		add_edge(student3, student4, 1.0, graph);
+		add_edge(student3, student5, 1.5, graph);
 
-		 network = StudentNetwork{graph};
+		network = StudentNetwork{graph};
 
 		// try with a disconnected graph
 		StudentNetwork::graph_t disconnected_graph{2};
@@ -61,7 +61,7 @@ class StudentNetworkTest : public ::testing::Test {
 		disconnected_graph[disconnected_student2] = Student::Id{2};
 
 		disconnected_network = StudentNetwork{disconnected_graph};
-	 }
+	}
 
  protected:
 	StudentNetwork network, disconnected_network;
@@ -132,5 +132,52 @@ TEST_F(StudentNetworkTest, FindWeightedDistance) {
 	EXPECT_EQ(2u, disconnected_distances.size());
 	EXPECT_DOUBLE_EQ(0., disconnected_distances[Student::Id(1)]);
 	EXPECT_DOUBLE_EQ(0., disconnected_distances[Student::Id(2)]);
+}
 
+TEST_F(StudentNetworkTest, CalculateUnweightedBetweennessCentrality) {
+	auto centralities = network.CalculateUnweightedBetweennessCentrality();
+
+	EXPECT_EQ(5u, centralities.size());
+	EXPECT_DOUBLE_EQ(0., centralities[Student::Id(147195)]);
+	EXPECT_DOUBLE_EQ(0., centralities[Student::Id(312995)]);
+	EXPECT_DOUBLE_EQ(3., centralities[Student::Id(352468)]);
+	EXPECT_DOUBLE_EQ(0., centralities[Student::Id(500928)]);
+	EXPECT_DOUBLE_EQ(0., centralities[Student::Id(567890)]);
+
+	auto disconnected_centralities =
+		disconnected_network.CalculateUnweightedBetweennessCentrality();
+
+	EXPECT_EQ(2u, disconnected_centralities.size());
+	EXPECT_DOUBLE_EQ(0., disconnected_centralities[Student::Id(1)]);
+	EXPECT_DOUBLE_EQ(0., disconnected_centralities[Student::Id(2)]);
+
+	// Build network shaped like a diamond split into two triangles.
+	StudentNetwork::graph_t diamond_graph{4};
+
+	auto student1 = vertex(0, diamond_graph);
+	diamond_graph[student1] = Student::Id{1};
+	auto student2 = vertex(1, diamond_graph);
+	diamond_graph[student2] = Student::Id{2};
+	auto student3 = vertex(2, diamond_graph);
+	diamond_graph[student3] = Student::Id{3};
+	auto student4 = vertex(3, diamond_graph);
+	diamond_graph[student4] = Student::Id{4};
+	
+	// add edges
+	add_edge(student1, student2, 1.0, diamond_graph);
+	add_edge(student2, student3, 1.0, diamond_graph);
+	add_edge(student2, student4, 1.0, diamond_graph);
+	add_edge(student3, student4, 1.0, diamond_graph);
+	add_edge(student4, student1, 1.0, diamond_graph);
+
+	auto diamond_network = StudentNetwork{diamond_graph};
+
+	auto centralities2 = 
+		diamond_network.CalculateUnweightedBetweennessCentrality();
+
+	EXPECT_EQ(4u, centralities2.size());
+	EXPECT_DOUBLE_EQ(0., centralities2[Student::Id(1)]);
+	EXPECT_DOUBLE_EQ(0.5, centralities2[Student::Id(2)]);
+	EXPECT_DOUBLE_EQ(0., centralities2[Student::Id(3)]);
+	EXPECT_DOUBLE_EQ(0.5, centralities2[Student::Id(4)]);
 }

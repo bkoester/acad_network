@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -8,6 +7,7 @@
 #include <utility>
 #include <vector>
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/program_options.hpp>
 
 #include "course_container.hpp"
@@ -16,34 +16,40 @@
 #include "reduce_network.hpp"
 #include "student_container.hpp"
 #include "student_network.hpp"
-#include "student_segmentation.hpp"
 #include "utility.hpp"
 
 
-using std::copy_if; using std::for_each;
+using std::copy_if; using std::for_each; using std::transform;
 using std::begin; using std::end; using std::back_inserter;
 using std::cerr; using std::cin; using std::cout; using std::endl;
 using std::ifstream; using std::ofstream; 
-using std::ostream_iterator;
 using std::pair;
 using std::string; using std::to_string;
 using std::unique_ptr;
 using std::vector;
+
 namespace po = boost::program_options;
-namespace chr = std::chrono;
+using boost::algorithm::join;
 
 
-
-//static void GetWeightedAndUnweightedSummations(const StudentNetwork& network);
+/*
+static void GetWeightedAndUnweightedSummations(const StudentNetwork& network);
 
 static void PrintIndividualStudentNetwork(const StudentNetwork& network, 
 		StudentNetwork::vertex_t student_d, const string& file_name);
+*/
+
+template <typename FilterFunc>
+static void PrintWeightedDistances(const StudentNetwork& network, 
+									 const string& filename,
+									 FilterFunc filter);
+
+template <typename FilterFunc>
+static void PrintUnweightedDistances(const StudentNetwork& network,
+									   const string& filename,
+									   FilterFunc filter);
 
 /*
-static void ComputeWeightedDistances(const StudentNetwork& network);
-static void ComputeUnweightedDistances(const StudentNetwork& network);
-							   */
-
 static void ReduceStudentNetwork(const StudentNetwork& network,
 								 const StudentContainer& students,
 								 const CourseContainer& courses);
@@ -53,6 +59,7 @@ static void MakeReducedNetwork(const StudentNetwork& network, string segment,
 							   string weightedness, SegmentFunc segment_func, 
 							   AccumulateFunc accumulate_func, 
 							   Init init);
+*/
 
 
 int main(int argc, char* argv[]) {
@@ -125,8 +132,50 @@ int main(int argc, char* argv[]) {
 		ifstream student_network_archive{student_network_archive_path};
 		StudentNetwork student_network{student_network_archive};
 	
-		//ComputeWeightedDistances(student_network);
-		//ComputeUnweightedDistances(student_network);
+		PrintWeightedDistances(
+				student_network, 
+				"musical_theatre_weighted_distances.tsv",
+				[&students](Student::Id id) 
+				{ return students.Find(id).GetMajor1Description() == 
+				"Musical Theatre."; });
+
+		PrintUnweightedDistances(
+				student_network, 
+				"musical_theatre_unweighted_distances.tsv",
+				[&students](Student::Id id) 
+				{ return students.Find(id).GetMajor1Description() == 
+				"Musical Theatre."; });
+
+		PrintWeightedDistances(
+				student_network, 
+				"general_studies_weighted_distances.tsv",
+				[&students](Student::Id id) 
+				{ return students.Find(id).GetMajor1Description() == 
+				"General Studies"; });
+
+
+		PrintUnweightedDistances(
+				student_network, 
+				"general_studies_unweighted_distances.tsv",
+				[&students](Student::Id id) 
+				{ return students.Find(id).GetMajor1Description() == 
+				"General Studies"; });
+
+		PrintWeightedDistances(
+				student_network, 
+				"philosophy_weighted_distances.tsv",
+				[&students](Student::Id id) 
+				{ return students.Find(id).GetMajor1Description() == 
+				"Philosophy"; });
+
+		PrintUnweightedDistances(
+				student_network, 
+				"philosophy_unweighted_distances.tsv",
+				[&students](Student::Id id) 
+				{ return students.Find(id).GetMajor1Description() == 
+				"Philosophy"; });
+
+		/*
 		ReduceStudentNetwork(student_network, students, courses);
 		
 		vector<Student> musical_theater;
@@ -171,6 +220,7 @@ int main(int argc, char* argv[]) {
 							student_network.GetVertexDescriptor(student.id()),
 							"output/individual_" + to_string(student.id()) + 
 								".tsv"); });
+		*/
 	}
 
 	return 0;
@@ -203,57 +253,65 @@ void PrintIndividualStudentNetwork(const StudentNetwork& network,
 }
 
 
-/*
-void ComputeWeightedDistances(const StudentNetwork& network) {
-	ofstream dijkstra_file{"output/stats_dijkstra.tsv"};
-	auto beginning_time = chr::system_clock::now();
-	int num_students{0};
+// Gets dijkstra shortest path for a set of vertices to every other (connected)
+// vertex on the graph and writes it to stats_dijkstra.tsv. Applies a filter to
+// determine if it should compute for the given student.
+// FilterFunc should be a function that accepts a student ID and returns a
+// boolean value for whether shortest paths should be found for that student.
+template <typename FilterFunc>
+void PrintWeightedDistances(const StudentNetwork& network, 
+							const string& filename, 
+							FilterFunc filter) {
+	ofstream dijkstra_file{filename};
 	for (auto vertex_d : network.GetVertexDescriptors()) {
-		dijkstra_file << network[vertex_d] << "\t";
+		auto student_id = network[vertex_d];
+
+		// Determine whether or not we should process this student.
+		if (!filter(student_id)) { continue; }
+
+		dijkstra_file << student_id << "\t";
 
 		// weighted distance stats
 		auto weighted_distances = network.FindWeightedDistances(vertex_d);
-		ostream_iterator<double> dijkstra_it{dijkstra_file, " "};
-		transform(begin(weighted_distances), end(weighted_distances), 
-				dijkstra_it, [](pair<Student::Id, double> elt)
-				{ return elt.second; });
-		dijkstra_file << endl;
 
-		// output timing information
-		if (++num_students % 10 == 0) {
-			cerr << num_students << "\t" << chr::duration_cast<chr::seconds>(
-				chr::system_clock::now() - beginning_time).count() << endl;
-		}
-		if (num_students > 500) { break; }
+		// get the second member of the pair
+		auto distance_values = vector<string>{};
+		transform(begin(weighted_distances), end(weighted_distances),
+				back_inserter(distance_values), 
+				[](pair<Student::Id, double> elt)
+				{ return to_string(elt.second); });
+		dijkstra_file << join(distance_values, "\t") << endl;
 	}
 }
 
 
-void ComputeUnweightedDistances(const StudentNetwork& network) {
-	ofstream bfs_file{"output/stats_bfs.tsv"};
-	auto beginning_time = chr::system_clock::now();
-	int num_students{0};
+template <typename FilterFunc>
+void PrintUnweightedDistances(const StudentNetwork& network, 
+							  const string& filename,
+							  FilterFunc filter) {
+	ofstream bfs_file{filename};
 	for (auto vertex_d : network.GetVertexDescriptors()) {
+		auto student_id = network[vertex_d];
+
+		// Determine whether or not we should process this student.
+		if (!filter(student_id)) { continue; }
+
 		bfs_file << network[vertex_d] << "\t";
 
 		// unweighted distance stats
 		auto unweighted_distances = network.FindUnweightedDistances(vertex_d);
-		ostream_iterator<int> bfs_it{bfs_file, " "};
-		transform(begin(unweighted_distances), end(unweighted_distances), 
-				bfs_it, [](pair<Student::Id, int> elt)
-				{ return elt.second; });
-		bfs_file << endl;
-		
-		// output timing information
-		if (++num_students % 10 == 0) {
-			cerr << num_students << "\t" << chr::duration_cast<chr::seconds>(
-				chr::system_clock::now() - beginning_time).count() << endl;
-		}
-		if (num_students > 500) { break; }
+
+		// get the second member of the pair
+		auto distance_values = vector<string>{};
+		transform(begin(unweighted_distances), end(unweighted_distances),
+				back_inserter(distance_values),
+				[](pair<Student::Id, double> elt)
+				{ return to_string(elt.second); });
+		bfs_file << join(distance_values, "\t") << endl;
 	}
 }
-*/
 
+/*
 // reduces network to see the interaction between various segments
 void ReduceStudentNetwork(const StudentNetwork& network,
 						  const StudentContainer& students,
@@ -303,4 +361,4 @@ void MakeReducedNetwork(const StudentNetwork& network, string segment,
 	output << segment << "1" << '\t' << segment << "2" << '\t' << "count" 
 		   << endl;
 	reduced_network.SaveEdgewise(output);
-}
+} */

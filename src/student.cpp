@@ -16,9 +16,8 @@
 
 
 using std::begin; using std::end;
-using std::cout; using std::endl;
 using std::copy; using std::transform; using std::remove;
-using std::ostream; using std::istream; using std::endl;
+using std::ostream; using std::istream;
 using std::ostringstream; 
 using std::ostream_iterator; using std::inserter;
 using std::string; using std::stoi;
@@ -211,7 +210,6 @@ ostream& operator<<(ostream& os, const Student& student) {
 				  ostream_iterator<Course::Id>{os, ", "},
 				  [](const Course* course) { return course->GetId(); });
 		os << (*student.courses_taken_.rbegin())->GetId();
-		os << endl;
 	}
 	return os;
 }

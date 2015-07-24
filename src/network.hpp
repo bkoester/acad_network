@@ -1,6 +1,8 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+#include <cmath>
+
 #include <iostream>
 #include <iterator>
 #include <map>
@@ -89,12 +91,14 @@ class Network {
 
 	// More complex algorithms:
 	// Returns the number of steps to get from start to any other vertex.
-	// If a vertex is disconnected, its distance is returned as 0.
+	// Disconnected vertices are filtered out of the output (i.e. a key for them
+	// does not exist in the map)
 	std::map<Vertex, int> FindUnweightedDistances(vertex_t start) const;
 
 	// Returns the weighted distance to get from start to any other vertex.
 	// Uses bundled edge property as weight.
-	// If a vertex is disconnected, its distance is returned as 0.
+	// Disconnected vertices are filtered out of the output (i.e. a key for them
+	// does not exist in the map)
 	std::map<Vertex, Edge> FindWeightedDistances(vertex_t start) const;
 
 	// Calculates betweeness centrality of vertices.
@@ -402,8 +406,12 @@ std::map<Vertex, int> Network<Vertex, Edge>::FindUnweightedDistances(
 	std::map<Vertex, int> output;
 	for (auto vertex_descriptor = 0u; vertex_descriptor < distances.size(); 
 			++vertex_descriptor) {
-		output[operator[](vertex_descriptor)] = 
-			distances[vertex_descriptor];
+		auto distance = distances[vertex_descriptor];
+
+		// Filter out disconnected vertices and the start vertex.
+		if (distance == 0) { continue; }
+
+		output[operator[](vertex_descriptor)] = distance;
 	}
 
 	return output;
@@ -425,8 +433,13 @@ std::map<Vertex, Edge> Network<Vertex, Edge>::FindWeightedDistances(
 	for (auto vertex_descriptor = 0u; vertex_descriptor < distances.size();
 			++vertex_descriptor) {
 		auto distance = distances[vertex_descriptor];
-		// test if distance is maximum (change to zero)
-		if (std::numeric_limits<Edge>::max() - distance == 0) { distance = 0; }
+
+		// Filter out disconnected vertices.
+		if (std::round(std::numeric_limits<Edge>::max() - distance) == 0.)
+		{ continue; }
+		// Filter out the start vertex.
+		if (start == vertex_descriptor) { continue; }
+
 		output[operator[](vertex_descriptor)] = distance;
 	}
 

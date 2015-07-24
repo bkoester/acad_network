@@ -99,19 +99,16 @@ TEST_F(StudentNetworkTest, FindUnweightedDistance) {
 	auto distances = network.FindUnweightedDistances(
 			network.GetVertexDescriptor(Student::Id(312995)));
 
-	EXPECT_EQ(5u, distances.size());
-	EXPECT_EQ(0, distances[Student::Id(312995)]);
-	EXPECT_EQ(1, distances[Student::Id(500928)]);
-	EXPECT_EQ(1, distances[Student::Id(147195)]);
-	EXPECT_EQ(1, distances[Student::Id(352468)]);
-	EXPECT_EQ(2, distances[Student::Id(567890)]);
+	EXPECT_EQ(4u, distances.size());
+	EXPECT_EQ(1, distances.at(Student::Id(500928)));
+	EXPECT_EQ(1, distances.at(Student::Id(147195)));
+	EXPECT_EQ(1, distances.at(Student::Id(352468)));
+	EXPECT_EQ(2, distances.at(Student::Id(567890)));
 
 	auto disconnected_distances = disconnected_network.FindUnweightedDistances(
 			disconnected_network.GetVertexDescriptor(Student::Id(1)));
 
-	EXPECT_EQ(2u, disconnected_distances.size());
-	EXPECT_EQ(0, disconnected_distances[Student::Id(1)]);
-	EXPECT_EQ(0, disconnected_distances[Student::Id(2)]);
+	EXPECT_EQ(0u, disconnected_distances.size());
 }
 
 
@@ -119,37 +116,34 @@ TEST_F(StudentNetworkTest, FindWeightedDistance) {
 	auto distances = network.FindWeightedDistances(network.GetVertexDescriptor(
 				Student::Id(312995)));
 
-	EXPECT_EQ(5u, distances.size());
-	EXPECT_DOUBLE_EQ(0., distances[Student::Id(312995)]);
-	EXPECT_DOUBLE_EQ(2., distances[Student::Id(500928)]);
-	EXPECT_DOUBLE_EQ(3., distances[Student::Id(147195)]);
-	EXPECT_DOUBLE_EQ(1., distances[Student::Id(352468)]);
-	EXPECT_DOUBLE_EQ(2.5, distances[Student::Id(567890)]);
+	EXPECT_EQ(4u, distances.size());
+	EXPECT_DOUBLE_EQ(2., distances.at(Student::Id(500928)));
+	EXPECT_DOUBLE_EQ(3., distances.at(Student::Id(147195)));
+	EXPECT_DOUBLE_EQ(1., distances.at(Student::Id(352468)));
+	EXPECT_DOUBLE_EQ(2.5, distances.at(Student::Id(567890)));
 
 	auto disconnected_distances = disconnected_network.FindWeightedDistances(
 			disconnected_network.GetVertexDescriptor(Student::Id(1)));
 
-	EXPECT_EQ(2u, disconnected_distances.size());
-	EXPECT_DOUBLE_EQ(0., disconnected_distances[Student::Id(1)]);
-	EXPECT_DOUBLE_EQ(0., disconnected_distances[Student::Id(2)]);
+	EXPECT_EQ(0u, disconnected_distances.size());
 }
 
 TEST_F(StudentNetworkTest, CalculateUnweightedBetweennessCentrality) {
 	auto centralities = network.CalculateUnweightedBetweennessCentrality();
 
 	EXPECT_EQ(5u, centralities.size());
-	EXPECT_DOUBLE_EQ(0., centralities[Student::Id(147195)]);
-	EXPECT_DOUBLE_EQ(0., centralities[Student::Id(312995)]);
-	EXPECT_DOUBLE_EQ(3., centralities[Student::Id(352468)]);
-	EXPECT_DOUBLE_EQ(0., centralities[Student::Id(500928)]);
-	EXPECT_DOUBLE_EQ(0., centralities[Student::Id(567890)]);
+	EXPECT_DOUBLE_EQ(0., centralities.at(Student::Id(147195)));
+	EXPECT_DOUBLE_EQ(0., centralities.at(Student::Id(312995)));
+	EXPECT_DOUBLE_EQ(3., centralities.at(Student::Id(352468)));
+	EXPECT_DOUBLE_EQ(0., centralities.at(Student::Id(500928)));
+	EXPECT_DOUBLE_EQ(0., centralities.at(Student::Id(567890)));
 
 	auto disconnected_centralities =
 		disconnected_network.CalculateUnweightedBetweennessCentrality();
 
 	EXPECT_EQ(2u, disconnected_centralities.size());
-	EXPECT_DOUBLE_EQ(0., disconnected_centralities[Student::Id(1)]);
-	EXPECT_DOUBLE_EQ(0., disconnected_centralities[Student::Id(2)]);
+	EXPECT_DOUBLE_EQ(0., disconnected_centralities.at(Student::Id(1)));
+	EXPECT_DOUBLE_EQ(0., disconnected_centralities.at(Student::Id(2)));
 
 	// Build network shaped like a diamond split into two triangles.
 	StudentNetwork::graph_t diamond_graph{4};
@@ -176,8 +170,8 @@ TEST_F(StudentNetworkTest, CalculateUnweightedBetweennessCentrality) {
 		diamond_network.CalculateUnweightedBetweennessCentrality();
 
 	EXPECT_EQ(4u, centralities2.size());
-	EXPECT_DOUBLE_EQ(0., centralities2[Student::Id(1)]);
-	EXPECT_DOUBLE_EQ(0.5, centralities2[Student::Id(2)]);
-	EXPECT_DOUBLE_EQ(0., centralities2[Student::Id(3)]);
-	EXPECT_DOUBLE_EQ(0.5, centralities2[Student::Id(4)]);
+	EXPECT_DOUBLE_EQ(0., centralities2.at(Student::Id(1)));
+	EXPECT_DOUBLE_EQ(0.5, centralities2.at(Student::Id(2)));
+	EXPECT_DOUBLE_EQ(0., centralities2.at(Student::Id(3)));
+	EXPECT_DOUBLE_EQ(0.5, centralities2.at(Student::Id(4)));
 }

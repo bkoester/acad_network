@@ -17,7 +17,7 @@ import csv
 
 
 def parse_edge_file(edge_file):
-    """Reads vertex pairs and their associated values into a dict.
+    """Reads vertex pairs and their associated values into tuples.
 
     Args:
         edge_file (file-like object): File containing edges
@@ -29,8 +29,8 @@ def parse_edge_file(edge_file):
 
     # loop through all the edges
     first_line = True
-    for vertex1, vertex2, value in csv_reader:
-        yield vertex1, vertex2, value
+    for row in csv_reader:
+        yield tuple(row)
         
 
 def get_vertex_total_weight(edge_lines, vertex):

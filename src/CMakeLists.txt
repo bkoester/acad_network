@@ -17,7 +17,12 @@ set(BUILD_MAIN_SRC build_main.cpp)
 set(LOAD_SRCS
 	)
 
-set(LOAD_MAIN_SRC load_main.cpp)
+SET(LOAD_MAIN_SRCS 
+	network_processing/degree_summation.cpp
+	network_processing/individual_distances.cpp
+	network_processing/individual_network.cpp
+	network_processing/reduce_network.cpp
+	)
 
 set(SERIALIZE_MAIN_SRC serialize_main.cpp)
 
@@ -53,7 +58,6 @@ set(SWIG_SRCS
 
 set(STUDENTS_COURSES_LIBRARY "students_courses")
 set(BUILD_BINARY "build")
-set(LOAD_BINARY "load")
 set(SERIALIZE_BINARY "serialize")
 set(STUDENTS_COURSES_UNITTEST_BINARY "students_courses_unittest")
 set(STUDENTS_COURSES_UNITTEST_LIBRARY "students_courses_unittest_objects")
@@ -113,10 +117,6 @@ add_executable(${BUILD_BINARY}
 	${BUILD_MAIN_SRC}
 	${BUILD_SRCS})
 
-add_executable(${LOAD_BINARY}
-	${LOAD_MAIN_SRC}
-	${LOAD_SRCS})
-
 add_executable(${SERIALIZE_BINARY}
 	${SERIALIZE_MAIN_SRC}
 	${SERIALIZE_SRCS})
@@ -131,9 +131,17 @@ set(BINARY_LINK_LIBRARIES
 target_link_libraries(${STUDENTS_COURSES_LIBRARY} 
     ${Boost_LIBRARIES})
 target_link_libraries(${BUILD_BINARY} ${BINARY_LINK_LIBRARIES})
-target_link_libraries(${LOAD_BINARY} ${BINARY_LINK_LIBRARIES})
 target_link_libraries(${SERIALIZE_BINARY} ${BINARY_LINK_LIBRARIES})
 
+# make a separate binary for every file in the network_processing directory
+foreach (load_main_src ${LOAD_MAIN_SRCS})
+	get_filename_component(load_binary_name ${load_main_src} NAME_WE)
+	add_executable(${load_binary_name} 
+		${load_main_src}
+		${LOAD_SRCS}
+		)
+	target_link_libraries(${load_binary_name} ${BINARY_LINK_LIBRARIES})
+endforeach(load_main_src)
 
 # if we choose to build unit tests, add rules for building unittest executable
 if (unit_tests)

@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
 
 	auto weighted_func = [](double edge, double current_edge) 
 				{ return edge + current_edge; };
-	auto unweighted_func = [](double edge, int current_edge) 
+	auto unweighted_func = [](double, int current_edge) 
 				{ return 1 + current_edge; };
 
 	// major

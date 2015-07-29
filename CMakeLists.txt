@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.10)  # for compiler version
+cmake_minimum_required(VERSION 3.0.0)  # for CMAKE_CXX_COMPILER_ID
 project (thesis)
 
 # set some locations
@@ -45,13 +45,34 @@ if (CMAKE_COMPILER_IS_GNUCC)
 		set(CXXSTD "-std=c++14")
 	endif()
 	
-    set(COMMON_FLAGS "-Wall -Werror -pedantic-errors ${CXXSTD}")
-    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${COMMON_FLAGS})
-    set(CMAKE_CXX_FLAGS_RELEASE 
-        "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
-    set(CMAKE_CXX_FLAGS_DEBUG 
-        "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS} -g -O0")
-    set(SWIG_COMPILE_FLAGS "-fPIC")
+	# -Wno-missing-field-initializers for swig
+	set(COMMON_FLAGS "-Wno-missing-field-initializers \
+		-Wall -Wextra -Werror -pedantic-errors ${CXXSTD}")
+    set(CMAKE_CXX_FLAGS ${COMMON_FLAGS})
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g -O0")
+	set(SWIG_COMPILE_FLAGS "-fPIC -Wno-missing-field-initializers")
+
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+	# AppleClang versions mapped to vanilla clang versions using:
+	# https://gist.github.com/yamaya/2924292
+	if (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 5.1)
+		message(FATAL_ERROR 
+            "Cannot use clang version ${CMAKE_CXX_COMPILER_VERSION} < 3.3!")
+	elseif (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 6.0)
+		set(CXXSTD "-std=c++11")
+	else ()
+		set(CXXSTD "-std=c++14")
+	endif()
+
+	# -Wno-missing-field-initializers for swig
+	set(COMMON_FLAGS "-Wno-missing-field-initializers \
+		-Wall -Wextra -Werror -pedantic-errors ${CXXSTD} -stdlib=libc++")
+    set(CMAKE_CXX_FLAGS ${COMMON_FLAGS})
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g -O0")
+	set(SWIG_COMPILE_FLAGS "-fPIC")
+
 endif()
 
 

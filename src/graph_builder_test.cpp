@@ -7,12 +7,17 @@
 #include "course.hpp"
 #include "network_structure_test.hpp"
 #include "student.hpp"
-#include "student_container.hpp"
+#include "student_container_mock.hpp"
 #include "student_network.hpp"
 #include "test_data_streams.hpp"
 
 
 using std::stringstream;
+
+using ::testing::AtLeast;
+using ::testing::Const;
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 
 TEST(GraphBuilderTest, BuildStudentNetworkFromStudents) { 
@@ -35,7 +40,19 @@ TEST(GraphBuilderTest, BuildStudentNetworkFromStudents) {
 	Student student5{567890};
 	student5.AddCourseTaken(&course6);
 	// put them in a container
-	StudentContainer students;
+	MockStudentContainer students;
+	EXPECT_CALL(Const(students), Find(147195)).Times(AtLeast(1)).WillRepeatedly(
+			ReturnRef(student1));
+	EXPECT_CALL(Const(students), Find(312995)).Times(AtLeast(1)).WillRepeatedly(
+			ReturnRef(student2));
+	EXPECT_CALL(Const(students), Find(352468)).Times(AtLeast(1)).WillRepeatedly(
+			ReturnRef(student3));
+	EXPECT_CALL(Const(students), Find(500928)).Times(AtLeast(1)).WillRepeatedly(
+			ReturnRef(student4));
+	EXPECT_CALL(Const(students), Find(567890)).Times(AtLeast(1)).WillRepeatedly(
+			ReturnRef(student5));
+	ON_CALL(students, size()).WillByDefault(Return(5));
+
 	students.Insert({student1, student2, student3, student4, student5});
 
 	course1.AddStudentEnrolled(student1.id());

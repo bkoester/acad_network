@@ -47,7 +47,6 @@ ostream& operator<<(ostream& output, const Course::Id& course_id) {
 
 ostream& operator<<(ostream& output, const Course& course) {
 	output << course.subject() << " " << course.number() << " " << course.term();
-	assert(course.GetNumStudentsEnrolled() >= 0);	
 	if (course.GetNumStudentsEnrolled() == 0) { return output; }
 	output << " ";
 	copy(begin(course.students_enrolled()), 

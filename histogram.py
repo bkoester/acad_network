@@ -1,4 +1,4 @@
-"""Plots the degree distribution of students given a file."""
+"""Simply puts given numbers into a graph."""
 
 
 __author__ = "karepker@umich.edu Kar Epker"
@@ -6,112 +6,51 @@ __copyright__ = "Kar Epker, 2015"
 
 
 import argparse
-import csv
-import matplotlib.pyplot
-import numpy
-import operator
 import sys
 
-import data_processing
-
-
-def sort_legend(subfig):
-    """Sorts the labels in the legend.
-
-    Args:
-        subfig (subfigure object): The subfigure object whose axis to sort.
-
-    Returns:
-        A sorted list of handles and labels.
-    """
-    orig_handles, orig_labels = subfig.get_legend_handles_labels()
-    return zip(*sorted(zip(orig_handles, orig_labels), 
-                       key=operator.itemgetter(1)))
-
-
-def create_histogram(subfig, segments, **kwargs):
-    """Creates a histogram with the correct format for the given subfigure.
-
-    Args:
-        subfig (subfigure object): The subfigure object for which to create a
-            histogram.
-        segments (dict(string => numpy.arrray(float))): The segments to plot on 
-            the histogram.
-        kwargs (dict): Other arguments to give to the histogram creation.
-
-    Returns:
-        A sorted list of handles and labels.
-    """
-    histtype = 'step' if len(segments.keys()) > 1 else 'bar'
-    cm = matplotlib.pyplot.get_cmap('gist_rainbow')
-    sorted_segments = sorted(segments.items(), key=lambda x: x[0])
-    subfig.hist([data for key, data in sorted_segments],
-            args.bins, histtype=histtype,
-            color=[cm(1. * i / len(segments.keys())) for i in
-            range(len(segments.keys()))], 
-            label=[''.join([key, r', $n = ', str(len(data)), r'$'])  
-                for key, data in sorted_segments], **kwargs)
+import matplotlib.pyplot
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Analyze data dealing with'
-        'networks.')
-    parser.add_argument('weightedness', 
-        help='Either "weighted" or "unweighted"')
-    parser.add_argument('-b', '--bins', type=int, default=500,
-        help='Number of bins to use with histogram.')
-    parser.add_argument('--no-segment', dest='segment', action='store_false', 
-            help='Turn off data segmenting the data or not.')
-    parser.add_argument('--no-unnormalized', dest='unnormalized', 
-            action='store_false', help='Don\'t show the unnormalized histogram.')
-    parser.add_argument('--threshold', type=int, default=500,
+    parser = argparse.ArgumentParser(
+            description='Put data into histogram with basic configuration.')
+    parser.add_argument(
+            'file', nargs='?', type=argparse.FileType('r'),
+            default=sys.stdin, help='File to segment (default standard input).')
+    parser.add_argument(
+            '-b', '--bins', type=int, default=500,
+            help='Number of bins to use with histogram.')
+    parser.add_argument(
+            '--threshold', type=int, default=0,
             help='Filter segments with fewer than this many data points.')
-    parser.set_defaults(segment=True)
+    parser.add_argument(
+            '-x', '--x-axis', dest='x_axis', help='Label of the x-axis.')
+    parser.add_argument(
+            '-y', '--y-axis', dest='y_axis', help='Label of the y-axis.')
+    parser.add_argument(
+            '-t', '--title', dest='title', help='Title of the graph.')
 
     args = parser.parse_args()
 
-    if args.weightedness not in ['weighted', 'unweighted']:
-        raise ValueError('Weightedness "%s" not known!' % args.weightedness)
+    data = []
+    for line in args.file:
+        data.append(float(line))
 
-    # segment the data filter out small segments
-    segments = data_processing.segment_data(sys.stdin, args.segment)
-    filtered_segments = {segment: values for segment, values in segments.items()
-            if values.size >= args.threshold}
-    
-    # set up the histogram for various colors
-    size = (12, 8) if args.segment and args.unnormalized else (12, 4)
-    fig = matplotlib.pyplot.figure(figsize=size)
-    #fig.subplots_adjust(hspace=0.4)
+    fig = matplotlib.pyplot.figure(figsize=(12, 4))
+    subfig = fig.add_subplot(1, 1, 1)
+    subfig.hist(
+            data, args.bins, histtype='bar', color='red',
+            label=['$n = {}$'.format(len(data))])
 
-    # Create the non-normalized histogram.
-    if args.unnormalized:
-        if args.segment:
-            ax1 = fig.add_subplot(2, 1, 1)
-        else:
-            ax1 = fig.add_subplot(1, 1, 1)
-        create_histogram(ax1, filtered_segments)
-        ax1.set_xlabel(' '.join([args.weightedness.title(), 'degree']))
-        ax1.set_ylabel('Frequency')
-        ax1.set_title(
-                ' '.join([args.weightedness.title(), 'degree distribution']))
-        handles, labels = sort_legend(ax1)
+    if args.x_axis:
+        subfig.set_xlabel(args.x_axis)
+    if args.y_axis:
+        subfig.set_ylabel(args.y_axis)
+    if args.title:
+        subfig.set_title(args.title)
 
-    # create the normalized histogram if there is segmentation
-    if args.segment:
-        if args.unnormalized:
-            ax2 = fig.add_subplot(2, 1, 2)
-        else:
-            ax2 = fig.add_subplot(1, 1, 1)
-        create_histogram(ax2, filtered_segments, normed=True)
-        ax2.set_xlabel(' '.join([args.weightedness.title(), 'degree']))
-        ax2.set_ylabel('Normalized frequency')
-        ax2.set_title(' '.join(['Normalized', args.weightedness.lower(), 
-                                'degree distribution']))
-
-        handles, labels = sort_legend(ax2)
-
-    # create the legend
-    matplotlib.pyplot.figlegend(handles, labels, loc='right')
+    handles, labels = subfig.get_legend_handles_labels()
+    matplotlib.pyplot.figlegend(handles, labels, loc='lower left')
 
     matplotlib.pyplot.tight_layout()
     matplotlib.pyplot.show()

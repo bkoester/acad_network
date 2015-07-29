@@ -7,6 +7,12 @@ student_id_1\tvalue_11[\tvalue_12\t...\tvalue_1n]
 student_id_2\tvalue_21[\tvalue_22\t...\tvalue_2n]
 ...
 
+Will also accept (if student IDs aren't appropriate):
+
+name_1\tvalue_11[\tvalue_12\t...\tvalue_1n]
+name_2\tvalue_21[\tvalue_22\t...\tvalue_2n]
+...
+
 The terminology "values" is used often throughout this file. Values always
 refers to the fields marked values as given above. Values can be processed in a
 few different ways. They can either be combined into a list `get_id_value_list`,
@@ -71,8 +77,23 @@ def _iterate_over_all_values(vertex_file_lines):
             for value in values:
                 yield value
         else:
-            raise ValueError('Values are of unknown type (should be either flat' 
+            raise ValueError('Values are of unknown type (should be either flat'
                              ' with the student ID or in a list.')
+
+
+def get_name_values(vertex_file):
+    """Reads the data file into an iterable of (name, *values)
+
+    Args:
+        vertex_file (file-like object): The file to parse in the format given
+            above.
+
+    Yields:
+        Tuple of (name, *values).
+    """
+    csv_reader = csv.reader(vertex_file, delimiter='\t')
+    for name, *values in csv_reader:
+        yield tuple([name] + [float(value) for value in values])
 
 
 def get_id_values(vertex_file):
@@ -106,22 +127,22 @@ def get_id_value_list(vertex_file):
 
 
 def accumulate(vertex_file_lines, func):
-    """Performs a function 
+    """Performs a function
 
     Args:
         vertex_file_lines (iterable): (id, *values) tuples.
         func (function): A function that takes a list.
-      
+
     Returns:
         func applied to all values.
     """
     return func(_iterate_over_all_values(vertex_file_lines))
-    
+
 
 def accumulate_lines(vertex_file_lines, func):
     """Applies a given function to all the values in the line.
 
-    Essentially, this is a glorified version of python's built-in map function 
+    Essentially, this is a glorified version of python's built-in map function
     operating on each set of values.
 
     Args:
@@ -133,11 +154,11 @@ def accumulate_lines(vertex_file_lines, func):
     """
     for student_id, *values in vertex_file_lines:
         if _are_values_listed(values):
-            yield student_id, func(values[0]) 
+            yield student_id, func(values[0])
         elif _are_values_flat(values):
-            yield student_id, func(values) 
+            yield student_id, func(values)
         else:
-            raise ValueError('Values are of unknown type (should be either flat' 
+            raise ValueError('Values are of unknown type (should be either flat'
                              ' with the student ID or in a list.')
 
 
@@ -153,7 +174,7 @@ def map_to_segments(vertex_file_lines, segmenter, students_wrapper):
             A line at a time containing segment, value
     """
     for student_id, *values in vertex_file_lines:
-        yield tuple([students_wrapper.segment_student(student_id, segmenter)] + 
+        yield tuple([students_wrapper.segment_student(student_id, segmenter)] +
                     values)
 
 
@@ -188,7 +209,7 @@ def reduce_to_all(segmented_data):
     for _, value in segmented_data:
         values = numpy.append(values, float(value))
 
-    return { 'all': values }
+    return {'all': values}
 
 def reduce_to_in_out(segmented_data, in_segment):
     """Reduces data into "in" segment and "out" segment
@@ -210,7 +231,6 @@ def reduce_to_in_out(segmented_data, in_segment):
         else:
             out_segment_values = numpy.append(out_segment_values, float(value))
 
-    return { 
-        in_segment: in_segment_values,
-        ' '.join(['not', in_segment]): out_segment_values,
-    }
+    return {in_segment: in_segment_values,
+            ' '.join(['not', in_segment]): out_segment_values,
+           }

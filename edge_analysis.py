@@ -14,9 +14,12 @@ __copyright__ = "Kar Epker, 2015"
 
 
 import csv
+import collections
+
+import numpy
 
 
-def parse_edge_file(edge_file):
+def get_vertices_values(edge_file):
     """Reads vertex pairs and their associated values into tuples.
 
     Args:
@@ -28,10 +31,9 @@ def parse_edge_file(edge_file):
     csv_reader = csv.reader(edge_file, delimiter='\t')
 
     # loop through all the edges
-    first_line = True
-    for row in csv_reader:
-        yield tuple(row)
-        
+    for vertex1, vertex2, value in csv_reader:
+        yield vertex1, vertex2, float(value)
+
 
 def get_vertex_total_weight(edge_lines, vertex):
     """Gets the total edge weight outgoing from any vertex.
@@ -45,7 +47,24 @@ def get_vertex_total_weight(edge_lines, vertex):
     total_weight = 0
     for vertex1, vertex2, value in edge_lines:
         if vertex1 == vertex or vertex2 == vertex:
-            total_weight += float(value)
+            total_weight += value
 
     return total_weight
 
+def reduce_to_vertices(edge_lines):
+    """Collects all values associated with each vertex.
+
+    Args:
+        edge_lines (iterable): Tuples in the form vertex_1\tvertex_2\tvalue
+
+    Returns:
+        Dict of vertex => numpy array of values associated with vertex
+    """
+    vertex_values = collections.defaultdict(lambda: numpy.ndarray(0))
+
+    for vertex1, vertex2, value in edge_lines:
+        vertex_values[vertex1] = numpy.append(vertex_values[vertex1], value)
+        if vertex1 != vertex2:
+            vertex_values[vertex2] = numpy.append(vertex_values[vertex2], value)
+
+    return vertex_values

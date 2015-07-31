@@ -36,7 +36,7 @@ class Course {
 		}
 
 		bool operator==(const Id& other) const
-		{ return subject == other.subject && 
+		{ return subject == other.subject &&
 			number == other.number && term == other.term; }
 
 		bool operator!=(const Id& other) const { return !(*this == other); }
@@ -44,7 +44,7 @@ class Course {
 		struct Hasher {
 			int operator()(const Course::Id& course) const {
 				return std::hash<std::string>()(course.subject) ^
-					std::hash<short>()(course.number) ^ 
+					std::hash<short>()(course.number) ^
 					std::hash<int>()(course.term);
 			}
 		};
@@ -53,7 +53,7 @@ class Course {
 	struct Hasher {
 		int operator()(const Course& course) const {
 			return std::hash<std::string>()(course.subject()) ^
-				std::hash<short>()(course.number()) ^ 
+				std::hash<short>()(course.number()) ^
 				std::hash<int>()(course.term());
 		}
 	};
@@ -67,7 +67,7 @@ class Course {
 		subject_{subject}, number_{number}, term_{term}, num_credits_{0} {}
 
 	Course(std::string subject, short number, int term, double num_credits) :
-		subject_{subject}, number_{number}, term_{term}, 
+		subject_{subject}, number_{number}, term_{term},
 		num_credits_{num_credits} {}
 
 
@@ -77,8 +77,8 @@ class Course {
 	double num_credits() const { return num_credits_; }
 
 	bool operator==(const Course& other) const {
-		return other.subject_ == subject_ && other.number_ == number_ && 
-			other.term_ == term_; 
+		return other.subject_ == subject_ && other.number_ == number_ &&
+			other.term_ == term_;
 	}
 
 	bool operator!=(const Course& other) const { return !(*this == other); }
@@ -112,7 +112,7 @@ class Course {
 	friend class CourseTest;
 	friend class boost::serialization::access;
 	// ID class
-	friend class Course::Id;
+	friend struct Course::Id;
 	// read input from student course tab
 	friend std::istream& operator>>(std::istream& input, Course& course);
 
@@ -133,7 +133,7 @@ std::ostream& operator<<(std::ostream& output, const Course::Id& course_id);
 
 
 struct CourseComparator {
-	bool operator()(const std::unique_ptr<Course>& course1, 
+	bool operator()(const std::unique_ptr<Course>& course1,
 					const std::unique_ptr<Course>& course2) const {
 		return *course1 < *course2;
 	}

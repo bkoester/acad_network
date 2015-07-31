@@ -17,7 +17,7 @@ set(BUILD_MAIN_SRC build_main.cpp)
 set(LOAD_SRCS
 	)
 
-SET(LOAD_MAIN_SRCS 
+SET(LOAD_MAIN_SRCS
 	network_processing/degree_summation.cpp
 	network_processing/individual_distances.cpp
 	network_processing/individual_network.cpp
@@ -65,27 +65,23 @@ set(BUILD_UNITTEST_BINARY "build_unittest")
 set(LOAD_UNITTEST_BINARY "load_unittest")
 set(SERIALIZE_UNITTEST_BINARY "serialize_unittest")
 
-include_directories(
-	${CMAKE_CURRENT_SOURCE_DIR}
-	${Boost_INCLUDE_DIRS}
-	)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 if (swig_hooks)
-	include_directories(
-		${PYTHON_INCLUDE_PATH}
-	)
+	include_directories(SYSTEM ${PYTHON_INCLUDE_PATH})
 
 	set(CMAKE_SWIG_FLAGS "")
 
-	set_source_files_properties(${SWIG_SRCS} PROPERTIES 
+	set_source_files_properties(${SWIG_SRCS} PROPERTIES
 		CPLUSPLUS ON)
 
-	set(SWIG_MODULE_student_container_EXTRA_DEPS 
+	set(SWIG_MODULE_student_container_EXTRA_DEPS
 		student.i
 		student_container.hpp
 		)
 
-	set(SWIG_MODULE_course_container_EXTRA_DEPS 
+	set(SWIG_MODULE_course_container_EXTRA_DEPS
 		course.i
 		course_container.hpp
 		)
@@ -96,8 +92,8 @@ if (swig_hooks)
 	swig_add_module(course_container python course_container.i)
 
 
-	set(STUDENT_COURSES_SWIG_LINK_LIBRARIES 
-		${PYTHON_LIBRARIES} 
+	set(STUDENT_COURSES_SWIG_LINK_LIBRARIES
+		${PYTHON_LIBRARIES}
 		${STUDENTS_COURSES_LIBRARY}
 		)
 
@@ -121,22 +117,22 @@ add_executable(${SERIALIZE_BINARY}
 	${SERIALIZE_MAIN_SRC}
 	${SERIALIZE_SRCS})
 
-
 set(BINARY_LINK_LIBRARIES
     ${Boost_LIBRARIES}
     ${STUDENTS_COURSES_LIBRARY}
 	${CMAKE_THREAD_LIBS_INIT}
     )
 
-target_link_libraries(${STUDENTS_COURSES_LIBRARY} 
-    ${Boost_LIBRARIES})
+target_link_libraries(${STUDENTS_COURSES_LIBRARY}
+    ${Boost_LIBRARIES}
+	)
 target_link_libraries(${BUILD_BINARY} ${BINARY_LINK_LIBRARIES})
 target_link_libraries(${SERIALIZE_BINARY} ${BINARY_LINK_LIBRARIES})
 
 # make a separate binary for every file in the network_processing directory
 foreach (load_main_src ${LOAD_MAIN_SRCS})
 	get_filename_component(load_binary_name ${load_main_src} NAME_WE)
-	add_executable(${load_binary_name} 
+	add_executable(${load_binary_name}
 		${load_main_src}
 		${LOAD_SRCS}
 		)

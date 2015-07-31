@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <numeric>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -14,11 +15,11 @@
 #include "course.hpp"
 #include "utility.hpp"
 
-
+using std::accumulate;
 using std::begin; using std::end;
 using std::copy; using std::transform; using std::remove;
 using std::ostream; using std::istream;
-using std::ostringstream; 
+using std::ostringstream;
 using std::ostream_iterator; using std::inserter;
 using std::string; using std::stoi;
 using std::unordered_map;
@@ -138,8 +139,8 @@ const unordered_map<double, string> major_code_map{
 };
 
 
-void Student::AddCoursesTaken(std::initializer_list<const Course*> courses) { 
-	copy(begin(courses), end(courses), 
+void Student::AddCoursesTaken(std::initializer_list<const Course*> courses) {
+	copy(begin(courses), end(courses),
 			inserter(courses_taken_, end(courses_taken_)));
 }
 

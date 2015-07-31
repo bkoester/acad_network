@@ -33,7 +33,7 @@ class StudentContainerTest : public ::testing::Test {
 		stringstream student_stream{student_tab};
 		students = StudentContainer::LoadFromTsv(student_stream);
 	}
-	
+
  protected:
 	StudentContainer students;
 	Student::Id unused_id1, unused_id2, unused_id3;
@@ -43,7 +43,7 @@ class StudentContainerTest : public ::testing::Test {
 TEST_F(StudentContainerTest, Find) {
 	EXPECT_EQ(5u, students.size());
 
-	EXPECT_EQ(Student{147195}, students.Find(147195));  
+	EXPECT_EQ(Student{147195}, students.Find(147195));
 	EXPECT_EQ(Student{312995}, students.Find(312995));
 	EXPECT_EQ(Student{352468}, students.Find(352468));
 	EXPECT_EQ(Student{500928}, students.Find(500928));
@@ -53,7 +53,7 @@ TEST_F(StudentContainerTest, Find) {
 	EXPECT_THROW(students.Find(unused_id3), StudentNotFound);
 
 	const auto& const_students = StudentContainer{students};
-	EXPECT_EQ(Student{147195}, const_students.Find(147195));  
+	EXPECT_EQ(Student{147195}, const_students.Find(147195));
 	EXPECT_EQ(Student{312995}, const_students.Find(312995));
 	EXPECT_EQ(Student{352468}, const_students.Find(352468));
 	EXPECT_EQ(Student{500928}, const_students.Find(500928));
@@ -68,7 +68,7 @@ TEST_F(StudentContainerTest, Insert) {
 	students.Insert(
 			{Student{unused_id1}, Student{unused_id2}, Student{unused_id3}});
 
-	EXPECT_EQ(Student{unused_id1}, students.Find(unused_id1));  
+	EXPECT_EQ(Student{unused_id1}, students.Find(unused_id1));
 	EXPECT_EQ(Student{unused_id2}, students.Find(unused_id2));
 	EXPECT_EQ(Student{unused_id3}, students.Find(unused_id3));
 }
@@ -88,7 +88,7 @@ TEST_F(StudentContainerTest, UpdateCourses) {
 	EXPECT_EQ(end(students), students_it);
 
 	// create courses that students should be enrolled in
-	MockCourseContainer::container_t courses_holder;
+	MockCourseContainer::container_t courses_holder{};
 	courses_holder.push_back(Course{"AAPTIS", short{277}, 201403});
 	courses_holder.push_back(Course{"CHEM", short{210}, 201403});
 	courses_holder.push_back(Course{"CHEM", short{211}, 201407});
@@ -120,7 +120,7 @@ TEST_F(StudentContainerTest, UpdateCourses) {
 	auto& course6 = courses_holder[5];
 
 	// create CourseContainer mock and set call expectations
-	const MockCourseContainer courses;
+	const MockCourseContainer courses{};
 	using ::testing::AtLeast;
 	using ::testing::Return;
 	EXPECT_CALL(courses, begin()).Times(AtLeast(1)).WillRepeatedly(
@@ -172,7 +172,7 @@ TEST_F(StudentContainerTest, UpdateCourses) {
 TEST_F(StudentContainerTest, Serialization) {
 	stringstream student_stream;
 	students.SaveToArchive(student_stream);
-	
+
 	StudentContainer serialized_students{
         StudentContainer::LoadFromArchive(student_stream)};
 

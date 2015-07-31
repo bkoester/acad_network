@@ -8,6 +8,7 @@
 #include <iostream>
 #include <iterator>
 #include <mutex>
+#include <numeric>
 #include <set>
 #include <thread>
 #include <unordered_map>
@@ -81,7 +82,7 @@ CourseNetwork BuildCourseNetworkFromEnrollment(
 	auto student_to_courses = GetStudentIdsToCourses(students);
 
 	// aggregate pairs of courses
-	unordered_map<DistinctUnorderedPair<Course::Id>, 
+	unordered_map<DistinctUnorderedPair<Course::Id>,
 				  int, PairHasher<Course::Id::Hasher>> edge_weights;
 	unordered_set<Course::Id, Course::Id::Hasher> courses;
 	for (const auto& elt : student_to_courses) {
@@ -136,7 +137,7 @@ class StudentNetworkBuilder {
 			assert(student_it != students.end());
 			*vertex_it = student_it->id();
 		}
-		
+
 		it1_ = begin(network_.GetVertexDescriptors());
 		it2_ = begin(network_.GetVertexDescriptors());
 	}
@@ -149,7 +150,7 @@ class StudentNetworkBuilder {
 		// output time information for profiling
 		if (++num_pairs_ % timing_modulus == 0) {
 			cerr << num_pairs_ << " " << chr::duration_cast<chr::seconds>(
-				chr::system_clock::now() - 
+				chr::system_clock::now() -
 				beginning_pairs_time_).count() << endl;
 			cerr << "Mem usage: " << GetMemoryUsage() << endl;
 		}
@@ -162,7 +163,7 @@ class StudentNetworkBuilder {
 		return make_pair(it1_, it2_);
 	}
 
-	void AddEdge(StudentNetwork::vertex_t student1, 
+	void AddEdge(StudentNetwork::vertex_t student1,
 			StudentNetwork::vertex_t student2, double value) {
 		lock_guard<mutex> edge_lock_guard{edges_mutex_};
 		network_(student1, student2) = value;
@@ -190,7 +191,7 @@ StudentNetwork BuildStudentNetworkFromStudents(
 	StudentNetworkBuilder builder{network, students};
 	vector<thread> thread_pool;
 	for (int i{0}; i < num_threads; ++i) {
-		thread_pool.emplace_back(CalculateStudentNetworkEdges, cref(network), 
+		thread_pool.emplace_back(CalculateStudentNetworkEdges, cref(network),
 				cref(students), ref(builder));
 	}
 
@@ -200,11 +201,11 @@ StudentNetwork BuildStudentNetworkFromStudents(
 	return network;
 }
 
-	
+
 void CalculateStudentNetworkEdges(const StudentNetwork& network,
 								  const StudentContainer& students,
 								  StudentNetworkBuilder& builder) {
-	for (auto it_pair = builder.GetNextIteratorPair(); 
+	for (auto it_pair = builder.GetNextIteratorPair();
 			!builder.ReachedEndOfStudents(it_pair.first);
 			it_pair = builder.GetNextIteratorPair()) {
 		if (it_pair.first == it_pair.second) { continue; }
@@ -221,25 +222,25 @@ void CalculateStudentNetworkEdges(const StudentNetwork& network,
 						 back_inserter(courses_in_common));
 
 		// Calculate the connection between the two students.
-		double connection{accumulate(begin(courses_in_common), 
+		double connection{accumulate(begin(courses_in_common),
 				end(courses_in_common), 0.,
-				[](double connection, const Course* course) { 
-					return connection + course->num_credits() / 
+				[](double connection, const Course* course) {
+					return connection + course->num_credits() /
 						double(course->GetNumStudentsEnrolled());
 				})};
 
 		// Add an edge with the appropriate connection value.
 		if (!courses_in_common.empty()) {
-			builder.AddEdge(*it_pair.first, *it_pair.second, connection); 
+			builder.AddEdge(*it_pair.first, *it_pair.second, connection);
 		}
 	}
 }
 
 
 // Gets a hash table of students => set of courses they have taken
-unordered_map<Student::Id, unordered_set<Course::Id, Course::Id::Hasher>> 
+unordered_map<Student::Id, unordered_set<Course::Id, Course::Id::Hasher>>
 GetStudentIdsToCourses(const StudentContainer& students) {
-	unordered_map<Student::Id, unordered_set<Course::Id, Course::Id::Hasher>> 
+	unordered_map<Student::Id, unordered_set<Course::Id, Course::Id::Hasher>>
 		student_to_courses;
 
 	// make a map of student id => courses taken
@@ -248,6 +249,6 @@ GetStudentIdsToCourses(const StudentContainer& students) {
 			student_to_courses[student.id()].insert(course->GetId());
 		}
 	}
-	
+
 	return student_to_courses;
 }

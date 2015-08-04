@@ -11,6 +11,7 @@
 #include "student_container.hpp"
 #include "student_network.hpp"
 #include "utility.hpp"
+#include "weighting_function.hpp"
 
 
 using std::cerr; using std::cin; using std::cout; using std::endl;
@@ -26,7 +27,7 @@ int main(int argc, char* argv[]) {
 	NetworkType_e network_to_build;
 	desc.add_options()
 		("help,h", "Show this help message")
-		("student_archive_path", 
+		("student_archive_path",
 		 po::value<string>(&student_archive_path)->required(),
 		 "Set the path at which to find the student file")
 		("course_archive_path",
@@ -73,8 +74,9 @@ int main(int argc, char* argv[]) {
 		assert(network_to_build == NetworkType_e::Student);
 
 		// build the student network
+		auto weighting_func = WeightingFuncFactory("CreditHoursOverEnrollment");
 		StudentNetwork student_network{
-			BuildStudentNetworkFromStudents(students)};
+			BuildStudentNetworkFromStudents(students, weighting_func)};
 		student_network.Save(cout);
 	}
 

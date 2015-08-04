@@ -10,6 +10,7 @@ set(STUDENTS_COURSES_SRCS
 
 set(BUILD_SRCS
 	graph_builder.cpp
+	weighting_function.cpp
 	)
 
 set(BUILD_MAIN_SRC build_main.cpp)
@@ -40,6 +41,7 @@ set(STUDENTS_COURSES_UNITTEST_SRCS
 
 set(BUILD_UNITTEST_SRCS
 	graph_builder_test.cpp
+	weighting_function_test.cpp
 	)
 
 set(LOAD_UNITTEST_SRCS

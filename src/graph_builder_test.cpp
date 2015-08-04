@@ -5,7 +5,6 @@
 #include "gtest/gtest.h"
 
 #include "course.hpp"
-#include "network_structure_test.hpp"
 #include "student.hpp"
 #include "student_container_mock.hpp"
 #include "student_network.hpp"
@@ -19,8 +18,14 @@ using ::testing::Const;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+using boost::optional;
+using boost::make_optional;
 
-TEST(GraphBuilderTest, BuildStudentNetworkFromStudents) { 
+
+static optional<double> TestWeightingFunc(const Student&, const Student&);
+
+
+TEST(GraphBuilderTest, BuildStudentNetworkFromStudents) {
 	// make the students
 	auto course1 = Course{"ENGLISH", 125, 0, 4};
 	auto course2 = Course{"AAPTIS", 277, 0, 4};
@@ -69,6 +74,89 @@ TEST(GraphBuilderTest, BuildStudentNetworkFromStudents) {
 	course6.AddStudentEnrolled(student3.id());
 	course6.AddStudentEnrolled(student5.id());
 
-	StudentNetwork network{BuildStudentNetworkFromStudents(students)};
-	TestStudentNetworkStructure(network);
+	StudentNetwork network{
+		BuildStudentNetworkFromStudents(students, TestWeightingFunc)};
+
+	StudentNetwork::vertex_t student1_d{
+		network.GetVertexDescriptor(Student::Id{147195})};
+	StudentNetwork::vertex_t student2_d{
+		network.GetVertexDescriptor(Student::Id{312995})};
+	StudentNetwork::vertex_t student3_d{
+		network.GetVertexDescriptor(Student::Id{352468})};
+	StudentNetwork::vertex_t student4_d{
+		network.GetVertexDescriptor(Student::Id{500928})};
+	StudentNetwork::vertex_t student5_d{
+		network.GetVertexDescriptor(Student::Id{567890})};
+
+	EXPECT_THROW(network.Get(student1_d, student1_d), NoEdgeException);
+	EXPECT_DOUBLE_EQ(3.0, network.Get(student1_d, student2_d));
+	EXPECT_DOUBLE_EQ(2.0, network.Get(student1_d, student3_d));
+	EXPECT_DOUBLE_EQ(1.0, network.Get(student1_d, student4_d));
+	EXPECT_THROW(network.Get(student1_d, student5_d), NoEdgeException);
+
+	EXPECT_THROW(network.Get(student2_d, student2_d), NoEdgeException);
+	EXPECT_DOUBLE_EQ(3.0, network.Get(student2_d, student3_d));
+	EXPECT_DOUBLE_EQ(2.0, network.Get(student2_d, student4_d));
+	EXPECT_THROW(network.Get(student2_d, student5_d), NoEdgeException);
+
+	EXPECT_THROW(network.Get(student3_d, student3_d), NoEdgeException);
+	EXPECT_DOUBLE_EQ(3.0, network.Get(student3_d, student4_d));
+	EXPECT_THROW(network.Get(student3_d, student5_d), NoEdgeException);
+
+	EXPECT_THROW(network.Get(student4_d, student4_d), NoEdgeException);
+	EXPECT_THROW(network.Get(student4_d, student5_d), NoEdgeException);
+
+	EXPECT_THROW(network.Get(student5_d, student5_d), NoEdgeException);
+}
+
+
+optional<double> TestWeightingFunc(const Student& student1,
+								   const Student& student2) {
+	if ((student1 == Student{147195} && student2 == Student{147195}) ||
+			(student2 == Student{147195} && student1 == Student{147195})) {
+		return boost::none;
+	} else if ((student1 == Student{147195} && student2 == Student{312995}) ||
+			(student2 == Student{147195} && student1 == Student{312995})) {
+		return make_optional(3.);
+	} else if ((student1 == Student{147195} && student2 == Student{352468}) ||
+			(student2 == Student{147195} && student1 == Student{352468})) {
+		return make_optional(2.);
+	} else if ((student1 == Student{147195} && student2 == Student{500928}) ||
+			(student2 == Student{147195} && student1 == Student{500928})) {
+		return make_optional(1.);
+	} else if ((student1 == Student{147195} && student2 == Student{567890}) ||
+			(student2 == Student{147195} && student1 == Student{567890})) {
+		return boost::none;
+	} else if ((student1 == Student{312995} && student2 == Student{312995}) ||
+			(student2 == Student{312995} && student1 == Student{312995})) {
+		return boost::none;
+	} else if ((student1 == Student{312995} && student2 == Student{352468}) ||
+			(student2 == Student{312995} && student1 == Student{352468})) {
+		return make_optional(3.);
+	} else if ((student1 == Student{312995} && student2 == Student{500928}) ||
+			(student2 == Student{312995} && student1 == Student{500928})) {
+		return make_optional(2.);
+	} else if ((student1 == Student{312995} && student2 == Student{567890}) ||
+			(student2 == Student{312995} && student1 == Student{567890})) {
+		return boost::none;
+	} else if ((student1 == Student{352468} && student2 == Student{352468}) ||
+			(student2 == Student{352468} && student1 == Student{352468})) {
+		return boost::none;
+	} else if ((student1 == Student{352468} && student2 == Student{500928}) ||
+			(student2 == Student{352468} && student1 == Student{500928})) {
+		return make_optional(3.);
+	} else if ((student1 == Student{352468} && student2 == Student{567890}) ||
+			(student2 == Student{352468} && student1 == Student{567890})) {
+		return boost::none;
+	} else if ((student1 == Student{500928} && student2 == Student{500928}) ||
+			(student2 == Student{500928} && student1 == Student{500928})) {
+		return boost::none;
+	} else if ((student1 == Student{500928} && student2 == Student{567890}) ||
+			(student2 == Student{500928} && student1 == Student{567890})) {
+		return boost::none;
+	} else if ((student1 == Student{567890} && student2 == Student{567890}) ||
+			(student2 == Student{567890} && student1 == Student{567890})) {
+		return boost::none;
+	}
+	assert(false);
 }

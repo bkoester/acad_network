@@ -22,7 +22,7 @@ std::istream& operator>>(std::istream& input, NetworkType_e& network_type);
 
 
 template <typename Enum>
-constexpr auto ToIntegralType(Enum e) 
+constexpr auto ToIntegralType(Enum e)
 	-> typename std::underlying_type<Enum>::type {
 		return static_cast<typename std::underlying_type<Enum>::type>(e);
 	}

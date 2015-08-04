@@ -33,13 +33,13 @@ class Network {
 	using vertex_t = typename boost::graph_traits<graph_t>::vertex_descriptor;
 	using edge_t = typename boost::graph_traits<graph_t>::edge_descriptor;
 	using degree_t = typename boost::graph_traits<graph_t>::degree_size_type;
-	using vertices_size_t = 
+	using vertices_size_t =
 		typename boost::graph_traits<graph_t>::vertices_size_type;
-	using vertex_iterator_t = 
+	using vertex_iterator_t =
 		typename boost::graph_traits<graph_t>::vertex_iterator;
 	using edges_size_t = typename boost::graph_traits<graph_t>::edges_size_type;
 	using edge_iterator_t = typename boost::graph_traits<graph_t>::edge_iterator;
-	using out_edge_iterator_t = 
+	using out_edge_iterator_t =
 		typename boost::graph_traits<graph_t>::out_edge_iterator;
 
 	// Construct empty graph.
@@ -193,14 +193,14 @@ class Network {
 	using const_out_edge_values_t = Values<OutEdgesAdaptor, const graph_t>;
 	using out_edge_values_t = Values<OutEdgesAdaptor, graph_t>;
 
-	vertex_descriptors_t GetVertexDescriptors() const 
+	vertex_descriptors_t GetVertexDescriptors() const
 	{ return vertex_descriptors_t{VertexAdaptor{graph_}}; }
 	vertex_values_t GetVertexValues()
 	{ return vertex_values_t{VertexAdaptor{graph_}, graph_}; }
 	const_vertex_values_t GetVertexValues() const
 	{ return const_vertex_values_t{VertexAdaptor{graph_}, graph_}; }
 
-	edge_descriptors_t GetEdgeDescriptors() const 
+	edge_descriptors_t GetEdgeDescriptors() const
 	{ return edge_descriptors_t{EdgeAdaptor{graph_}}; }
 	edge_values_t GetEdgeValues()
 	{ return edge_values_t{EdgeAdaptor{graph_}, graph_}; }
@@ -233,7 +233,7 @@ class Network {
 		EdgeAdaptor(const graph_t& graph) : graph_(graph) {}
 		EdgeAdaptor(const EdgeAdaptor& other) : graph_(other.graph_) {}
 
-		std::pair<edge_iterator_t, edge_iterator_t> Iterate() const 
+		std::pair<edge_iterator_t, edge_iterator_t> Iterate() const
 		{ return boost::edges(graph_); }
 		edges_size_t size() const { return boost::num_edges(graph_); }
 
@@ -270,7 +270,7 @@ Network<Vertex, Edge>::Network(long unsigned int num_vertices) :
 
 template <typename Vertex, typename Edge>
 template <typename ForwardIt>
-Network<Vertex, Edge>::Network(ForwardIt first, ForwardIt last) : 
+Network<Vertex, Edge>::Network(ForwardIt first, ForwardIt last) :
 		graph_{static_cast<long unsigned int>(std::distance(first, last))} {
 	auto it = first;
 	for (auto& vertex : GetVertexValues()) { vertex = *it++; }
@@ -286,13 +286,13 @@ Network<Vertex, Edge>::Network(const graph_t& graph) : graph_{graph} {}
 
 
 template <typename Vertex, typename Edge>
-typename Network<Vertex, Edge>::vertex_t 
+typename Network<Vertex, Edge>::vertex_t
 Network<Vertex, Edge>::GetSourceDescriptor(const edge_t& edge) const
 { return source(edge, graph_); }
 
 
 template <typename Vertex, typename Edge>
-typename Network<Vertex, Edge>::vertex_t 
+typename Network<Vertex, Edge>::vertex_t
 Network<Vertex, Edge>::GetTargetDescriptor(const edge_t& edge) const
 { return target(edge, graph_); }
 
@@ -318,11 +318,11 @@ Vertex& Network<Vertex, Edge>::GetTargetValue(const edge_t& edge)
 
 
 template <typename Vertex, typename Edge>
-boost::optional<typename Network<Vertex, Edge>::edge_t> 
+boost::optional<typename Network<Vertex, Edge>::edge_t>
 Network<Vertex, Edge>::GetEdgeDescriptor(
-		const vertex_t& source, const vertex_t& target) const { 
+		const vertex_t& source, const vertex_t& target) const {
 	auto boost_edge = boost::edge(source, target, graph_);
-	return boost::make_optional(boost_edge.second, boost_edge.first); 
+	return boost::make_optional(boost_edge.second, boost_edge.first);
 }
 
 
@@ -373,7 +373,7 @@ Edge& Network<Vertex, Edge>::operator()(
 
 template <typename Vertex, typename Edge>
 Edge& Network<Vertex, Edge>::operator()(
-		const Vertex& source, const Vertex& target) 
+		const Vertex& source, const Vertex& target)
 { return operator()(source, target, Edge{}); }
 
 
@@ -398,13 +398,13 @@ std::map<Vertex, int> Network<Vertex, Edge>::FindUnweightedDistances(
 	boost::breadth_first_search(graph_, start, boost::visitor(
 				boost::make_bfs_visitor(boost::record_distances(
 						boost::make_iterator_property_map(
-							std::begin(distances), 
+							std::begin(distances),
 							get(boost::vertex_index, graph_)),
 						boost::on_tree_edge()))));
 
 	// Descriptors are useless. Remap descriptors to bundled Vertex property.
 	std::map<Vertex, int> output;
-	for (auto vertex_descriptor = 0u; vertex_descriptor < distances.size(); 
+	for (auto vertex_descriptor = 0u; vertex_descriptor < distances.size();
 			++vertex_descriptor) {
 		auto distance = distances[vertex_descriptor];
 

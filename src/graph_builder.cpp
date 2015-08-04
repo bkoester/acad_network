@@ -16,6 +16,8 @@
 #include <utility>
 #include <vector>
 
+#include <boost/optional.hpp>
+
 #include "course.hpp"
 #include "course_container.hpp"
 #include "course_network.hpp"
@@ -24,6 +26,7 @@
 #include "student_container.hpp"
 #include "student_network.hpp"
 #include "utility.hpp"
+#include "weighting_function.hpp"
 
 
 using std::begin; using std::end; using std::istream_iterator;
@@ -39,6 +42,10 @@ using std::unordered_set;
 using std::vector;
 namespace chr = std::chrono;
 
+using boost::optional;
+
+using weighting_func_ptr = optional<double>(*)(const Student&, const Student&);
+
 
 // output timing information every time we have num_pairs % this variable == 0
 const int timing_modulus{10000000};
@@ -50,7 +57,8 @@ GetStudentIdsToCourses(const StudentContainer& students);
 class StudentNetworkBuilder;
 void CalculateStudentNetworkEdges(const StudentNetwork& network,
 		const StudentContainer& students,
-		StudentNetworkBuilder& builder);
+		StudentNetworkBuilder& builder,
+		weighting_func_ptr weighting_func);
 
 
 template <typename T>
@@ -184,7 +192,7 @@ class StudentNetworkBuilder {
 
 
 StudentNetwork BuildStudentNetworkFromStudents(
-		const StudentContainer& students) {
+		const StudentContainer& students, weighting_func_ptr weighting_func) {
 
 	// spawn threads to iterate through each pair of students
 	StudentNetwork network{students.size()};
@@ -192,7 +200,7 @@ StudentNetwork BuildStudentNetworkFromStudents(
 	vector<thread> thread_pool;
 	for (int i{0}; i < num_threads; ++i) {
 		thread_pool.emplace_back(CalculateStudentNetworkEdges, cref(network),
-				cref(students), ref(builder));
+				cref(students), ref(builder), weighting_func);
 	}
 
 	// wait for all threads to complete
@@ -204,7 +212,8 @@ StudentNetwork BuildStudentNetworkFromStudents(
 
 void CalculateStudentNetworkEdges(const StudentNetwork& network,
 								  const StudentContainer& students,
-								  StudentNetworkBuilder& builder) {
+								  StudentNetworkBuilder& builder,
+								  weighting_func_ptr weighting_func) {
 	for (auto it_pair = builder.GetNextIteratorPair();
 			!builder.ReachedEndOfStudents(it_pair.first);
 			it_pair = builder.GetNextIteratorPair()) {
@@ -212,26 +221,10 @@ void CalculateStudentNetworkEdges(const StudentNetwork& network,
 		// Get the courses each of the students have taken.
 		const Student& student1(students.Find(network[*it_pair.first]));
 		const Student& student2(students.Find(network[*it_pair.second]));
-		const set<const Course*>& student1_courses(student1.courses_taken());
-		const set<const Course*>& student2_courses(student2.courses_taken());
 
-		// Create a list of the courses the students have in common.
-		vector<const Course*> courses_in_common;
-		set_intersection(begin(student1_courses), end(student1_courses),
-						 begin(student2_courses), end(student2_courses),
-						 back_inserter(courses_in_common));
-
-		// Calculate the connection between the two students.
-		double connection{accumulate(begin(courses_in_common),
-				end(courses_in_common), 0.,
-				[](double connection, const Course* course) {
-					return connection + course->num_credits() /
-						double(course->GetNumStudentsEnrolled());
-				})};
-
-		// Add an edge with the appropriate connection value.
-		if (!courses_in_common.empty()) {
-			builder.AddEdge(*it_pair.first, *it_pair.second, connection);
+		if (auto connection = weighting_func(student1, student2)) {
+			builder.AddEdge(
+					*it_pair.first, *it_pair.second, connection.value());
 		}
 	}
 }

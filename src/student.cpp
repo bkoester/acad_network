@@ -260,7 +260,7 @@ istream& operator>>(istream& input, Student& student) {
 	if (major2 != "NA") { student.major2_ = stoi(major2); }
 	else { student.major2_ = boost::none; }
 	student.school_ = school;
-	
+
 	return input;
 }
 
@@ -278,7 +278,7 @@ istream& operator>>(istream& input, Student::Gender& gender) {
 			gender = Student::Gender::Female;
 			break;
 		default:
-			gender = Student::Gender::Unspecified; 
+			gender = Student::Gender::Unspecified;
 			break;
 	}
 

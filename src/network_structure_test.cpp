@@ -1,6 +1,7 @@
 #include "network_structure_test.hpp"
 
 #include <algorithm>
+#include <iterator>
 
 #include "gtest/gtest.h"
 
@@ -11,6 +12,7 @@
 
 
 using std::find_if;
+using std::begin; using std::end;
 
 
 static StudentNetwork::vertex_t FindStudentId(
@@ -54,7 +56,7 @@ void TestCourseNetworkStructure(const CourseNetwork& network) {
 	EXPECT_EQ(1, network.CalculateValue(chem211_vertex, aaptis277_vertex));
 	EXPECT_EQ(0, network.CalculateValue(chem211_vertex, environ311_vertex));
 	EXPECT_EQ(0, network.CalculateValue(chem211_vertex, math425_vertex));
-	
+
 	EXPECT_EQ(0, network.CalculateValue(aaptis277_vertex, aaptis277_vertex));
 	EXPECT_EQ(1, network.CalculateValue(aaptis277_vertex, environ311_vertex));
 	EXPECT_EQ(0, network.CalculateValue(aaptis277_vertex, math425_vertex));
@@ -134,12 +136,12 @@ void TestStudentNetworkStructure(const StudentNetwork& network) {
 
 StudentNetwork::vertex_t FindStudentId(
 		const StudentNetwork& network, Student::Id student) {
-	auto it = find_if(network.GetVertexDescriptors().begin(),
-			network.GetVertexDescriptors().end(),
+	auto it = find_if(begin(network.GetVertexDescriptors()),
+			end(network.GetVertexDescriptors()),
 			[&network, student](StudentNetwork::vertex_t vertex_descriptor)
 			{ return network[vertex_descriptor] == student; });
-	EXPECT_NE(network.GetVertexValues().end(), 
-			  network.GetVertexValues().begin());
+	EXPECT_NE(end(network.GetVertexValues()),
+			  begin(network.GetVertexValues()));
 
 	return *it;
 }

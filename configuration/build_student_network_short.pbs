@@ -24,9 +24,13 @@ cp ${DATA_DIR}/${COURSE_ARCHIVE_FILENAME} $WORKING_DIR
 cp ${DATA_DIR}/${STUDENT_ARCHIVE_FILENAME} $WORKING_DIR
 cp ${BINARY_DIR}/${BINARY_NAME} $WORKING_DIR
 
+
+# Note: alternative weighting functions are available, see
+# `src/weighting_function.hpp` for a list of functions and what they do.
+
 cd $WORKING_DIR
 ./${BINARY_NAME} --threads=4 --course_archive_path=${COURSE_ARCHIVE_FILENAME} \
 	--student_archive_path=${STUDENT_ARCHIVE_FILENAME} \
-	--network_to_build=student
+	--weighting_function=CreditHoursOverEnrollment --network_to_build=student
 
 rm -rf $WORKING_DIR

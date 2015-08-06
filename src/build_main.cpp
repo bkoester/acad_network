@@ -23,10 +23,13 @@ namespace po = boost::program_options;
 
 int main(int argc, char* argv[]) {
 	po::options_description desc{"Options for network building binary:"};
-	string student_archive_path, course_archive_path;
+	string student_archive_path, course_archive_path, weighting_function_name;
 	NetworkType_e network_to_build;
 	desc.add_options()
 		("help,h", "Show this help message")
+		("weighting_function",
+		 po::value<string>(&weighting_function_name)->required(),
+		 "Choose the function by which to weight connections in the network.")
 		("student_archive_path",
 		 po::value<string>(&student_archive_path)->required(),
 		 "Set the path at which to find the student file")
@@ -74,7 +77,7 @@ int main(int argc, char* argv[]) {
 		assert(network_to_build == NetworkType_e::Student);
 
 		// build the student network
-		auto weighting_func = WeightingFuncFactory("CreditHoursOverEnrollment");
+		auto weighting_func = WeightingFuncFactory(weighting_function_name);
 		StudentNetwork student_network{
 			BuildStudentNetworkFromStudents(students, weighting_func)};
 		student_network.Save(cout);

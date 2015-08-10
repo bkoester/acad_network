@@ -26,7 +26,7 @@ def get_vertices_values(edge_file):
         edge_file (file-like object): File containing edges
 
     Returns:
-        A dict of containing set{vertex1, vertex2} => value
+        A set of tuples containing vertex1, vertex2, value
     """
     csv_reader = csv.reader(edge_file, delimiter='\t')
 

@@ -43,8 +43,9 @@
       //*******************************************************************
       //  CREATE MATRIX AND MAP
       //*******************************************************************
-      d3.tsv('/data/network_{{field}}_{{weightedness}}.tsv',
-			  function (error, data) {
+	  var loaded_json = JSON.parse('{{!data}}');
+	  draw(loaded_json);
+	  function draw(data) {
         var mpr = chordMpr(data);
 
         mpr
@@ -59,7 +60,7 @@
             return +recs[0].count;
           });
         drawChords(mpr.getMatrix(), mpr.getMap());
-      });
+      }
       //*******************************************************************
       //  DRAW THE CHORD DIAGRAM
       //*******************************************************************

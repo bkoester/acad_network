@@ -12,7 +12,7 @@ from cpp_iterator_wrapper import CppIteratorWrapper
 
 class StudentContainerWrapper:
     """Wraps the StudentContainer swig class.
-    
+
     Consumers of this class should use self.students.
     """
 
@@ -40,12 +40,15 @@ class StudentContainerWrapper:
             student_archive_path)
 
 
+    def __len__(self):
+        return self.students.size()
+
     def __iter__(self):
         return CppIteratorWrapper(self.students.begin(), self.students.end())
 
     def load_courses(self, courses):
         """Loads the courses the students took from course container.
-        
+
         Args:
             courses (swig CourseContainer): A swig CourseContainer object
             holding the courses

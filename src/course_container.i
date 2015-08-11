@@ -22,6 +22,8 @@ class CourseContainer {
     // Only expose const member function to external clients.
 	const Course& Find(Course course) const;
 
+	container_t::size_type size();
+
     container_t::const_iterator begin() const;
     container_t::const_iterator end() const;
 

@@ -39,6 +39,8 @@ class StudentContainer {
 	virtual const Student& Find(Student::Id id) const;
 	void UpdateCourses(const CourseContainer& courses);
 
+    virtual container_t::size_type size() const;
+
     container_t::const_iterator begin() const;
     container_t::const_iterator end() const;
 

@@ -11,7 +11,7 @@ from cpp_iterator_wrapper import CppIteratorWrapper
 
 class CourseContainerWrapper:
     """Wraps the CourseContainer swig class
-    
+
 
     Consumers of this class should use self.courses.
     """
@@ -28,6 +28,8 @@ class CourseContainerWrapper:
         self.courses = course_container.CourseContainer_LoadFromArchive(
             course_archive_path)
 
+    def __len__(self):
+        return self.courses.size()
+
     def __iter__(self):
         return CppIteratorWrapper(self.courses.begin(), self.courses.end())
-

@@ -18,7 +18,7 @@ class CourseContainer {
  public:
 	using container_t = std::vector<Course>;
 
-	// Read Student::Ids and courses they took from enrollment data. 
+	// Read Student::Ids and courses they took from enrollment data.
 	// Populate a set of courses and which students took them.
     static CourseContainer LoadFromTsv(std::istream& enrollment_stream);
 	// Load the course container from a Boost archive.
@@ -67,9 +67,9 @@ class CourseContainer {
 
 class CourseNotFound : public std::exception {
  public:
-	CourseNotFound(const Course& course) : 
-		error_message_{"Course " + course.subject() + " " 
-			+ std::to_string(course.number()) + " " 
+	CourseNotFound(const Course& course) :
+		error_message_{"Course " + course.subject() + " "
+			+ std::to_string(course.number()) + " "
 			+ std::to_string(course.term()) + " not found!"} {}
 	const char* what() const noexcept { return error_message_.c_str(); }
 

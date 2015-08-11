@@ -42,7 +42,7 @@ class StudentContainer {
 
 	template <typename Archive>
 	void serialize(Archive& ar, const unsigned int) { ar & students_; }
-	
+
 	// Populate the list of courses a student took.
 	void UpdateCourses(const CourseContainer& courses);
 
@@ -51,7 +51,7 @@ class StudentContainer {
 	virtual Student& Find(Student::Id id);
 	virtual const Student& Find(Student::Id id) const;
 
-	virtual container_t::size_type size() const 
+	virtual container_t::size_type size() const
 	{ return students_.size(); }
 
 	container_t::iterator begin() { return std::begin(students_); }

@@ -28,16 +28,16 @@ import vertex_analysis
 def get_segment_counts(students, field):
     """Gets the number of students in various segments.
 
-        Args:
-            students (StudentContainerWrapper): The wrapper containing the
-                students
-            field (string): The field to get segment counts for
+    Args:
+        students (StudentContainerWrapper): The wrapper containing the
+            students
+        field (string): The field to get segment counts for
 
-        Returns:
-            A dict of segment => count.
+    Returns:
+        A dict of segment => count.
 
-        Throws:
-            KeyError if the heading wasn't found in the file.
+    Throws:
+        KeyError if the heading wasn't found in the file.
     """
     segmenter = StudentContainerWrapper.SEGMENTERS[field]
 

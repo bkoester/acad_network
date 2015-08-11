@@ -232,5 +232,5 @@ def reduce_to_in_out(segmented_data, in_segment):
             out_segment_values = numpy.append(out_segment_values, float(value))
 
     return {in_segment: in_segment_values,
-            ' '.join(['not', in_segment]): out_segment_values,
+            'not {}'.format(in_segment): out_segment_values,
            }

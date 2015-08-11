@@ -1,4 +1,12 @@
-"""Compares RPD of actual vs. expected interactions of nodes in a network."""
+"""Compares RPD of actual vs. expected interactions of nodes in a network.
+
+Expects a list of edges in the network, i.e.
+
+vertex1\tvertex2\tvalue
+vertex1\tvertex3\tvalue
+...
+
+"""
 
 
 __author__ = "karepker@umich.edu Kar Epker"

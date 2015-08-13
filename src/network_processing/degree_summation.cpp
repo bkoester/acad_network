@@ -14,7 +14,7 @@
 
 using std::begin; using std::end;
 using std::cerr; using std::cout; using std::endl;
-using std::ifstream; using std::ofstream; 
+using std::ifstream; using std::ofstream;
 using std::string;
 
 namespace po = boost::program_options;
@@ -22,17 +22,17 @@ namespace po = boost::program_options;
 
 int main(int argc, char* argv[]) {
 	po::options_description desc{"Sum degrees of students in network:"};
-	string student_archive_path, course_archive_path, 
+	string student_archive_path, course_archive_path,
 		   course_network_archive_path, student_network_archive_path;
 	desc.add_options()
 		("help,h", "Show this help message")
 		("student_network_archive_path",
 		 po::value<string>(&student_network_archive_path)->required(),
 		 "Set the path at which to find the archive student network")
-		("student_archive_path", 
+		("student_archive_path",
 		 po::value<string>(&student_archive_path)->required(),
 		 "Set the path at which to find the student file")
-		("course_archive_path", 
+		("course_archive_path",
 		 po::value<string>(&course_archive_path)->required(),
 		 "Set the path at which to find the enrollment file");
 
@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
 		auto unweighted_sum = out_edges.size();
 		weighted_students << student_network[student_d] << '\t' << weighted_sum
 						  << endl;
-		unweighted_students << student_network[student_d] << '\t' 
+		unweighted_students << student_network[student_d] << '\t'
 							<< unweighted_sum << endl;
 	}
 }

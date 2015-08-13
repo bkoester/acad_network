@@ -12,7 +12,7 @@
 
 
 using std::cerr; using std::cout; using std::endl;
-using std::ifstream; using std::ofstream; 
+using std::ifstream; using std::ofstream;
 using std::string; using std::to_string;
 
 namespace po = boost::program_options;
@@ -20,17 +20,17 @@ namespace po = boost::program_options;
 
 int main(int argc, char* argv[]) {
 	po::options_description desc{"Options for reducing network:"};
-	string student_archive_path, course_archive_path, 
+	string student_archive_path, course_archive_path,
 		   course_network_archive_path, student_network_archive_path;
 	desc.add_options()
 		("help,h", "Show this help message")
 		("student_network_archive_path",
 		 po::value<string>(&student_network_archive_path),
 		 "Set the path at which to find the archive student network")
-		("student_archive_path", 
+		("student_archive_path",
 		 po::value<string>(&student_archive_path)->required(),
 		 "Set the path at which to find the student file")
-		("course_archive_path", 
+		("course_archive_path",
 		 po::value<string>(&course_archive_path)->required(),
 		 "Set the path at which to find the enrollment file");
 
@@ -63,9 +63,9 @@ int main(int argc, char* argv[]) {
 	ifstream student_network_archive{student_network_archive_path};
 	StudentNetwork student_network{student_network_archive};
 
-	auto weighted_func = [](double edge, double current_edge) 
+	auto weighted_func = [](double edge, double current_edge)
 				{ return edge + current_edge; };
-	auto unweighted_func = [](double, int current_edge) 
+	auto unweighted_func = [](double, int current_edge)
 				{ return 1 + current_edge; };
 
 	// major
@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
 			student_network, major1_func, unweighted_func, 0);
 	ofstream major1_unweighted_output{"output/network_major1_unweighted.tsv"};
 	major1_unweighted_reduced_network.SaveEdgewise(major1_unweighted_output);
-		
+
 	// school
 	auto school_func = [&students](const Student::Id& id)
 		{ return students.Find(id).school(); };

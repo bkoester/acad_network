@@ -3,8 +3,8 @@
 
 I.e. data output in a file format such as:
 
-vertex1\tvertex2\tvalue
-vertex1\tvertex3\tvalue
+name_1,1\tname_1,2\tvalue
+name_2,1\tname_2,2\tvalue
 ...
 """
 

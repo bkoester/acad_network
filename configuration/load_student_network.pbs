@@ -17,7 +17,7 @@ BINARY_DIR="${SCRIPT_DIR}/../release/src"
 COURSE_ARCHIVE_FILENAME=course_archive.txt
 STUDENT_ARCHIVE_FILENAME=student_archive.txt
 STUDENT_NETWORK_ARCHIVE_FILENAME=student_network.txt
-BINARY_NAME=load
+BINARY_NAME=degree_summation
 
 # make the correct directories
 mkdir $WORKING_DIR
@@ -30,11 +30,10 @@ cp ${DATA_DIR}/${STUDENT_NETWORK_ARCHIVE_FILENAME} $WORKING_DIR
 cp ${BINARY_DIR}/${BINARY_NAME} $WORKING_DIR
 
 cd $WORKING_DIR
-./${BINARY_NAME} --threads=1 \
+./${BINARY_NAME} \
 	--student_network_archive_path=${STUDENT_NETWORK_ARCHIVE_FILENAME} \
 	--student_archive_path=${STUDENT_ARCHIVE_FILENAME} \
 	--course_archive_path=${COURSE_ARCHIVE_FILENAME} \
-	--network_to_load=student
 
 # copy any output data out
 cp -R output/ ${DATA_DIR}/generated${PBS_JOBID}

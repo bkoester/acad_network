@@ -16,7 +16,7 @@ namespace po = boost::program_options;
 
 int main(int argc, char* argv[]) {
 	po::options_description desc{"Save archives of students and courses:"};
-	string student_path, enrollment_path, student_archive_path, 
+	string student_path, enrollment_path, student_archive_path,
 		   course_archive_path;
 	desc.add_options()
 		("help,h", "Show this help message")
@@ -24,10 +24,10 @@ int main(int argc, char* argv[]) {
 		 "Set the path at which to find the student file")
 		("enrollment_file", po::value<string>(&enrollment_path)->required(),
 		 "Set the path at which to find the enrollment file")
-		("student_archive_path", 
+		("student_archive_path",
 		 po::value<string>(&student_archive_path)->required(),
 		 "Set the path to which the student archive should be saved.")
-		("course_archive_path", 
+		("course_archive_path",
 		 po::value<string>(&course_archive_path)->required(),
 		 "Set the path at which to course archive should be saved.");
 
@@ -47,6 +47,16 @@ int main(int argc, char* argv[]) {
 	// read students and enrollment data
 	ifstream student_stream{student_path};
 	ifstream enrollment_stream{enrollment_path};
+	if (!student_stream.is_open()) {
+		cerr << "Could not open student file \"" << student_path << "\"!"
+			 << endl;
+		return -1;
+	}
+	if (!enrollment_stream.is_open()) {
+		cerr << "Could not open enrollment file \"" << enrollment_path << "\"!"
+			 << endl;
+		return -1;
+	}
 	StudentContainer students{StudentContainer::LoadFromTsv(student_stream)};
 	CourseContainer courses{CourseContainer::LoadFromTsv(enrollment_stream)};
 

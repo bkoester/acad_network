@@ -126,10 +126,10 @@ set(BINARY_LINK_LIBRARIES
     )
 
 target_link_libraries(${STUDENTS_COURSES_LIBRARY}
-    ${Boost_LIBRARIES}
+    ${Boost_LIBRARIES} -lm
 	)
-target_link_libraries(${BUILD_BINARY} ${BINARY_LINK_LIBRARIES})
-target_link_libraries(${SERIALIZE_BINARY} ${BINARY_LINK_LIBRARIES})
+target_link_libraries(${BUILD_BINARY} ${BINARY_LINK_LIBRARIES} -lstdc++)
+target_link_libraries(${SERIALIZE_BINARY} ${BINARY_LINK_LIBRARIES} -lstdc++)
 
 # make a separate binary for every file in the network_processing directory
 foreach (load_main_src ${LOAD_MAIN_SRCS})
@@ -138,7 +138,7 @@ foreach (load_main_src ${LOAD_MAIN_SRCS})
 		${load_main_src}
 		${LOAD_SRCS}
 		)
-	target_link_libraries(${load_binary_name} ${BINARY_LINK_LIBRARIES})
+	target_link_libraries(${load_binary_name} ${BINARY_LINK_LIBRARIES} -lm)
 endforeach(load_main_src)
 
 # if we choose to build unit tests, add rules for building unittest executable

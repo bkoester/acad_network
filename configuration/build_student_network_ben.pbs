@@ -1,0 +1,37 @@
+#!/bin/bash
+#PBS -A lsa_fluxm
+#PBS -l qos=flux
+#PBS -q fluxm
+#PBS -M bkoester@umich.edu
+#PBS -N students
+#PBS -l nodes=1:ppn=4,walltime=1:00:00,mem=65gb
+#PBS -m abe
+#PBS -V
+
+WORKING_DIR=/tmp/$PBS_JOBID
+#SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)
+SCRIPT_DIR="/home/bkoester/networks/student_code/configuration"
+DATA_DIR="/home/bkoester/networks/data"
+#BINARY_DIR="${SCRIPT_DIR}/../release/src"
+BINARY_DIR="/home/bkoester/networks/student_code/release/src"
+
+COURSE_ARCHIVE_FILENAME=course_archive.tab
+STUDENT_ARCHIVE_FILENAME=student_archive.tab
+BINARY_NAME=build
+
+mkdir $WORKING_DIR
+
+cp ${DATA_DIR}/${COURSE_ARCHIVE_FILENAME} $WORKING_DIR
+cp ${DATA_DIR}/${STUDENT_ARCHIVE_FILENAME} $WORKING_DIR
+cp ${BINARY_DIR}/${BINARY_NAME} $WORKING_DIR
+
+
+# Note: alternative weighting functions are available, see
+# `src/weighting_function.hpp` for a list of functions and what they do.
+
+cd $WORKING_DIR
+./${BINARY_NAME} --threads=4 --course_archive_path=${COURSE_ARCHIVE_FILENAME} \
+	--student_archive_path=${STUDENT_ARCHIVE_FILENAME} \
+	--weighting_function=CreditHoursOverEnrollment --network_to_build=course
+
+rm -rf $WORKING_DIR

@@ -19,6 +19,8 @@ if (swig_hooks)
 	find_package(PythonLibs)
 endif()
 
+#these BOOST directories need to be checked with the right paths.
+#I'm using my own install, couldn't find the path on flux.
 site_name(SITE_NAME)
 if (${SITE_NAME} MATCHES ".*flux.*")
 	set(BOOST_ROOT "/home/bkoester/src/boost/boost_1_57_0/")

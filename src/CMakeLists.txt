@@ -124,7 +124,13 @@ set(BINARY_LINK_LIBRARIES
     ${STUDENTS_COURSES_LIBRARY}
 	${CMAKE_THREAD_LIBS_INIT}
     )
-
+    
+#added in the -lstdc++ and -lm linkers in these
+#target_link_libraries until 'make serialize' and 'make build' both
+#worked. I basically googled the compilation errors and
+#added 'cmake' to the search to figure out where to
+#add the linkers that the error code suggestsed needed adding.
+    
 target_link_libraries(${STUDENTS_COURSES_LIBRARY}
     ${Boost_LIBRARIES} -lm
 	)

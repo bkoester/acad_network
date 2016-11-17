@@ -8,6 +8,9 @@
 #PBS -m abe
 #PBS -V
 
+#Note: The student network error log still
+#indicates that this uses 32gb, but the job
+#kept getting cancelled somehow. Upping the request to 65gb fixed the problem.
 WORKING_DIR=/tmp/$PBS_JOBID
 #SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)
 SCRIPT_DIR="/home/bkoester/networks/student_code/configuration"
@@ -29,6 +32,8 @@ cp ${BINARY_DIR}/${BINARY_NAME} $WORKING_DIR
 # Note: alternative weighting functions are available, see
 # `src/weighting_function.hpp` for a list of functions and what they do.
 
+#It should be sufficient to simply change 'network_to_build' to course or student
+#depending on the network.
 cd $WORKING_DIR
 ./${BINARY_NAME} --threads=4 --course_archive_path=${COURSE_ARCHIVE_FILENAME} \
 	--student_archive_path=${STUDENT_ARCHIVE_FILENAME} \
